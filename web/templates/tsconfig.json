@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",            // ← ES6/ES2015 以上ならOK（ES2017 がおすすめ）
+    "module": "ESNext",
+    "lib": ["DOM", "ES2017"],      // ← Promise, async/await を使うために必要
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowUmdGlobalAccess": true
+  },
+  
+  
+}

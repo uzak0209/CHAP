@@ -1,28 +1,27 @@
 version: "3.9"
 
 services:
-  app:
+  web:
     build: .
     ports:
-      - "80:8080"
-    depends_on:
-      - db
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: uzak
-      DB_PASS: Skakki0209
-      DB_NAME: mapapp
-
+      - "80:8443"
+      - "443:8443"
   db:
     image: postgres:15
     restart: always
-    environment:
-      POSTGRES_USER: uzak
-      POSTGRES_PASSWORD: Skakki0209
-      POSTGRES_DB: mapapp
+    env_file:
+      - .env
     volumes:
       - db-data:/var/lib/postgresql/data
-
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    env_file:
+      - .env
 volumes:
   db-data:
