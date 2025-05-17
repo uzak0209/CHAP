@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    ports:
+      - "80:8080"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: uzak
+      DB_PASS: Skakki0209
+      DB_NAME: mapapp
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: uzak
+      POSTGRES_PASSWORD: Skakki0209
+      POSTGRES_DB: mapapp
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
