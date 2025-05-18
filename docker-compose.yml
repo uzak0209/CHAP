@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  web:
+    build: 
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "8443:8443"
+      - "443:8443"
+    volumes:
+      - ./web/keys:/keys
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "1111:1111"
+    env_file:
+      - .env
+    volumes:
+      - ./api/keys:/keys
+
