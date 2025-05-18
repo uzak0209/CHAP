@@ -22,11 +22,6 @@ var googleOauthConfig = &oauth2.Config{
 
 var oauthStateString = "randomState"
 
-func handleMain(w http.ResponseWriter, r *http.Request) {
-	html := `<html><body><a href="/auth/google">Googleログイン</a></body></html>`
-	fmt.Fprint(w, html)
-}
-
 func handleGoogleLogin(w http.ResponseWriter, r *http.Request) {
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
@@ -59,18 +54,13 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to decode user info", http.StatusInternalServerError)
 		return
 	}
-
-	fmt.Fprintf(w, "ログイン成功: %+v", userInfo)
+	fmt.Println("User Info:", userInfo)
+	http.Redirect(w, r, "https://localhost:8443", http.StatusTemporaryRedirect)
 }
 
 func main() {
-	http.HandleFunc("/", handleMain)
 	http.HandleFunc("/auth/google", handleGoogleLogin)
 	http.HandleFunc("/auth/google/callback", handleGoogleCallback)
-
 	fmt.Println("Listening on https://localhost:1112/")
-	fmt.Println("GOOGLE_CLIENT_ID:", os.Getenv("GOOGLE_CLIENT_ID"))
-	fmt.Println("GOOGLE_CLIENT_SECRET:", os.Getenv("GOOGLE_CLIENT_SECRET"))
-
 	log.Fatal(http.ListenAndServeTLS(":1112", "./keys/server.crt", "./keys/server.key", nil))
 }
