@@ -11,7 +11,6 @@ export async function sendMessage(obj:Types.MapObject): Promise<void> {
     if (!res.ok) {
         throw new Error("APIリクエストに失敗しました");
     }
-
 }
 
 export async function getThread(threadId: string): Promise<void> {
@@ -20,7 +19,6 @@ export async function getThread(threadId: string): Promise<void> {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
-
         },
         body: JSON.stringify({ lat: position.lat, lng: position.lng })
     });
