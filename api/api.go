@@ -35,7 +35,7 @@ func withCORS(handler http.HandlerFunc) http.HandlerFunc {
 func main() {
 
 	http.HandleFunc("/api/message", withCORS(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("APIサーバー起動中: https://localhost:1111")
+
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 			return
@@ -45,7 +45,7 @@ func main() {
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
-		fmt.Print(msg.Message)
+		fmt.Println(r.Body)
 		json.NewEncoder(w).Encode(msg)
 	}))
 

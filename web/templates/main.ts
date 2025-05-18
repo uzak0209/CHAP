@@ -14,7 +14,7 @@ import * as Types from './types.js';
             lat: lat,
             lng: lng,
             id: 1,
-            createdTime:time,
+            created_time:time.toDateString(),
             type: Types.ObjectType.MESSAGE,
             valid: true,
         });

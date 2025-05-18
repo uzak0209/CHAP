@@ -7,8 +7,6 @@ export async function sendMessage(obj) {
         },
         body: JSON.stringify(obj)
     });
-    console.log(JSON.stringify(obj));
-    alert(JSON.stringify(obj));
     if (!res.ok) {
         throw new Error("APIリクエストに失敗しました");
     }
