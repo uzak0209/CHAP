@@ -1,7 +1,7 @@
 import * as Types from './types.js';
 import { sendMessage } from './api.js';
 declare const L: typeof import("leaflet");
-export function renderMap(lat: number, lng: number, map:L.Map) {
+export function renderMap(map:L.Map) {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);

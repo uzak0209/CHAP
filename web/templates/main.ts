@@ -3,12 +3,11 @@ import { renderMap, addMarker } from './map.js';
 import * as Types from './types.js';
 
 (async () => {
-
     try {
         const { lat, lng } = await getCurrentLocation();
         console.log("現在地:", lat, lng);
         const map = L.map('map').setView([lat, lng], 15);
-        renderMap(lat, lng, map);
+        renderMap(map);
         const time= new Date();
         addMarker(lat, lng, "現在地", map, {
             lat: lat,

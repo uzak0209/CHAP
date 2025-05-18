@@ -1,10 +1,11 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 // メッセージ用構造体
@@ -30,6 +31,37 @@ type User struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+// db
+func SearchDB() error {
+	// create sql.DB instance for PostgreSQL service
+	db, err := sql.Open("postgres", os.Getenv("ELEPHANTSQL_URL"))
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	defer db.Close()
+
+	return nil
+}
+func InsertDB(obj MapObject) error {
+	// create sql.DB instance for PostgreSQL service
+	db, err := sql.Open("postgres", os.Getenv("ELEPHANTSQL_URL"))
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	defer db.Close()
+
+	// Insert the object into the database
+	query := `INSERT INTO messages (lat, lng, id, type, created_time, valid) VALUES ($1, $2, $3, $4, $5, $6)`
+	_, err = db.Exec(query, obj.Lat, obj.Lng, obj.ID, obj.Type, obj.CreatedTime, obj.Valid)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
 
 // CORSミドルウェア
@@ -65,9 +97,7 @@ func main() {
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
-		fmt.Println(obj)
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(obj)
+
 	}))
 
 	log.Println("APIサーバー起動中: https://localhost:1111")
