@@ -1,6 +1,18 @@
 version: "3.9"
 
 services:
+  google:
+    build: 
+      context: ./google
+      dockerfile: Dockerfile
+    ports:
+      - "1112:1112"
+    env_file:
+      - .env   
+    volumes:
+      - ./google/keys:/keys
+
+
   web:
     build: 
       context: ./web
