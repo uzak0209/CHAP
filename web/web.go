@@ -15,6 +15,7 @@ func main() {
 		// .jsファイルの場合はMIMEタイプを明示的に設定
 		if strings.HasSuffix(r.URL.Path, ".js") {
 			w.Header().Set("Content-Type", "application/javascript")
+			w.Header().Set("Cache-Control", "no-cache")
 		}
 		fs.ServeHTTP(w, r)
 	})

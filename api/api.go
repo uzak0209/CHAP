@@ -8,8 +8,28 @@ import (
 )
 
 // メッセージ用構造体
-type Message struct {
-	Message string `json:"message"`
+type MapObject struct {
+	Lat         float64    `json:"lat"`
+	Lng         float64    `json:"lng"`
+	ID          int        `json:"id"`
+	Type        ObjectType `json:"type"` // Replace with actual type if needed
+	User        User       `json:"user"` // optional
+	CreatedTime string     `json:"created_time"`
+	Valid       bool       `json:"valid"`
+}
+type ObjectType string
+
+const (
+	MESSAGE ObjectType = "MESSAGE"
+	THREAD  ObjectType = "THREAD"
+	EVENT   ObjectType = "EVENT"
+)
+
+type User struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 // CORSミドルウェア
@@ -40,13 +60,14 @@ func main() {
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		var msg Message
-		if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
+		var obj MapObject
+		if err := json.NewDecoder(r.Body).Decode(&obj); err != nil {
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
-		fmt.Println(r.Body)
-		json.NewEncoder(w).Encode(msg)
+		fmt.Println(obj)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(obj)
 	}))
 
 	log.Println("APIサーバー起動中: https://localhost:1111")

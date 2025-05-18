@@ -14,7 +14,11 @@ import * as Types from './types.js';
             lat: lat,
             lng: lng,
             id: 1,
-            created_time:time.toDateString(),
+            user: {
+                id: 1,
+                name: "ユーザー名",
+                email: ""},
+            created_time: time.toLocaleString('ja-JP'),
             type: Types.ObjectType.MESSAGE,
             valid: true,
         });
