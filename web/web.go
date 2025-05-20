@@ -20,8 +20,8 @@ func main() {
 		fs.ServeHTTP(w, r)
 	})
 
-	log.Println("Server running on https://localhost:8443")
-	err := http.ListenAndServeTLS(":8443", "./keys/server.crt", "./keys/server.key", nil)
+	log.Println("Server running on https://localhost")
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal(err)
 	}

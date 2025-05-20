@@ -68,7 +68,7 @@ func InsertDB(obj MapObject) error {
 func withCORS(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// CORSヘッダーを追加
-		w.Header().Set("Access-Control-Allow-Origin", "https://localhost:8443")
+		w.Header().Set("Access-Control-Allow-Origin", "https://localhost")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		w.Header().Set("Access-Control-Allow-Credentials", "true") // 必要なら
@@ -100,8 +100,8 @@ func main() {
 
 	}))
 
-	log.Println("APIサーバー起動中: https://localhost:1111")
-	err := http.ListenAndServeTLS(":1111", "./keys/server.crt", "./keys/server.key", nil)
+	log.Println("APIサーバー起動中: http://localhost:3000")
+	err := http.ListenAndServe(":3000", nil)
 	if err != nil {
 		log.Fatal(err)
 	}

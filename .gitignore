@@ -1,4 +1,2 @@
-web/keys
 .env
-api/keys
-google/keys
+nginx/ssl

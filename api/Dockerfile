@@ -21,7 +21,7 @@ FROM debian:bookworm-slim
 COPY --from=builder /api/api .
 
 # ポートを公開（必要に応じて）
-EXPOSE 1111
+EXPOSE 3000
 
 # 実行コマンド
 CMD ["./api"]

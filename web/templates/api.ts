@@ -1,7 +1,7 @@
 import { getCurrentLocation } from "./getCurrentLocation.js";
 import * as Types from "./types.js";
 export async function sendMessage(obj:Types.MapObject): Promise<void> {
-    const res = await fetch("https://localhost:1111/api/message", {
+    const res = await fetch("https://localhost/api/message", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

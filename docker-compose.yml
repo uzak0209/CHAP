@@ -1,67 +1,57 @@
 version: "3.9"
 
 services:
-  google:
-    build: 
-      context: ./google
-      dockerfile: Dockerfile
+  nginx:
+    build: ./nginx
     ports:
-      - "1112:1112"
+      - "80:80"
+      - "443:443"  # HTTPSのポートも公開
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - web
+      - api
+      - auth
+
+  auth:
+    build: 
+      context: ./auth
+      dockerfile: Dockerfile
+    expose:
+      - 4000
     env_file:
       - .env   
-    volumes:
-      - ./google/keys:/keys
+ 
 
 
   web:
     build: 
       context: ./web
       dockerfile: Dockerfile
-    ports:
-      - "8443:8443"
-      - "443:8443"
-    volumes:
-      - ./web/keys:/keys
+    expose:
+    - 8080
+
 
   api:
     build:
       context: ./api
       dockerfile: Dockerfile
-    ports:
-      - "1111:1111"
+    expose:
+      - 3000
     env_file:
       - .env
-    volumes:
-      - ./api/keys:/keys
+
 
   db:
     image: postgres
     container_name: db
-    ports:
-      - "5432:5432"
+    expose:
+      - 5432
     environment:
       - POSTGRES_DB=${DB_NAME:-db}
       - POSTGRES_USER=${DB_USER:-postgres}
       - POSTGRES_PASSWORD=${DB_PASS:-postgres}
     volumes:
       - ./db:/docker-entrypoint-initdb.d
-      - pgdata:/var/lib/postgresql/data
 
-  adminer:
-    image: michalhosna/adminer
-    container_name: adminer
-    ports:
-      - "8080:8080"
-    restart: always
-    depends_on:
-      - db
-    environment:
-      - ADMINER_SERVER=db
-      - ADMINER_DRIVER=pgsql
-      - ADMINER_DB=${DB_NAME:-db}
-      - ADMINER_USERNAME=${DB_USER:-postgres}
-      - ADMINER_PASSWORD=${DB_PASS:-postgres}
-      - ADMINER_NAME=Adminer for PostgreSQL DB
-
-volumes:
-  pgdata:

@@ -17,7 +17,7 @@ import (
 var googleOauthConfig = &oauth2.Config{
 	ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 	ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
-	RedirectURL:  "https://localhost:1112/auth/google/callback",
+	RedirectURL:  "https://localhost/auth/google/callback",
 	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 	Endpoint:     google.Endpoint,
 }
@@ -61,17 +61,16 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, `
 		<!DOCTYPE html>
 		<html>
-		<head><meta charset="utf-8"><title>ログイン中...</title></head>
+		<head><meta charset="utf-8"><title></title></head>
 		<body>
 			<script>
 				localStorage.setItem("jwt", %q);
-				window.location.href = "https://localhost:8443";
+				window.location.href = "https://localhost:443";
 			</script>
-			<p>ログイン中...</p>
 		</body>
 		</html>
 	`, jwtToken)
-	http.Redirect(w, r, "https://localhost:8443", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "https://localhost", http.StatusTemporaryRedirect)
 }
 func generateJWT(userInfo map[string]interface{}) string {
 	claims := jwt.MapClaims{
@@ -84,8 +83,8 @@ func generateJWT(userInfo map[string]interface{}) string {
 	return signed
 }
 func main() {
-	http.HandleFunc("/auth/google", handleGoogleLogin)
-	http.HandleFunc("/auth/google/callback", handleGoogleCallback)
-	fmt.Println("Listening on https://localhost:1112/")
-	log.Fatal(http.ListenAndServeTLS(":1112", "./keys/server.crt", "./keys/server.key", nil))
+	http.HandleFunc("/google", handleGoogleLogin)
+	http.HandleFunc("/google/callback", handleGoogleCallback)
+	fmt.Println("Listening on https://localhost:4000/")
+	log.Fatal(http.ListenAndServe(":4000", nil))
 }

@@ -1,0 +1,89 @@
+openapi: 3.0.3
+info:
+  title: Message API
+  version: 1.0.0
+  description: |-
+    This is CHAP's web server. Feel free to use it to store any data you like.
+  termsOfService: https://localhost:8443/
+  contact:
+    email: kazuki175209@gmail.com
+
+servers:
+  - url: https://localhost:1111
+    description: Local API Server (TLS)
+
+paths:
+  /api/message:
+    post:
+      summary: Create a new message on the map
+      description: Accepts a JSON object representing a message and stores it in the database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MapObject'
+      responses:
+        '200':
+          description: Successfully processed the message
+        '400':
+          description: Bad Request (Invalid JSON)
+        '405':
+          description: Method Not Allowed
+        '500':
+          description: Server Error
+
+components:
+  schemas:
+    MapObject:
+      type: object
+      properties:
+        lat:
+          type: number
+          format: float
+        lng:
+          type: number
+          format: float
+        id:
+          type: integer
+        type:
+          type: string
+          enum:
+            - MESSAGE
+            - THREAD
+            - EVENT
+        user:
+          $ref: '#/components/schemas/User'
+        created_time:
+          type: string
+        valid:
+          type: boolean
+      required:
+        - lat
+        - lng
+        - id
+        - type
+        - created_time
+        - valid
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        frineds:
+          type: array
+          items:
+            type: integer
+          
+      required:
+        - id
+        - name
+        - email
+        - password
