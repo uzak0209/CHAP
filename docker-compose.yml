@@ -13,6 +13,8 @@ services:
       - web
       - api
       - auth
+    networks:
+      - app-net
 
   auth:
     build: 
@@ -22,7 +24,8 @@ services:
       - 4000
     env_file:
       - .env   
- 
+    networks:
+      - app-net
 
 
   web:
@@ -31,6 +34,8 @@ services:
       dockerfile: Dockerfile
     expose:
     - 8080
+    networks:
+        - app-net
 
 
   api:
@@ -41,6 +46,8 @@ services:
       - 3000
     env_file:
       - .env
+    networks:
+      - app-net
 
 
   db:
@@ -54,4 +61,29 @@ services:
       - POSTGRES_PASSWORD=${DB_PASS:-postgres}
     volumes:
       - ./db:/docker-entrypoint-initdb.d
+    networks: 
+      - app-net
+  adminer:
+    image: michalhosna/adminer
+    container_name: adminer
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - db
+    environment:
+      ADMINER_SERVER: db
+      ADMINER_DRIVER: pgsql
+      ADMINER_DB: ${DB_NAME:-db}
+      ADMINER_USERNAME: ${DB_USER:-postgres}
+      ADMINER_PASSWORD: ${DB_PASS:-postgres}
+      ADMINER_NAME: Adminer for PostgreSQL DB
+    networks:
+      - app-net
+volumes:
+  redis-data:
 
+
+networks:
+  app-net:
+    driver: bridge

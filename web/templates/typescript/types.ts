@@ -8,9 +8,9 @@ export type User = {
 export type MapObject = {
   lat: number;
   lng: number;
-  id: number;
   type: ObjectType;
-  user?: User; // optional
+  content: string|File;
+  user_id?: number; // optional
   created_time: string; // ISO 8601 形式の日時文字列
   valid: boolean;
 };

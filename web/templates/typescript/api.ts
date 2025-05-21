@@ -1,6 +1,7 @@
 import { getCurrentLocation } from "./getCurrentLocation.js";
-export async function sendMessage(obj) {
-    const res = await fetch("https://localhost:1111/api/message", {
+import * as Types from "./types.js";
+export async function sendMessage(obj:Types.MapObject): Promise<void> {
+    const res = await fetch("https://localhost/api/message", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -11,8 +12,8 @@ export async function sendMessage(obj) {
         throw new Error("APIリクエストに失敗しました");
     }
 }
-export async function getThread(threadId) {
-    const position = await getCurrentLocation();
+export async function getThread(threadId: string): Promise<void> {
+    const position=await getCurrentLocation();
     const res = await fetch(`https://your-api.example.com/api/thread/${threadId}`, {
         method: "POST",
         headers: {
@@ -20,7 +21,9 @@ export async function getThread(threadId) {
         },
         body: JSON.stringify({ lat: position.lat, lng: position.lng })
     });
+
     if (!res.ok) {
         throw new Error("APIリクエストに失敗しました");
     }
+
 }

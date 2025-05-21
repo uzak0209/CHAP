@@ -58,18 +58,14 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("User Info:", userInfo)
 	jwtToken := generateJWT(userInfo)
-	fmt.Fprintf(w, `
-		<!DOCTYPE html>
-		<html>
-		<head><meta charset="utf-8"><title></title></head>
-		<body>
-			<script>
-				localStorage.setItem("jwt", %q);
-				window.location.href = "https://localhost:443";
-			</script>
-		</body>
-		</html>
-	`, jwtToken)
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt",
+		Value:    jwtToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true, // 開発時は false にしてもOK
+		SameSite: http.SameSiteLaxMode,
+	})
 	http.Redirect(w, r, "https://localhost", http.StatusTemporaryRedirect)
 }
 func generateJWT(userInfo map[string]interface{}) string {

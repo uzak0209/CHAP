@@ -1,5 +1,5 @@
 import { sendMessage } from './api.js';
-export function renderMap(lat, lng, map) {
+export function renderMap(map) {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
