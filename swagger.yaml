@@ -4,19 +4,18 @@ info:
   version: 1.0.0
   description: |-
     This is CHAP's web server. Feel free to use it to store any data you like.
-  termsOfService: https://localhost:8443/
+  termsOfService: https://localhost/
   contact:
     email: kazuki175209@gmail.com
 
 servers:
-  - url: https://localhost:1111
+  - url: https://localhost/api
     description: Local API Server (TLS)
 
 paths:
-  /api/message:
+  /message:
     post:
-      summary: Create a new message on the map
-      description: Accepts a JSON object representing a message and stores it in the database.
+      summary: 新しい投稿を追加
       requestBody:
         required: true
         content:
@@ -25,65 +24,89 @@ paths:
               $ref: '#/components/schemas/MapObject'
       responses:
         '200':
-          description: Successfully processed the message
+          description: 投稿が正常に処理された
         '400':
-          description: Bad Request (Invalid JSON)
+          description: 不正なリクエスト
         '405':
-          description: Method Not Allowed
+          description: メソッドが許可されていない
+
+  /search_around_post:
+    get:
+      summary: 近くの投稿を取得
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Coordinate'
+      responses:
+        '200':
+          description: 投稿のリストを返す
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MapObject'
+        '400':
+          description: 不正なリクエスト
         '500':
-          description: Server Error
+          description: サーバーエラー
+
+  /search_userid:
+    post:
+      summary: ユーザーIDでユーザー情報を取得
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: integer
+      responses:
+        '200':
+          description: 該当ユーザーを返す
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: 不正なリクエスト
+        '500':
+          description: サーバーエラー
 
 components:
   schemas:
-    MapObject:
-      type: object
-      properties:
-        lat:
-          type: number
-          format: float
-        lng:
-          type: number
-          format: float
-        id:
-          type: integer
-        type:
-          type: string
-          enum:
-            - MESSAGE
-            - THREAD
-            - EVENT
-        user:
-          $ref: '#/components/schemas/User'
-        created_time:
-          type: string
-        valid:
-          type: boolean
-      required:
-        - lat
-        - lng
-        - id
-        - type
-        - created_time
-        - valid
-
     User:
       type: object
       properties:
-        id:
+        ID:
           type: integer
-        name:
+        Name:
           type: string
-        email:
+        Email:
           type: string
-        password:
+        Password:
           type: string
-        frineds:
-          type: array
-          items:
-            type: integer
-          
-      required:
-        - id
-        - name
-        - email
-        - password
+    MapObject:
+      type: object
+      properties:
+        ID:
+          type: integer
+        Content:
+          type: string
+        CreatedTime:
+          type: string
+          format: date-time
+        Lat:
+          type: number
+          format: float
+        Lng:
+          type: number
+          format: float
+    Coordinate:
+      type: object
+      properties:
+        Lat:
+          type: number
+        Lng:
+          type: number

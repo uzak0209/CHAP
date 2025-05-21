@@ -18,6 +18,7 @@ func main() {
 			w.Header().Set("Cache-Control", "no-cache")
 		}
 		fs.ServeHTTP(w, r)
+
 	})
 
 	log.Println("Server running on https://localhost")
