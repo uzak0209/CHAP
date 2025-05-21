@@ -115,7 +115,7 @@ func main() {
 		fmt.Println("Received object:", obj)
 	})
 	http.HandleFunc("/search_around_post", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
+		if r.Method != http.MethodPost {
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 			return
 		}
