@@ -9,20 +9,19 @@ import (
 	"os"
 
 	_ "github.com/lib/pq"
+
+	. "api/types"
 )
 
 var DB_conf = DB_info{
-	host:     os.Getenv("DB_HOST"),
-	port:     5432,
-	user:     os.Getenv("DB_USER"),
-	password: os.Getenv("DB_PASS"),
-	dbname:   os.Getenv("DB_NAME"),
+	Host:     os.Getenv("DB_HOST"),
+	Port:     5432,
+	User:     os.Getenv("DB_USER"),
+	Password: os.Getenv("DB_PASS"),
+	DBname:   os.Getenv("DB_NAME"),
 }
+var psqlInfo = DB_conf.GetDBInfo()
 
-var psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-	DB_conf.host, DB_conf.port, DB_conf.user, DB_conf.password, DB_conf.dbname)
-
-// db
 func Search_userid(UserID int) (User, error) {
 	// create sql.DB instance for PostgreSQL service
 	db, err := sql.Open("postgres", psqlInfo)
@@ -47,23 +46,31 @@ func Search_userid(UserID int) (User, error) {
 
 	return user, nil
 }
-func Search_around(lat float64, lng float64) ([]MapObject, error) {
-	// create sql.DB instance for PostgreSQL service
+func Search_around(lat float64, lng float64, typ ObjectType) ([]MapObject, error) {
+
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+	var query string
 	defer db.Close()
-
-	query := `SELECT * FROM posts WHERE lat BETWEEN $1 AND $2 AND lng BETWEEN $3 AND $4`
+	switch typ {
+	case MESSAGE:
+		query = `SELECT * FROM posts WHERE lat BETWEEN $1 AND $2 AND lng BETWEEN $3 AND $4`
+	case THREAD:
+		query = `SELECT * FROM threads WHERE lat BETWEEN $1 AND $2 AND lng BETWEEN $3 AND $4`
+	case EVENT:
+		query = `SELECT * FROM events WHERE lat BETWEEN $1 AND $2 AND lng BETWEEN $3 AND $4`
+	default:
+		return nil, fmt.Errorf("invalid type: %s", typ)
+	}
 	rows, err := db.Query(query, lat-AROUND, lat+AROUND, lng-AROUND, lng+AROUND)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
-
 	var objs []MapObject
 	var obj MapObject
 	for rows.Next() {
@@ -97,73 +104,71 @@ func InsertDB(obj MapObject) error {
 	}
 	return nil
 }
-
-func main() {
-
-	http.HandleFunc("/message", func(w http.ResponseWriter, r *http.Request) {
-
+func handleInsertMessage(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var obj MapObject
+	if err := json.NewDecoder(r.Body).Decode(&obj); err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	if err := InsertDB(obj); err != nil {
+		log.Println("InsertDB error:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("Received object:", obj)
+}
+func handleSearchAround(typ ObjectType) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		var obj MapObject
-		if err := json.NewDecoder(r.Body).Decode(&obj); err != nil {
+		var coord Coordinate
+		if err := json.NewDecoder(r.Body).Decode(&coord); err != nil {
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
-		InsertDB(obj)
-		fmt.Println("Received object:", obj)
-	})
-	http.HandleFunc("/search_around_post", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-			return
-		}
-		var lat, lng float64
-		if err := json.NewDecoder(r.Body).Decode(&Coordinate{Lat: lat, Lng: lng}); err != nil {
-			http.Error(w, "Bad Request", http.StatusBadRequest)
-			return
-		}
-		objs, err := Search_around(lat, lng)
-
+		objs, err := Search_around(coord.Lat, coord.Lng, typ)
 		if err != nil {
-			log.Fatal(err)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(objs); err != nil {
-			log.Println("Error encoding response:", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-	})
-	http.HandleFunc("/search_userid", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-			return
-		}
-		var userID int
-		if err := json.NewDecoder(r.Body).Decode(&userID); err != nil {
-			http.Error(w, "Bad Request", http.StatusBadRequest)
-			return
-		}
-		user, err := Search_userid(userID)
-		if err != nil {
-			log.Println("Error searching user:", err)
+			log.Println("Search_around error:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(user); err != nil {
-			log.Println("Error encoding response:", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-	})
-	log.Println("APIサーバー起動中: http://localhost:3000")
-	err := http.ListenAndServe(":3000", nil)
+		json.NewEncoder(w).Encode(objs)
+	}
+}
+func handleSearchUserByID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var userID int
+	if err := json.NewDecoder(r.Body).Decode(&userID); err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	user, err := Search_userid(userID)
 	if err != nil {
+		log.Println("Search_userid error:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+}
+func main() {
+	http.HandleFunc("/message", handleInsertMessage)
+	http.HandleFunc("/search_userid", handleSearchUserByID)
+	http.HandleFunc("/search_around_post", handleSearchAround(MESSAGE))
+	http.HandleFunc("/search_around_thread", handleSearchAround(THREAD))
+	http.HandleFunc("/search_around_event", handleSearchAround(EVENT))
+	log.Println("APIサーバー起動中: http://localhost:3000")
+	if err := http.ListenAndServe(":3000", nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
-
 }

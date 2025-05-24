@@ -31,7 +31,7 @@ paths:
           description: メソッドが許可されていない
 
   /search_around_post:
-    get:
+    post:
       summary: 近くの投稿を取得
       requestBody:
         required: true

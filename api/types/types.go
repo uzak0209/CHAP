@@ -1,4 +1,4 @@
-package main
+package types
 
 const AROUND = 0.01
 
@@ -28,14 +28,18 @@ type User struct {
 	Password string `json:"password"`
 }
 type DB_info struct {
-	host     string
-	port     int
-	user     string
-	password string
-	dbname   string
+	Host     string
+	Port     int
+	User     string
+	Password string
+	DBname   string
 }
 
 type Coordinate struct {
 	Lat float64 `json:"lat"`
 	Lng float64 `json:"lng"`
+}
+
+func (DB DB_info) GetDBInfo() string {
+	return "host=%s port=%d user=%s password=%s dbname=%s sslmode=disable"
 }
