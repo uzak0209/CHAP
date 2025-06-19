@@ -17,8 +17,14 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  user: null,
-  isAuthenticated: false,
+  user: {
+    id: 'temp-user-1',
+    email: 'test@example.com',
+    displayName: 'テストユーザー',
+    photoURL: '',
+    isAdmin: false,
+  },
+  isAuthenticated: true, // 開発用に一時的にtrueに設定
   isLoading: false,
   error: null,
   inviteCode: '',

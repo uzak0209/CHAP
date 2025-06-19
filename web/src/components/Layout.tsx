@@ -19,9 +19,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const authRequiredPages = ['/', '/post', '/notifications', '/profile', '/chat', '/create-room', '/settings', '/map'];
   const isAuthRequired = authRequiredPages.includes(location.pathname);
 
+  // ログインページや管理者ページは認証チェックをスキップ
+  const noAuthPages = ['/login', '/onboarding', '/admin'];
+  const isNoAuthPage = noAuthPages.some(page => location.pathname.startsWith(page));
+
   // 認証が必要なページで未認証の場合はログインページにリダイレクト
-  if (isAuthRequired && !isAuthenticated) {
-    navigate('/login');
+  React.useEffect(() => {
+    if (isAuthRequired && !isAuthenticated && !isNoAuthPage) {
+      navigate('/login');
+    }
+  }, [isAuthRequired, isAuthenticated, isNoAuthPage, navigate]);
+
+  // 認証が必要で未認証の場合は何も表示しない
+  if (isAuthRequired && !isAuthenticated && !isNoAuthPage) {
     return null;
   }
 
@@ -43,7 +53,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </Box>
 
-      {isAuthenticated && (
+      {isAuthenticated && !isNoAuthPage && (
         <BottomNavigation
           value={location.pathname}
           onChange={handleNavigation}
