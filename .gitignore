@@ -2,4 +2,5 @@
 nginx/ssl
 
 # dependencies
-/node_modules
+/web/node_modules
+/web/templates/node_modules
