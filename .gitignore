@@ -1,2 +1,5 @@
 .env
 nginx/ssl
+
+# dependencies
+/node_modules
