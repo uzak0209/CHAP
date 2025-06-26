@@ -8,7 +8,7 @@ type MapObject struct {
 	Lng         float64    `json:"lng"`
 	ID          int        `json:"id"`
 	Type        ObjectType `json:"type"`
-	UserID      int        `json:"user_id"` // optional
+	UserID      int        `json:"user_id"`
 	CreatedTime string     `json:"created_time"`
 	Content     string     `json:"content"`
 	Valid       bool       `json:"valid"`
