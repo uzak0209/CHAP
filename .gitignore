@@ -1,6 +1,6 @@
 .env
 nginx/ssl
-
+/web/.next
 # dependencies
 /web/node_modules
 /web/templates/node_modules

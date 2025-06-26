@@ -1,5 +1,5 @@
 .env
 nginx/ssl
-
+**/.next
 # dependencies
 /node_modules
