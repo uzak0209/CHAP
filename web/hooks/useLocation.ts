@@ -10,7 +10,7 @@ export function useLocation() {
           lat: pos.coords.latitude, 
           lng: pos.coords.longitude 
         }),
-        () => setLocation({ lat: 35.6762, lng: 139.6503 }) // 東京駅をデフォルト
+
       );
     }
   }, []);
