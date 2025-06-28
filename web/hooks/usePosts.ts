@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Post } from '@/types/post';
+import { Post } from '@/types/types';
 
 export function usePosts(location: { lat: number; lng: number } | null) {
   const [posts, setPosts] = useState<Post[]>([]);

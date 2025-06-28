@@ -4,6 +4,8 @@ import (
 	"api/db"
 	"api/types"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -62,4 +64,42 @@ func GetAroundAllThread(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, threads)
+}
+func GetUpdateThread(c *gin.Context) {
+	from := c.Param("from")
+	var threads []types.Thread
+
+	// from を数値に変換（例：Unix timestamp）
+	fromTime, err := strconv.ParseInt(from, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid 'from' parameter"})
+		return
+	}
+
+	// 条件に合う投稿を取得（updated_at > from）
+	if err := db.GetDB().
+		Where("updated_at > ?", time.Unix(fromTime, 0)).
+		Find(&threads).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch updated threads"})
+		return
+	}
+
+	c.JSON(http.StatusOK, threads)
+}
+func DeleteThread(c *gin.Context) {
+	id := c.Param("id")
+	var thread types.Thread
+
+	result := db.GetDB().First(&thread, id)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
+		return
+	}
+
+	if err := db.GetDB().Delete(&thread).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete thread"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "thread deleted"})
 }

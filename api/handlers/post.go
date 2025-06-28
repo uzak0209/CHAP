@@ -4,6 +4,8 @@ import (
 	"api/db"
 	"api/types"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -64,24 +66,28 @@ func GetAroundAllPost(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, posts)
 }
-
-func UpdatePost(c *gin.Context) {
+func GetUpdatePost(c *gin.Context) {
 	from := c.Param("from")
-	var post types.Post
+	var posts []types.Post
 
-	if err := c.ShouldBindJSON(&post); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid json format"})
+	// from を数値に変換（例：Unix timestamp）
+	fromTime, err := strconv.ParseInt(from, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid 'from' parameter"})
 		return
 	}
 
-	result := db.GetDB().Model(&post).Where("id = ?", from).Updates(post)
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update post"})
+	// 条件に合う投稿を取得（updated_at > from）
+	if err := db.GetDB().
+		Where("updated_at > ?", time.Unix(fromTime, 0)).
+		Find(&posts).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch updated posts"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success"})
+	c.JSON(http.StatusOK, posts)
 }
+
 func DeletePost(c *gin.Context) {
 	id := c.Param("id")
 	var post types.Post

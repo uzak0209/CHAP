@@ -16,18 +16,26 @@ func SetupRoutes(r *gin.Engine) {
 
 		// 位置情報検索
 		v1.POST("/around/post", handlers.GetAroundAllPost)
+		v1.POST("/around/thread", handlers.GetAroundAllThread)
+		v1.POST("/around/event", handlers.GetAroundAllEvent)
 
 		// 投稿関連
 		v1.POST("/create/post", handlers.CreatePost)
 		v1.GET("/post/:id", handlers.GetPost)
+		v1.PUT("/update/post/:id", handlers.GetUpdatePost)
+		v1.DELETE("/delete/post/:id", handlers.DeletePost)
 
 		// スレッド関連
 		v1.POST("/create/thread", handlers.CreateThread)
 		v1.GET("/thread/:id", handlers.GetThread)
+		v1.PUT("/update/thread/:id", handlers.GetUpdateThread)
+		v1.DELETE("/delete/thread/:id", handlers.DeleteThread)
 
 		// イベント関連
 		v1.POST("/create/event", handlers.CreateEvent)
 		v1.GET("/event/:id", handlers.GetEvent)
+		v1.PUT("/update/event/:id", handlers.GetUpdateEvent)
+		v1.DELETE("/delete/event/:id", handlers.DeleteEvent)
 	}
 
 	// ヘルスチェック
