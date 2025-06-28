@@ -7,7 +7,7 @@ import { PostFilters } from '@/components/Post/PostFilters';
 import { useLocation } from '@/hooks/useLocation';
 import { usePosts } from '@/hooks/usePosts';
 import { LoadingSpinner } from '@/components/ui/loading';
-import { Post } from '@/types/post';
+import { Post } from '@/types/types';
 
 export default function Home() {
   const [sortBy, setSortBy] = useState<'time' | 'distance'>('time');
@@ -60,9 +60,6 @@ function filterAndSortPosts(
   return posts
     .filter(post => filter === 'all' || post.tags.includes(filter))
     .sort((a, b) => {
-      if (sortBy === 'distance') {
-        return (a.distance || 0) - (b.distance || 0);
-      }
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return new Date(b.created_time).getTime() - new Date(a.created_time).getTime();
     });
 } 
