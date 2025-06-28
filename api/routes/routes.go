@@ -14,9 +14,20 @@ func SetupRoutes(r *gin.Engine) {
 		// ユーザー関連
 		v1.GET("/user/:id", handlers.GetUserByID)
 
+		// 位置情報検索
+		v1.POST("/around/post", handlers.GetAroundAllPost)
+
 		// 投稿関連
-		v1.GET("/around", handlers.GetAround)
-		v1.POST("/post", handlers.CreatePost)
+		v1.POST("/create/post", handlers.CreatePost)
+		v1.GET("/post/:id", handlers.GetPost)
+
+		// スレッド関連
+		v1.POST("/create/thread", handlers.CreateThread)
+		v1.GET("/thread/:id", handlers.GetThread)
+
+		// イベント関連
+		v1.POST("/create/event", handlers.CreateEvent)
+		v1.GET("/event/:id", handlers.GetEvent)
 	}
 
 	// ヘルスチェック

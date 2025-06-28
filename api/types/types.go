@@ -1,5 +1,7 @@
 package types
 
+const AROUND = 0.01 // 検索範囲の定数
+
 // メッセージ用構造体
 type Post struct {
 	Coordinate  Coordinate `json:"coordinate"`
@@ -35,7 +37,6 @@ type Event struct {
 	Like        int        `json:"like"`
 	Tags        []string   `json:"tags"`
 }
-type ObjectType string
 
 type User struct {
 	ID       int    `json:"id"`
@@ -49,16 +50,4 @@ type User struct {
 type Coordinate struct {
 	Lat float64 `json:"lat"`
 	Lng float64 `json:"lng"`
-}
-
-// MapObject represents a generic object with location data
-type MapObject struct {
-	ID          int        `json:"id"`
-	UserID      int        `json:"user_id"`
-	Content     string     `json:"content"`
-	Coordinate  Coordinate `json:"coordinate"`
-	CreatedTime string     `json:"created_time"`
-	Valid       bool       `json:"valid"`
-	Like        int        `json:"like"`
-	Tags        []string   `json:"tags"`
 }
