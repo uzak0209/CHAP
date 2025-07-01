@@ -19,21 +19,11 @@ export function AuthForm({
   inviteCode,
   phoneNumber,
   loading,
-  onInviteCodeChange,
   onPhoneNumberChange,
   onLogin,
-  onQRScan
 }: AuthFormProps) {
   return (
     <div className="space-y-4">
-      {authMethod === 'invite' && (
-        <InviteCodeForm
-          value={inviteCode}
-          onChange={onInviteCodeChange}
-          onQRScan={onQRScan}
-        />
-      )}
-      
       {authMethod === 'sms' && (
         <SMSForm
           value={phoneNumber}
@@ -46,34 +36,6 @@ export function AuthForm({
         disabled={!inviteCode && authMethod === 'invite' || !phoneNumber && authMethod === 'sms'}
         onClick={onLogin}
       />
-    </div>
-  );
-}
-
-function InviteCodeForm({ 
-  value, 
-  onChange, 
-  onQRScan 
-}: { 
-  value: string; 
-  onChange: (value: string) => void;
-  onQRScan: () => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="inviteCode">招待コード</Label>
-        <Input
-          id="inviteCode"
-          placeholder="招待コードを入力"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      </div>
-      <Button onClick={onQRScan} variant="outline" className="w-full">
-        <QrCode className="w-4 h-4 mr-2" />
-        QRコードをスキャン
-      </Button>
     </div>
   );
 }

@@ -11,7 +11,7 @@ const AROUND = 0.01 // 検索範囲の定数
 // メッセージ用構造体
 type Post struct {
 	Coordinate  Coordinate `json:"coordinate" gorm:"embedded"`
-	ID          int        `json:"id"`
+	ID          string     `json:"id" gorm:"primaryKey"`
 	UserID      uuid.UUID  `json:"user_id" gorm:"type:uuid;not null"`
 	CreatedTime string     `json:"created_time"`
 	DeletedTime string     `json:"deleted_time"`
@@ -24,7 +24,7 @@ type Post struct {
 }
 type Thread struct {
 	Coordinate  Coordinate `json:"coordinate" gorm:"embedded"`
-	ID          int        `json:"id"`
+	ID          string     `json:"id" gorm:"primaryKey"`
 	UserID      uuid.UUID  `json:"user_id" gorm:"type:uuid;not null"`
 	CreatedTime string     `json:"created_time"`
 	DeletedTime string     `json:"deleted_time"`
@@ -36,7 +36,7 @@ type Thread struct {
 }
 type Event struct {
 	Coordinate  Coordinate `json:"coordinate" gorm:"embedded"`
-	ID          int        `json:"id"`
+	ID          string     `json:"id" gorm:"primaryKey"`
 	UserID      uuid.UUID  `json:"user_id" gorm:"type:uuid;not null"`
 	CreatedTime string     `json:"created_time"`
 	DeletedTime string     `json:"deleted_time"`
@@ -48,12 +48,22 @@ type Event struct {
 }
 
 type User struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Image    string `json:"image"`
-	Likes    int    `json:"likes"`
+	ID    uuid.UUID `json:"id" gorm:"type:uuid;primaryKey"`
+	Name  string    `json:"name" gorm:"not null"`
+	Image string    `json:"image"`
+	
+}	
+type PostLikes struct {
+	UserID uuid.UUID `json:"user_id" gorm:"type:uuid;not null;primaryKey"`
+	PostID uuid.UUID `json:"post_id" gorm:"type:uuid;not null;primaryKey"`
+}
+type ThreadLikes struct {
+	UserID   uuid.UUID `json:"user_id" gorm:"type:uuid;not null;primaryKey"`
+	ThreadID uuid.UUID `json:"thread_id" gorm:"type:uuid;not null;primaryKey"`
+}
+type EventLikes struct {
+	UserID  uuid.UUID `json:"user_id" gorm:"type:uuid;not null;primaryKey"`
+	EventID uuid.UUID `json:"event_id" gorm:"type:uuid;not null;primaryKey"`
 }
 
 type Coordinate struct {
