@@ -190,8 +190,30 @@ paths:
           description: スレッドが見つかりません
 
   /update/thread/{id}:
+    get:
+      summary: スレッドの更新内容を取得
+      tags:
+        - Threads
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: スレッドID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: スレッドの更新内容
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+        '404':
+          description: スレッドが見つかりません
+
+  /edit/thread/{id}:
     put:
-      summary: スレッドを更新
+      summary: スレッドを編集
       tags:
         - Threads
       parameters:
@@ -209,7 +231,7 @@ paths:
               $ref: '#/components/schemas/Thread'
       responses:
         '200':
-          description: スレッドが正常に更新されました
+          description: スレッドが正常に編集されました
         '400':
           description: 無効なリクエスト
         '404':
@@ -276,8 +298,30 @@ paths:
           description: イベントが見つかりません
 
   /update/event/{id}:
+    get:
+      summary: イベントの更新内容を取得
+      tags:
+        - Events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: イベントID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: イベントの更新内容
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: イベントが見つかりません
+
+  /edit/event/{id}:
     put:
-      summary: イベントを更新
+      summary: イベントを編集
       tags:
         - Events
       parameters:
@@ -295,7 +339,7 @@ paths:
               $ref: '#/components/schemas/Event'
       responses:
         '200':
-          description: イベントが正常に更新されました
+          description: イベントが正常に編集されました
         '400':
           description: 無効なリクエスト
         '404':
@@ -435,8 +479,14 @@ components:
         content:
           type: string
           description: 投稿内容
-        coordinate:
-          $ref: '#/components/schemas/Coordinate'
+        lat:
+          type: number
+          format: double
+          description: 緯度
+        lng:
+          type: number
+          format: double
+          description: 経度
         created_time:
           type: string
           format: date-time
@@ -461,7 +511,8 @@ components:
           description: タグリスト
       required:
         - content
-        - coordinate
+        - lat
+        - lng
 
     Thread:
       type: object
@@ -475,8 +526,14 @@ components:
         content:
           type: string
           description: スレッド内容
-        coordinate:
-          $ref: '#/components/schemas/Coordinate'
+        lat:
+          type: number
+          format: double
+          description: 緯度
+        lng:
+          type: number
+          format: double
+          description: 経度
         created_time:
           type: string
           format: date-time
@@ -498,7 +555,8 @@ components:
           description: タグリスト
       required:
         - content
-        - coordinate
+        - lat
+        - lng
 
     Event:
       type: object
@@ -512,8 +570,14 @@ components:
         content:
           type: string
           description: イベント内容
-        coordinate:
-          $ref: '#/components/schemas/Coordinate'
+        lat:
+          type: number
+          format: double
+          description: 緯度
+        lng:
+          type: number
+          format: double
+          description: 経度
         created_time:
           type: string
           format: date-time
@@ -535,7 +599,8 @@ components:
           description: タグリスト
       required:
         - content
-        - coordinate
+        - lat
+        - lng
 
     Coordinate:
       type: object
