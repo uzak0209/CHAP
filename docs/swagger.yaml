@@ -58,6 +58,7 @@ paths:
         '500':
           description: サーバーエラー
 
+
   /post/{id}:
     get:
       summary: 投稿を取得
@@ -81,8 +82,30 @@ paths:
           description: 投稿が見つかりません
 
   /update/post/{id}:
+    get:
+      summary: 投稿の更新内容を取得
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 投稿ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 投稿の更新内容
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: 投稿が見つかりません
+
+  /edit/post/{id}:
     put:
-      summary: 投稿を更新
+      summary: 投稿を編集
       tags:
         - Posts
       parameters:
@@ -100,7 +123,7 @@ paths:
               $ref: '#/components/schemas/Post'
       responses:
         '200':
-          description: 投稿が正常に更新されました
+          description: 投稿が正常に編集されました
         '400':
           description: 無効なリクエスト
         '404':
