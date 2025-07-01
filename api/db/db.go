@@ -13,22 +13,43 @@ import (
 var db *gorm.DB
 
 func init() {
-	// .envファイルから環境変数を読み込む（無くても動くが警告ログ）
+	// .envファイルから環境変数を読み込む
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("No .env file found, using system environment variables")
 	}
 
-	// 環境変数からDB接続情報を取得
-	dbConf := DB_info{
-		Host:     os.Getenv("DB_HOST"),
-		Port:     5432, // 固定ポートならここでOK、可変なら別途envから読み込みも可
-		User:     os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASS"),
-		DBname:   os.Getenv("DB_NAME"),
-	}
+	// Supabaseの接続文字列を直接使用
+	dsn := os.Getenv("SUPABASE_DB_URL")
+	if dsn == "" {
+		// フォールバック：個別の環境変数から構築
+		host := os.Getenv("DB_HOST")
+		if host == "" {
+			host = "127.0.0.1"
+		}
 
-	// DSN（接続文字列）を生成
-	dsn := dbConf.GetDBInfo()
+		port := os.Getenv("DB_PORT")
+		if port == "" {
+			port = "54322"
+		}
+
+		user := os.Getenv("DB_USER")
+		if user == "" {
+			user = "postgres"
+		}
+
+		password := os.Getenv("DB_PASS")
+		if password == "" {
+			password = "postgres"
+		}
+
+		dbname := os.Getenv("DB_NAME")
+		if dbname == "" {
+			dbname = "postgres"
+		}
+
+		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+			host, user, password, dbname, port)
+	}
 
 	// DBに接続
 	var err error
@@ -36,6 +57,8 @@ func init() {
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
+
+	log.Println("Successfully connected to Supabase database via GORM")
 }
 
 // GetDB returns the gorm.DB instance
@@ -45,8 +68,7 @@ func GetDB() *gorm.DB {
 
 // Initialize initializes the database connection
 func Initialize() error {
-	// init() function already handles the initialization
-	// This is just to provide a consistent API
+	AutoMigrate()
 	if db == nil {
 		return fmt.Errorf("database not initialized")
 	}

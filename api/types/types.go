@@ -4,7 +4,7 @@ const AROUND = 0.01 // 検索範囲の定数
 
 // メッセージ用構造体
 type Post struct {
-	Coordinate  Coordinate `json:"coordinate"`
+	Coordinate  Coordinate `json:"coordinate" gorm:"embedded"`
 	ID          int        `json:"id"`
 	UserID      int        `json:"user_id"`
 	CreatedTime string     `json:"created_time"`
@@ -13,10 +13,10 @@ type Post struct {
 	Valid       bool       `json:"valid"`
 	Parent      int        `json:"parent"`
 	Like        int        `json:"like"`
-	Tags        []string   `json:"tags"`
+	Tags        []string   `gorm:"type:text[]"`
 }
 type Thread struct {
-	Coordinate  Coordinate `json:"coordinate"`
+	Coordinate  Coordinate `json:"coordinate" gorm:"embedded"`
 	ID          int        `json:"id"`
 	UserID      int        `json:"user_id"`
 	CreatedTime string     `json:"created_time"`
@@ -24,10 +24,10 @@ type Thread struct {
 	Content     string     `json:"content"`
 	Valid       bool       `json:"valid"`
 	Like        int        `json:"like"`
-	Tags        []string   `json:"tags"`
+	Tags        []string   `gorm:"type:text[]"`
 }
 type Event struct {
-	Coordinate  Coordinate `json:"coordinate"`
+	Coordinate  Coordinate `json:"coordinate" gorm:"embedded"`
 	ID          int        `json:"id"`
 	UserID      int        `json:"user_id"`
 	CreatedTime string     `json:"created_time"`
@@ -35,7 +35,7 @@ type Event struct {
 	Content     string     `json:"content"`
 	Valid       bool       `json:"valid"`
 	Like        int        `json:"like"`
-	Tags        []string   `json:"tags"`
+	Tags        []string   `gorm:"type:text[]"`
 }
 
 type User struct {
