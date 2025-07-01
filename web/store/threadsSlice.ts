@@ -2,17 +2,35 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Thread } from '../types/types'
 
 export interface ThreadsState {
-  items: Thread[]
-  selectedThread: Thread | null
-  loading: boolean
-  error: string | null
+  items: Thread[];
+  loading: {
+    fetch: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+  };
+  error: {
+    fetch: string | null;
+    create: string | null;
+    update: string | null;
+    delete: string | null;
+  };
 }
 
 const initialState: ThreadsState = {
   items: [],
-  selectedThread: null,
-  loading: false,
-  error: null
+  loading: {
+    fetch: false,
+    create: false,
+    update: false,
+    delete: false,
+  },
+  error: {
+    fetch: null,
+    create: null,
+    update: null,
+    delete: null,
+  },
 }
 
 // Async Thunks
@@ -21,9 +39,7 @@ export const fetchAroundThreads = createAsyncThunk(
   async (params: { lat: number; lng: number }) => {
     const response = await fetch('/api/v1/around/thread', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
     })
     if (!response.ok) throw new Error('Failed to fetch threads')
@@ -36,13 +52,12 @@ export const createThread = createAsyncThunk(
   async (threadData: Omit<Thread, 'id' | 'created_time'>) => {
     const response = await fetch('/api/v1/create/thread', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(threadData),
     })
     if (!response.ok) throw new Error('Failed to create thread')
-    return response.json()
+    const result = await response.json()
+    return result.thread || result
   }
 )
 
@@ -60,9 +75,7 @@ export const updateThread = createAsyncThunk(
   async ({ id, data }: { id: number; data: Partial<Thread> }) => {
     const response = await fetch(`/api/v1/update/thread/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
     if (!response.ok) throw new Error('Failed to update thread')
@@ -72,12 +85,11 @@ export const updateThread = createAsyncThunk(
 
 export const deleteThread = createAsyncThunk(
   'threads/delete',
-  async (id: number) => {
+  async (id: number): Promise<void> => {
     const response = await fetch(`/api/v1/delete/thread/${id}`, {
       method: 'DELETE',
     })
     if (!response.ok) throw new Error('Failed to delete thread')
-    return { id }
   }
 )
 
@@ -85,86 +97,91 @@ const threadsSlice = createSlice({
   name: 'threads',
   initialState,
   reducers: {
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload
-    },
-    setThreads: (state, action: PayloadAction<Thread[]>) => {
-      state.items = action.payload
-      state.error = null
-    },
-    addThread: (state, action: PayloadAction<Thread>) => {
-      state.items.unshift(action.payload)
-    },
-    updateThreadLocal: (state, action: PayloadAction<Thread>) => {
-      const index = state.items.findIndex(t => t.id === action.payload.id)
-      if (index !== -1) {
-        state.items[index] = action.payload
+    clearThreadErrors: (state) => {
+      state.error = {
+        fetch: null,
+        create: null,
+        update: null,
+        delete: null,
       }
     },
-    removeThread: (state, action: PayloadAction<number>) => {
-      state.items = state.items.filter(t => t.id !== action.payload)
-    },
-    setSelectedThread: (state, action: PayloadAction<Thread | null>) => {
-      state.selectedThread = action.payload
-    },
-    setError: (state, action: PayloadAction<string>) => {
-      state.error = action.payload
-      state.loading = false
-    },
-    clearThreads: (state) => {
-      state.items = []
-      state.selectedThread = null
-    }
   },
   extraReducers: (builder) => {
     builder
       // Fetch Around Threads
       .addCase(fetchAroundThreads.pending, (state) => {
-        state.loading = true
-        state.error = null
+        state.loading.fetch = true
+        state.error.fetch = null
       })
       .addCase(fetchAroundThreads.fulfilled, (state, action) => {
-        state.loading = false
+        state.loading.fetch = false
         state.items = action.payload
       })
       .addCase(fetchAroundThreads.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.error.message || 'Failed to fetch threads'
+        state.loading.fetch = false
+        state.error.fetch = action.error.message || 'スレッドの取得に失敗しました'
       })
       // Create Thread
       .addCase(createThread.pending, (state) => {
-        state.loading = true
+        state.loading.create = true
+        state.error.create = null
       })
       .addCase(createThread.fulfilled, (state, action) => {
-        state.loading = false
-        if (action.payload.thread) {
-          state.items.unshift(action.payload.thread)
+        state.loading.create = false
+        if (action.payload) {
+          state.items.unshift(action.payload)
         }
       })
       .addCase(createThread.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.error.message || 'Failed to create thread'
+        state.loading.create = false
+        state.error.create = action.error.message || 'スレッドの作成に失敗しました'
       })
       // Fetch Thread
-      .addCase(fetchThread.fulfilled, (state, action) => {
-        state.selectedThread = action.payload
+      .addCase(fetchThread.pending, (state) => {
+        state.loading.fetch = true
+        state.error.fetch = null
       })
-      // Update Thread
-      .addCase(updateThread.fulfilled, (state, action) => {
+      .addCase(fetchThread.fulfilled, (state, action) => {
+        state.loading.fetch = false
         const index = state.items.findIndex(t => t.id === action.payload.id)
         if (index !== -1) {
           state.items[index] = action.payload
-        }
-        if (state.selectedThread?.id === action.payload.id) {
-          state.selectedThread = action.payload
+        } else {
+          state.items.push(action.payload)
         }
       })
-      // Delete Thread
-      .addCase(deleteThread.fulfilled, (state, action) => {
-        state.items = state.items.filter(t => t.id !== action.payload.id)
-        if (state.selectedThread?.id === action.payload.id) {
-          state.selectedThread = null
+      .addCase(fetchThread.rejected, (state, action) => {
+        state.loading.fetch = false
+        state.error.fetch = action.error.message || 'スレッドの取得に失敗しました'
+      })
+      // Update Thread
+      .addCase(updateThread.pending, (state) => {
+        state.loading.update = true
+        state.error.update = null
+      })
+      .addCase(updateThread.fulfilled, (state, action) => {
+        state.loading.update = false
+        const index = state.items.findIndex(t => t.id === action.meta.arg.id)
+        if (index !== -1) {
+          state.items[index] = action.payload
         }
+      })
+      .addCase(updateThread.rejected, (state, action) => {
+        state.loading.update = false
+        state.error.update = action.error.message || 'スレッドの更新に失敗しました'
+      })
+      // Delete Thread
+      .addCase(deleteThread.pending, (state) => {
+        state.loading.delete = true
+        state.error.delete = null
+      })
+      .addCase(deleteThread.fulfilled, (state, action) => {
+        state.loading.delete = false
+        state.items = state.items.filter(t => t.id !== action.meta.arg)
+      })
+      .addCase(deleteThread.rejected, (state, action) => {
+        state.loading.delete = false
+        state.error.delete = action.error.message || 'スレッドの削除に失敗しました'
       })
   }
 })
