@@ -8,7 +8,7 @@ export { default as authSlice, authActions } from './authSlice'
 export { default as locationSlice, locationActions, getCurrentLocation } from './locationSlice'
 export { default as postsSlice, postsActions, fetchAroundPosts, createPost, fetchPost, updatePost, deletePost } from './postsSlice'
 export { default as threadsSlice, threadsActions, fetchAroundThreads, createThread, fetchThread, updateThread, deleteThread } from './threadsSlice'
-export { default as eventsSlice, eventsActions, fetchAroundEvents, createEvent, fetchEvent, updateEvent, deleteEvent } from './eventsSlice'
+export { default as eventsSlice, eventsActions, fetchAroundEvents, createEvent} from './eventsSlice'
 export { default as filtersSlice, filtersActions } from './filtersSlice'
 export { default as uiSlice, uiActions } from './uiSlice'
 

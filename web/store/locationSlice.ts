@@ -1,39 +1,49 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import { Coordinate } from '../types/types'
 
 export interface LocationState {
-  current: Coordinate | null
-  permission: 'granted' | 'denied' | 'prompt' | null
-  loading: boolean
-  error: string | null
+  current: {
+    lat: number | null;
+    lng: number | null;
+  };
+  permission: 'granted' | 'denied' | 'prompt' | null;
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: LocationState = {
-  current: null,
+  current: {
+    lat: null,
+    lng: null,
+  },
   permission: null,
   loading: false,
-  error: null
+  error: null,
 }
 
 // Async Thunk
 export const getCurrentLocation = createAsyncThunk(
   'location/getCurrent',
   async () => {
-    return new Promise<Coordinate>((resolve, reject) => {
+    return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported'))
+        reject(new Error('Geolocation is not supported by this browser.'))
         return
       }
-      
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           resolve({
             lat: position.coords.latitude,
-            lng: position.coords.longitude
+            lng: position.coords.longitude,
           })
         },
         (error) => {
-          reject(new Error(`Geolocation error: ${error.message}`))
+          reject(new Error(error.message))
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000,
         }
       )
     })
@@ -44,20 +54,15 @@ const locationSlice = createSlice({
   name: 'location',
   initialState,
   reducers: {
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload
-    },
-    setCurrentLocation: (state, action: PayloadAction<Coordinate>) => {
+    setLocation: (state, action: PayloadAction<{ lat: number; lng: number }>) => {
       state.current = action.payload
-      state.error = null
     },
     setPermission: (state, action: PayloadAction<'granted' | 'denied' | 'prompt'>) => {
       state.permission = action.payload
     },
-    setError: (state, action: PayloadAction<string>) => {
-      state.error = action.payload
-      state.loading = false
-    }
+    clearLocationError: (state) => {
+      state.error = null
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -72,7 +77,7 @@ const locationSlice = createSlice({
       })
       .addCase(getCurrentLocation.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Failed to get location'
+        state.error = action.error.message || '位置情報の取得に失敗しました'
         state.permission = 'denied'
       })
   }

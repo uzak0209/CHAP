@@ -1,39 +1,38 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ContentType } from '../types/types'
 
 export interface FiltersState {
-  contentType: ContentType
-  searchRadius: number
+  contentType: 'MESSAGE' | 'THREAD' | 'EVENT' | 'ALL';
+  searchRadius: number;
   timeRange: {
-    from: Date | null
-    to: Date | null
-  }
-  tags: string[]
-  showValid: boolean
+    from: Date | null;
+    to: Date | null;
+  };
+  tags: string[];
+  showValid: boolean;
 }
 
 const initialState: FiltersState = {
   contentType: 'ALL',
-  searchRadius: 0.01,
+  searchRadius: 1000, // meters
   timeRange: {
     from: null,
-    to: null
+    to: null,
   },
   tags: [],
-  showValid: true
+  showValid: true,
 }
 
 const filtersSlice = createSlice({
   name: 'filters',
   initialState,
   reducers: {
-    setContentType: (state, action: PayloadAction<ContentType>) => {
+    setContentType: (state, action: PayloadAction<'MESSAGE' | 'THREAD' | 'EVENT' | 'ALL'>) => {
       state.contentType = action.payload
     },
     setSearchRadius: (state, action: PayloadAction<number>) => {
       state.searchRadius = action.payload
     },
-    setTimeRange: (state, action: PayloadAction<{from: Date | null, to: Date | null}>) => {
+    setTimeRange: (state, action: PayloadAction<{ from: Date | null; to: Date | null }>) => {
       state.timeRange = action.payload
     },
     addTag: (state, action: PayloadAction<string>) => {
@@ -52,8 +51,8 @@ const filtersSlice = createSlice({
     },
     resetFilters: (state) => {
       return initialState
-    }
-  }
+    },
+  },
 })
 
 export const filtersActions = filtersSlice.actions
