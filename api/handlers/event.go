@@ -11,6 +11,35 @@ import (
 	"gorm.io/gorm"
 )
 
+func EditEvent(c *gin.Context) {
+	id := c.Param("id")
+	var event types.Event
+
+	// GORMでイベントを取得
+	result := db.GetDB().First(&event, id)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "event not found"})
+		return
+	}
+
+	// リクエストボディから更新内容を取得
+	if err := c.ShouldBindJSON(&event); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid json format"})
+		return
+	}
+
+	// 更新日時を現在の時刻に設定
+	event.UpdatedAt = time.Now()
+
+	// GORMで更新
+	if err := db.GetDB().Save(&event).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update event"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"event": event})
+}
+
 // GetEvent handles GET /event/:id
 func GetEvent(c *gin.Context) {
 	id := c.Param("id")
