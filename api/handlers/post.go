@@ -19,16 +19,23 @@ func CreatePost(c *gin.Context) {
 		return
 	}
 
+	// JWT認証からuser_idを取得
+	userID := c.GetString("user_id")
+	userIDInt, err := strconv.Atoi(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id"})
+		return
+	}
+	post.UserID = userIDInt
+
+	// GORMでSupabaseのPostgreSQLに保存
 	result := db.GetDB().Create(&post)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create post"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"status":  "success",
-		"post_id": post.ID,
-	})
+	c.JSON(http.StatusCreated, gin.H{"post": post})
 }
 
 // GetPost handles GET /post/:id
@@ -104,4 +111,25 @@ func DeletePost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "post deleted"})
+}
+
+func GetAround(c *gin.Context) {
+	var req types.Coordinate
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return
+	}
+
+	var posts []types.Post
+
+	// GORMで位置情報検索
+	db.GetDB().Where(
+		"coordinate_lat BETWEEN ? AND ? AND coordinate_lng BETWEEN ? AND ?",
+		req.Lat-types.AROUND,
+		req.Lat+types.AROUND,
+		req.Lng-types.AROUND,
+		req.Lng+types.AROUND,
+	).Find(&posts)
+
+	c.JSON(http.StatusOK, posts)
 }
