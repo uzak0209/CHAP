@@ -11,6 +11,35 @@ import (
 	"gorm.io/gorm"
 )
 
+func EditThread(c *gin.Context) {
+	id := c.Param("id")
+	var thread types.Thread
+
+	// GORMでスレッドを取得
+	result := db.GetDB().First(&thread, id)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
+		return
+	}
+
+	// リクエストボディから更新内容を取得
+	if err := c.ShouldBindJSON(&thread); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid json format"})
+		return
+	}
+
+	// 更新日時を現在の時刻に設定
+	thread.UpdatedAt = time.Now()
+
+	// GORMで更新
+	if err := db.GetDB().Save(&thread).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update thread"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"thread": thread})
+}
+
 // GetThread handles GET /thread/:id
 func GetThread(c *gin.Context) {
 	id := c.Param("id")

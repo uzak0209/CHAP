@@ -10,7 +10,6 @@ func AutoMigrate() error {
 		&types.Post{},
 		&types.Thread{},
 		&types.Event{},
-		&types.User{},
 	)
 
 	if err != nil {

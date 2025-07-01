@@ -8,8 +8,38 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
+
+func EditPost(c *gin.Context) {
+	id := c.Param("id")
+	var post types.Post
+
+	// GORMで投稿を取得
+	result := db.GetDB().First(&post, id)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "post not found"})
+		return
+	}
+
+	// リクエストボディから更新内容を取得
+	if err := c.ShouldBindJSON(&post); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid json format"})
+		return
+	}
+
+	// 更新日時を現在の時刻に設定
+	post.UpdatedAt = time.Now()
+
+	// GORMで更新
+	if err := db.GetDB().Save(&post).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update post"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"post": post})
+}
 
 // CreatePost handles POST /post
 func CreatePost(c *gin.Context) {
@@ -21,12 +51,13 @@ func CreatePost(c *gin.Context) {
 
 	// JWT認証からuser_idを取得
 	userID := c.GetString("user_id")
-	userIDInt, err := strconv.Atoi(userID)
+	// user_id is expected to be a UUID string, so parse it to uuid.UUID
+	uid, err := uuid.Parse(userID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
 		return
 	}
-	post.UserID = userIDInt
+	post.UserID = uid
 
 	// GORMでSupabaseのPostgreSQLに保存
 	result := db.GetDB().Create(&post)
@@ -86,7 +117,7 @@ func GetUpdatePost(c *gin.Context) {
 
 	// 条件に合う投稿を取得（updated_at > from）
 	if err := db.GetDB().
-		Where("updated_at > ?", time.Unix(fromTime, 0)).
+		Where("updated_at > ? or created_at > ?", time.Unix(fromTime, 0), time.Unix(fromTime, 0)).
 		Find(&posts).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch updated posts"})
 		return
