@@ -1,7 +1,7 @@
 import { Heart, MessageCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistance, formatTime } from '@/lib/format';
-import { Post } from '@/types/post';
+import { Post } from '@/types/types';
 
 interface PostCardProps {
   post: Post;
@@ -11,13 +11,11 @@ export function PostCard({ post }: PostCardProps) {
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
-        <PostHeader userId={post.userId} />
-        <PostContent content={post.content} images={post.images} />
+        <PostHeader userId={String(post.user_id)} />
+        <PostContent content={post.content} />
         <PostTags tags={post.tags} />
         <PostFooter 
-          reactions={post.reactions}
-          distance={post.distance}
-          createdAt={post.createdAt}
+          createdAt={post.created_time}
         />
       </CardContent>
     </Card>
@@ -62,25 +60,12 @@ function PostTags({ tags }: { tags: string[] }) {
   );
 }
 
-function PostFooter({ reactions, distance, createdAt }: {
-  reactions: { likes: number; comments: number };
-  distance?: number;
+function PostFooter({ createdAt }: {
   createdAt: string;
 }) {
   return (
     <div className="flex justify-between items-center text-sm text-muted-foreground">
       <div className="flex gap-4">
-        <div className="flex items-center gap-1">
-          <Heart className="w-4 h-4" />
-          <span>{reactions.likes}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <MessageCircle className="w-4 h-4" />
-          <span>{reactions.comments}</span>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        {distance && <span>{formatDistance(distance)}</span>}
         <span>{formatTime(createdAt)}</span>
       </div>
     </div>

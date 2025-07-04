@@ -8,6 +8,7 @@ import threadsReducer, { ThreadsState } from './threadsSlice'
 import eventsReducer, { EventsState } from './eventsSlice'
 import filtersReducer, { FiltersState } from './filtersSlice'
 import uiReducer, { UIState } from './uiSlice'
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux'
 
 // Re-export actions
 export { authActions } from './authSlice'
@@ -62,5 +63,6 @@ export const selectThreads = (state: RootState) => state.threads
 export const selectEvents = (state: RootState) => state.events
 export const selectFilters = (state: RootState) => state.filters
 export const selectUI = (state: RootState) => state.ui
-
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 export default store
