@@ -8,6 +8,7 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
+  console.log("PostCard rendered with post:", post);
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
@@ -46,6 +47,7 @@ function PostContent({ content, images }: { content: string; images?: string[] }
 }
 
 function PostTags({ tags }: { tags: string[] }) {
+  console.log("PostTags rendered with tags:", tags);
   return (
     <div className="flex flex-wrap gap-1 mb-3">
       {tags.map(tag => (
