@@ -37,7 +37,7 @@ const initialState: PostsState = {
 export const fetchAroundPosts = createAsyncThunk(
   'posts/fetchAround',
   async (params: { lat: number; lng: number }) => {
-    const response = await fetch('/api/v1/around/post', {
+    const response = await fetch('http://127.0.0.1:8080/api/v1/around/post', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
@@ -50,7 +50,7 @@ export const fetchAroundPosts = createAsyncThunk(
 export const createPost = createAsyncThunk(
   'posts/create',
   async (postData: Omit<Post, 'id' | 'created_time' | 'updated_at'>) => {
-    const response = await fetch('/api/v1/create/post', {
+    const response = await fetch('http://localhost:8080/api/v1/create/post', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(postData),
@@ -64,7 +64,7 @@ export const createPost = createAsyncThunk(
 export const fetchPost= createAsyncThunk(
   'posts/fetch',
   async (id: string) => { // string に変更
-    const response = await fetch(`/api/v1/post/${id}`)
+    const response = await fetch(`http://localhost:8080/api/v1/post/${id}`)
     if (!response.ok) throw new Error('Failed to fetch post')
     return response.json()
   }
@@ -73,7 +73,7 @@ export const fetchPost= createAsyncThunk(
 export const updatePost = createAsyncThunk(
   'posts/update',
   async (id: string) => { // string に変更
-    const response = await fetch(`/api/v1/update/post/${id}`)
+    const response = await fetch(`http://localhost:8080/api/v1/update/post/${id}`)
     if (!response.ok) throw new Error('Failed to get post update data')
     return response.json()
   }
@@ -82,7 +82,7 @@ export const updatePost = createAsyncThunk(
 export const editPost = createAsyncThunk(
   'posts/edit',
   async ({ id, data }: { id: string; data: Partial<Post> }) => { // string に変更
-    const response = await fetch(`/api/v1/edit/post/${id}`, {
+    const response = await fetch(`http://localhost:8080/api/v1/edit/post/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -95,7 +95,7 @@ export const editPost = createAsyncThunk(
 export const deletePost = createAsyncThunk(
   'posts/delete',
   async (id: string): Promise<string> => { // string に変更
-    const response = await fetch(`/api/v1/delete/post/${id}`, {
+    const response = await fetch(`http://localhost:8080/api/v1/delete/post/${id}`, {
       method: 'DELETE',
     })
     if (!response.ok) throw new Error('Failed to delete post')
