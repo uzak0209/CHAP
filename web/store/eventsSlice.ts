@@ -35,7 +35,7 @@ const initialState: EventsState = {
 
 export const fetchAroundEvents = createAsyncThunk(
   'events/fetchAround',
-  async (params: { lat: number; lng: number }) => {
+  async (params: { lat: string; lng: string }) => {
     const response = await fetch('/api/v1/around/event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -45,7 +45,14 @@ export const fetchAroundEvents = createAsyncThunk(
     return response.json()
   }
 )
-
+export const fetchEvent = createAsyncThunk(
+  'events/fetch',
+  async (id: string) => {
+    const response = await fetch(`/api/v1/event/${id}`)
+    if (!response.ok) throw new Error('Failed to fetch event')
+    return response.json()
+  }
+)
 export const createEvent = createAsyncThunk(
   'events/create',
   async (eventData: Omit<Event, 'id' | 'created_time'>) => {
@@ -60,9 +67,9 @@ export const createEvent = createAsyncThunk(
   }
 )
 
-export const updateEventById = createAsyncThunk(
+export const updateEvent = createAsyncThunk(
   'events/update',
-  async ({ id, data }: { id: number; data: Partial<Event> }) => {
+  async ({ id, data }: { id: string; data: Partial<Event> }) => {
     const response = await fetch(`/api/v1/update/event/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -73,9 +80,9 @@ export const updateEventById = createAsyncThunk(
   }
 )
 
-export const deleteEventById = createAsyncThunk(
+export const deleteEvent= createAsyncThunk(
   'events/delete',
-  async (id: number): Promise<void> => {
+  async (id: string): Promise<void> => {
     const response = await fetch(`/api/v1/delete/event/${id}`, {
       method: 'DELETE',
     })
@@ -126,31 +133,31 @@ const eventsSlice = createSlice({
         state.error.create = action.error.message || 'イベントの作成に失敗しました'
       })
 
-      .addCase(updateEventById.pending, (state) => {
+      .addCase(updateEvent.pending, (state) => {
         state.loading.update = true
         state.error.update = null
       })
-      .addCase(updateEventById.fulfilled, (state, action) => {
+      .addCase(updateEvent.fulfilled, (state, action) => {
         state.loading.update = false
         const index = state.items.findIndex(e => e.id === action.meta.arg.id)
         if (index !== -1) {
           state.items[index] = action.payload
         }
       })
-      .addCase(updateEventById.rejected, (state, action) => {
+      .addCase(updateEvent.rejected, (state, action) => {
         state.loading.update = false
         state.error.update = action.error.message || 'イベントの更新に失敗しました'
       })
 
-      .addCase(deleteEventById.pending, (state) => {
+      .addCase(deleteEvent.pending, (state) => {
         state.loading.delete = true
         state.error.delete = null
       })
-      .addCase(deleteEventById.fulfilled, (state, action) => {
+      .addCase(deleteEvent.fulfilled, (state, action) => {
         state.loading.delete = false
         state.items = state.items.filter(e => e.id !== action.meta.arg)
       })
-      .addCase(deleteEventById.rejected, (state, action) => {
+      .addCase(deleteEvent.rejected, (state, action) => {
         state.loading.delete = false
         state.error.delete = action.error.message || 'イベントの削除に失敗しました'
       })

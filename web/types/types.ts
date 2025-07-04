@@ -1,59 +1,76 @@
-// 共通の型定義
-export interface User {
-  id: number
-  name: string
-  email: string
-  image: string
-  likes: number
-}
-
-export interface Coordinate {
-  lat: number
-  lng: number
-}
-
+// Goのtypes.goに合わせた正しい型定義
 export interface Post {
-  id: number
-  user_id: number
-  content: string
-  coordinate: Coordinate
-  created_time: string
-  deleted_time: string
-  valid: boolean
-  parent: number
-  like: number
-  tags: string[]
+  id: string;           // UUIDの文字列
+  user_id: string;      // UUIDの文字列
+  coordinate: {
+    lat: number;
+    lng: number;
+  };
+  created_time: string;
+  deleted_time?: string;
+  updated_at: string;
+  content: string;
+  valid: boolean;
+  parent?: number;      // int
+  like: number;         // int
+  tags: string[];
 }
 
 export interface Thread {
-  id: number
-  user_id: number
-  content: string
-  coordinate: Coordinate
-  created_time: string
-  deleted_time: string
-  valid: boolean
-  like: number
-  tags: string[]
+  id: string;           // UUIDの文字列
+  user_id: string;      // UUIDの文字列
+  coordinate: {
+    lat: number;
+    lng: number;
+  };
+  created_time: string;
+  deleted_time?: string;
+  updated_at: string;
+  content: string;
+  valid: boolean;
+  like: number;         // int
+  tags: string[];
 }
 
 export interface Event {
-  id: number
-  user_id: number
-  content: string
-  coordinate: Coordinate
-  created_time: string
-  deleted_time: string
-  valid: boolean
-  like: number
-  tags: string[]
+  id: string;           // UUIDの文字列
+  user_id: string;      // UUIDの文字列
+  coordinate: {
+    lat: number;
+    lng: number;
+  };
+  created_time: string;
+  deleted_time?: string;
+  updated_at: string;
+  content: string;
+  valid: boolean;
+  like: number;         // int
+  tags: string[];
 }
 
-export type ContentType = 'MESSAGE' | 'THREAD' | 'EVENT' | 'ALL'
+export interface User {
+  id: string;           // UUIDの文字列
+  name: string;
+  image?: string;
+}
 
-export interface Notification {
-  id: string
-  type: 'success' | 'error' | 'warning' | 'info'
-  message: string
-  timestamp: number
+// いいね関連
+export interface PostLikes {
+  user_id: string;      // UUIDの文字列
+  post_id: string;      // UUIDの文字列
+}
+
+export interface ThreadLikes {
+  user_id: string;      // UUIDの文字列
+  thread_id: string;    // UUIDの文字列
+}
+
+export interface EventLikes {
+  user_id: string;      // UUIDの文字列
+  event_id: string;     // UUIDの文字列
+}
+
+export interface Coordinate {
+  lat: number;
+  lng: number;
 }

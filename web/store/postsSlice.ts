@@ -49,7 +49,7 @@ export const fetchAroundPosts = createAsyncThunk(
 
 export const createPost = createAsyncThunk(
   'posts/create',
-  async (postData: Omit<Post, 'id' | 'created_time'>) => {
+  async (postData: Omit<Post, 'id' | 'created_time' | 'updated_at'>) => {
     const response = await fetch('/api/v1/create/post', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -61,9 +61,9 @@ export const createPost = createAsyncThunk(
   }
 )
 
-export const fetchPost = createAsyncThunk(
-  'posts/fetchById',
-  async (id: number) => {
+export const fetchPost= createAsyncThunk(
+  'posts/fetch',
+  async (id: string) => { // string に変更
     const response = await fetch(`/api/v1/post/${id}`)
     if (!response.ok) throw new Error('Failed to fetch post')
     return response.json()
@@ -72,24 +72,34 @@ export const fetchPost = createAsyncThunk(
 
 export const updatePost = createAsyncThunk(
   'posts/update',
-  async ({ id, data }: { id: number; data: Partial<Post> }) => {
-    const response = await fetch(`/api/v1/update/post/${id}`, {
+  async (id: string) => { // string に変更
+    const response = await fetch(`/api/v1/update/post/${id}`)
+    if (!response.ok) throw new Error('Failed to get post update data')
+    return response.json()
+  }
+)
+
+export const editPost = createAsyncThunk(
+  'posts/edit',
+  async ({ id, data }: { id: string; data: Partial<Post> }) => { // string に変更
+    const response = await fetch(`/api/v1/edit/post/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
-    if (!response.ok) throw new Error('Failed to update post')
+    if (!response.ok) throw new Error('Failed to edit post')
     return response.json()
   }
 )
 
 export const deletePost = createAsyncThunk(
   'posts/delete',
-  async (id: number): Promise<void> => {
+  async (id: string): Promise<string> => { // string に変更
     const response = await fetch(`/api/v1/delete/post/${id}`, {
       method: 'DELETE',
     })
     if (!response.ok) throw new Error('Failed to delete post')
+    return id
   }
 )
 
@@ -108,7 +118,7 @@ const postsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Around Posts
+      // fetchAroundPosts
       .addCase(fetchAroundPosts.pending, (state) => {
         state.loading.fetch = true
         state.error.fetch = null
@@ -121,7 +131,8 @@ const postsSlice = createSlice({
         state.loading.fetch = false
         state.error.fetch = action.error.message || '投稿の取得に失敗しました'
       })
-      // Create Post
+
+      // createPost
       .addCase(createPost.pending, (state) => {
         state.loading.create = true
         state.error.create = null
@@ -136,7 +147,8 @@ const postsSlice = createSlice({
         state.loading.create = false
         state.error.create = action.error.message || '投稿の作成に失敗しました'
       })
-      // Fetch Post
+
+      // fetchPost
       .addCase(fetchPost.pending, (state) => {
         state.loading.fetch = true
         state.error.fetch = null
@@ -154,30 +166,46 @@ const postsSlice = createSlice({
         state.loading.fetch = false
         state.error.fetch = action.error.message || '投稿の取得に失敗しました'
       })
-      // Update Post
+
+      // updatePost
       .addCase(updatePost.pending, (state) => {
+        state.loading.fetch = true
+        state.error.fetch = null
+      })
+      .addCase(updatePost.fulfilled, (state, action) => {
+        state.loading.fetch = false
+        // 更新用データは既存アイテムには反映しない
+      })
+      .addCase(updatePost.rejected, (state, action) => {
+        state.loading.fetch = false
+        state.error.fetch = action.error.message || '更新データの取得に失敗しました'
+      })
+
+      // editPost
+      .addCase(editPost.pending, (state) => {
         state.loading.update = true
         state.error.update = null
       })
-      .addCase(updatePost.fulfilled, (state, action) => {
+      .addCase(editPost.fulfilled, (state, action) => {
         state.loading.update = false
         const index = state.items.findIndex(p => p.id === action.meta.arg.id)
         if (index !== -1) {
           state.items[index] = action.payload
         }
       })
-      .addCase(updatePost.rejected, (state, action) => {
+      .addCase(editPost.rejected, (state, action) => {
         state.loading.update = false
-        state.error.update = action.error.message || '投稿の更新に失敗しました'
+        state.error.update = action.error.message || '投稿の編集に失敗しました'
       })
-      // Delete Post
+
+      // deletePost
       .addCase(deletePost.pending, (state) => {
         state.loading.delete = true
         state.error.delete = null
       })
       .addCase(deletePost.fulfilled, (state, action) => {
         state.loading.delete = false
-        state.items = state.items.filter(p => p.id !== action.meta.arg)
+        state.items = state.items.filter(p => p.id !== action.payload)
       })
       .addCase(deletePost.rejected, (state, action) => {
         state.loading.delete = false
