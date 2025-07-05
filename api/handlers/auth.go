@@ -1,71 +1,163 @@
 package handlers
 
 import (
-	"bytes"
-	"encoding/json"
+	"api/db"
+	"api/types"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
-type SupabaseAuthResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	User         any    `json:"user"`
+type RegisterRequest struct {
+	Name     string `json:"name" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	var creds LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+type AuthResponse struct {
+	Token string     `json:"token"`
+	User  types.User `json:"user"`
+}
+
+func Login(c *gin.Context) {
+	var req LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
 
-	payload := map[string]string{
-		"email":    creds.Email,
-		"password": creds.Password,
+	// データベースからユーザーを検索
+	var user types.User
+	result := db.GetDB().Where("email = ?", req.Email).First(&user)
+	if result.Error != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
 	}
-	body, _ := json.Marshal(payload)
 
-	req, err := http.NewRequest("POST",
-		fmt.Sprintf("https://%s.supabase.co/auth/v1/token?grant_type=password", os.Getenv("SUPABASE_PROJECT_REF")),
-		bytes.NewBuffer(body))
+	// パスワード検証
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		return
+	}
+
+	// JWTトークン生成
+	token, err := generateJWT(user.ID.String())
 	if err != nil {
-		http.Error(w, "Failed to create request", http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return
 	}
 
-	req.Header.Set("apikey", os.Getenv("SUPABASE_ANON_KEY"))
-	req.Header.Set("Content-Type", "application/json")
+	user.Password = ""
 
-	resp, err := http.DefaultClient.Do(req)
+	c.JSON(http.StatusOK, AuthResponse{
+		Token: token,
+		User:  user,
+	})
+}
+
+func Register(c *gin.Context) {
+	var req RegisterRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return
+	}
+
+	// メールアドレスの重複チェック
+	var existingUser types.User
+	if err := db.GetDB().Where("email = ?", req.Email).First(&existingUser).Error; err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "email already exists"})
+		return
+	}
+
+	// パスワードハッシュ化
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, "Supabase Auth error", http.StatusInternalServerError)
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		log.Println("Supabase Error:", string(body))
-		http.Error(w, "Login failed", http.StatusUnauthorized)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
 		return
 	}
 
-	var authResp SupabaseAuthResponse
-	if err := json.NewDecoder(resp.Body).Decode(&authResp); err != nil {
-		http.Error(w, "Failed to parse response", http.StatusInternalServerError)
+	// 新規ユーザー作成
+	user := types.User{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: string(hashedPassword),
+	}
+
+	result := db.GetDB().Create(&user)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
 		return
 	}
 
-	// JWTをそのまま返す
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(authResp)
+	// JWTトークン生成
+	token, err := generateJWT(user.ID.String())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+		return
+	}
+
+	// パスワードは返さない
+	user.Password = ""
+
+	c.JSON(http.StatusCreated, AuthResponse{
+		Token: token,
+		User:  user,
+	})
+}
+
+func generateJWT(userID string) (string, error) {
+	// JWT Secretの確認
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		return "", fmt.Errorf("JWT_SECRET environment variable is not set")
+	}
+
+	// JWT Claims作成
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"exp":     time.Now().Add(time.Hour * 24 * 7).Unix(), // 7日間有効
+		"iat":     time.Now().Unix(),
+	}
+
+	// JWTトークン作成
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// 署名してトークン文字列を生成
+	tokenString, err := token.SignedString([]byte(jwtSecret))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+func GetCurrentUser(c *gin.Context) {
+	// ミドルウェアでセットされたユーザーIDを取得
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		return
+	}
+
+	var user types.User
+	result := db.GetDB().Where("id = ?", userID).First(&user)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	// パスワードは返さない
+	user.Password = ""
+
+	c.JSON(http.StatusOK, gin.H{"user": user})
 }

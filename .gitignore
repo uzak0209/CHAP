@@ -5,3 +5,4 @@ nginx/ssl
 /web/node_modules
 /web/templates/node_modules
 /web/dist
+/keys
