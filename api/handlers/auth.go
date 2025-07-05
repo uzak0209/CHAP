@@ -3,70 +3,69 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"os"
 )
 
-type SignUpRequest struct {
+type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-type SupabaseResponse struct {
-	User  interface{} `json:"user"`
-	Error interface{} `json:"error"`
+type SupabaseAuthResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	User         any    `json:"user"`
 }
 
-func SignUp(email, password string) (*SupabaseResponse, error) {
-	apiKey := os.Getenv("SUPABASE_ANON_KEY")             // Supabaseの.envにある
-	url := os.Getenv("SUPABASE_URL") + "/auth/v1/signup" // SupabaseのURL
-	reqBody := SignUpRequest{Email: email, Password: password}
-	body, _ := json.Marshal(reqBody)
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
-	if err != nil {
-		return nil, err
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	var creds LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("apikey", apiKey)
+	payload := map[string]string{
+		"email":    creds.Email,
+		"password": creds.Password,
+	}
+	body, _ := json.Marshal(payload)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	req, err := http.NewRequest("POST",
+		fmt.Sprintf("https://%s.supabase.co/auth/v1/token?grant_type=password", os.Getenv("SUPABASE_PROJECT_REF")),
+		bytes.NewBuffer(body))
 	if err != nil {
-		return nil, err
+		http.Error(w, "Failed to create request", http.StatusInternalServerError)
+		return
+	}
+
+	req.Header.Set("apikey", os.Getenv("SUPABASE_ANON_KEY"))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		http.Error(w, "Supabase Auth error", http.StatusInternalServerError)
+		return
 	}
 	defer resp.Body.Close()
 
-	var result SupabaseResponse
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	return &result, err
-}
-
-// Login handles user login via Supabase Auth
-func Login(email, password string) (*SupabaseResponse, error) {
-	url := os.Getenv("SUPABASE_URL") + "/auth/v1/token?grant_type=password"
-	apiKey := os.Getenv("SUPABASE_ANON_KEY")
-
-	reqBody := SignUpRequest{Email: email, Password: password}
-	body, _ := json.Marshal(reqBody)
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
-	if err != nil {
-		return nil, err
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		log.Println("Supabase Error:", string(body))
+		http.Error(w, "Login failed", http.StatusUnauthorized)
+		return
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("apikey", apiKey)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
+	var authResp SupabaseAuthResponse
+	if err := json.NewDecoder(resp.Body).Decode(&authResp); err != nil {
+		http.Error(w, "Failed to parse response", http.StatusInternalServerError)
+		return
 	}
-	defer resp.Body.Close()
 
-	var result SupabaseResponse
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	return &result, err
+	// JWTをそのまま返す
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(authResp)
 }

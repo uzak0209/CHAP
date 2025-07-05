@@ -29,7 +29,7 @@ func EditEvent(c *gin.Context) {
 	}
 
 	// 更新日時を現在の時刻に設定
-	event.UpdatedAt = time.Now()
+	event.UpdatedTime = time.Now()
 
 	// GORMで更新
 	if err := db.GetDB().Save(&event).Error; err != nil {

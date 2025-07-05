@@ -20,37 +20,7 @@ func init() {
 
 	// Supabaseの接続文字列を直接使用
 	dsn := os.Getenv("SUPABASE_DB_URL")
-	if dsn == "" {
-		// フォールバック：個別の環境変数から構築
-		host := os.Getenv("DB_HOST")
-		if host == "" {
-			host = "127.0.0.1"
-		}
-
-		port := os.Getenv("DB_PORT")
-		if port == "" {
-			port = "54322"
-		}
-
-		user := os.Getenv("DB_USER")
-		if user == "" {
-			user = "postgres"
-		}
-
-		password := os.Getenv("DB_PASS")
-		if password == "" {
-			password = "postgres"
-		}
-
-		dbname := os.Getenv("DB_NAME")
-		if dbname == "" {
-			dbname = "postgres"
-		}
-
-		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-			host, user, password, dbname, port)
-	}
-
+	fmt.Println("Using DSN:", dsn)
 	// DBに接続
 	var err error
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})

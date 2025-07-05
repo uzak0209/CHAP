@@ -14,8 +14,8 @@ export function PostCard({ post }: PostCardProps) {
       <CardContent className="p-4">
         <PostHeader userId={String(post.user_id)} />
         <PostContent content={post.content} />
-        <PostTags tags={post.tags} />
-        <PostFooter 
+        {post.tags && <PostTags tags={post.tags} />}
+        <PostFooter
           createdAt={post.created_time}
         />
       </CardContent>

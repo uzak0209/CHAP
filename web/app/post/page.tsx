@@ -10,24 +10,35 @@ import { Textarea } from '@/components/ui/textarea';
 import { Camera, MapPin, Hash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useLocation } from '@/hooks/useLocation';
-
+import { createPost, useAppDispatch,useAppSelector } from '@/store';
+import { v4 as uuidv4 } from 'uuid';
 export default function PostPage() {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  const location = useLocation();
+  const dispatch = useAppDispatch();
+  const location = useAppSelector((state) => state.location.current);
   const router = useRouter();
 
   const handleSubmit = async () => {
+
     if (!content.trim()) return;
-    
+    const userId = uuidv4();
     setLoading(true);
     try {
-      // TODO: Implement post submission
-      console.log('Submitting post:', { content, images, tags, location });
+      dispatch(createPost({
+        content,
+        tags,
+        user_id: "321dfb4c-0499-4413-a87d-c4400061c6f9", // TODO: Set the actual user_id here
+        coordinate:
+          location && location.lat !== null && location.lng !== null
+            ? { lat: location.lat, lng: location.lng }
+            : { lat: 0, lng: 0 },
+        valid: true,
+        like: 0,
+      }));
       router.push('/');
     } catch (error) {
       console.error('Post submission error:', error);
@@ -177,7 +188,7 @@ function TagsSection({
 function LocationInfo({ 
   location 
 }: { 
-  location: { lat: number; lng: number } | null 
+  location: { lat: number | null; lng: number | null } | null 
 }) {
   return (
     <div className="flex items-center gap-2 text-sm text-gray-600">

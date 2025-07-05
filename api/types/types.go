@@ -14,9 +14,9 @@ type Post struct {
 	Coordinate  Coordinate     `json:"coordinate" gorm:"embedded"`
 	ID          string         `json:"id" gorm:"primaryKey"`
 	UserID      uuid.UUID      `json:"user_id" gorm:"type:uuid;not null"`
-	CreatedTime string         `json:"created_time"`
-	DeletedTime string         `json:"deleted_time"`
-	UpdatedAt   time.Time      `json:"updated_at"`
+	CreatedTime time.Time      `json:"created_time"`
+	DeletedTime time.Time      `json:"deleted_time"`
+	UpdatedTime time.Time      `json:"updated_time"`
 	Content     string         `json:"content"`
 	Valid       bool           `json:"valid"`
 	Parent      int            `json:"parent"`
@@ -27,9 +27,9 @@ type Thread struct {
 	Coordinate  Coordinate     `json:"coordinate" gorm:"embedded"`
 	ID          string         `json:"id" gorm:"primaryKey"`
 	UserID      uuid.UUID      `json:"user_id" gorm:"type:uuid;not null"`
-	CreatedTime string         `json:"created_time"`
-	DeletedTime string         `json:"deleted_time"`
-	UpdatedAt   time.Time      `json:"updated_at"`
+	CreatedTime time.Time      `json:"created_time"`
+	DeletedTime time.Time      `json:"deleted_time"`
+	UpdatedTime time.Time      `json:"updated_time"`
 	Content     string         `json:"content"`
 	Valid       bool           `json:"valid"`
 	Like        int            `json:"like"`
@@ -39,9 +39,9 @@ type Event struct {
 	Coordinate  Coordinate     `json:"coordinate" gorm:"embedded"`
 	ID          string         `json:"id" gorm:"primaryKey"`
 	UserID      uuid.UUID      `json:"user_id" gorm:"type:uuid;not null"`
-	CreatedTime string         `json:"created_time"`
-	DeletedTime string         `json:"deleted_time"`
-	UpdatedAt   time.Time      `json:"updated_at"`
+	CreatedTime time.Time      `json:"created_time"`
+	DeletedTime time.Time      `json:"deleted_time"`
+	UpdatedTime time.Time      `json:"updated_time"`
 	Content     string         `json:"content"`
 	Valid       bool           `json:"valid"`
 	Like        int            `json:"like"`
@@ -49,9 +49,14 @@ type Event struct {
 }
 
 type User struct {
-	ID    uuid.UUID `json:"id" gorm:"type:uuid;primaryKey"`
-	Name  string    `json:"name" gorm:"not null"`
-	Image string    `json:"image"`
+	ID           uuid.UUID `json:"id" gorm:"type:uuid;primaryKey"`
+	Name         string    `json:"name" gorm:"not null"`
+	Image        string    `json:"image"`
+	Email        string    `json:"email" gorm:"not null;unique"`
+	CreatedAt    time.Time `json:"created_at" gorm:"autoCreateTime"`
+	Valid        bool      `json:"valid" gorm:"default:true"`
+	Password     string    `json:"password" gorm:"not null"`
+	LoginService string    `json:"login_service"`
 }
 type PostLikes struct {
 	UserID uuid.UUID `json:"user_id" gorm:"type:uuid;not null;primaryKey"`

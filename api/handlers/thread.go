@@ -29,7 +29,7 @@ func EditThread(c *gin.Context) {
 	}
 
 	// 更新日時を現在の時刻に設定
-	thread.UpdatedAt = time.Now()
+	thread.UpdatedTime = time.Now()
 
 	// GORMで更新
 	if err := db.GetDB().Save(&thread).Error; err != nil {
