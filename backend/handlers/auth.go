@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -98,6 +99,7 @@ func Register(c *gin.Context) {
 		Valid:     true,
 	}
 	fmt.Printf("Creating user: %+v\n", user) // デバッグ用ログ出力
+	user.ID = uuid.New()
 	result := db.GetDB().Create(&user)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
