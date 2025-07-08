@@ -59,6 +59,9 @@ func Login(c *gin.Context) {
 
 	user.Password = ""
 
+	// JWTをHttpOnly Cookieに設定
+	c.SetCookie("token", token, 60*60*24*7, "/", "", false, true) // 7日間有効、HttpOnly
+
 	c.JSON(http.StatusOK, AuthResponse{
 		Token: token,
 		User:  user,
@@ -88,11 +91,13 @@ func Register(c *gin.Context) {
 
 	// 新規ユーザー作成
 	user := types.User{
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: string(hashedPassword),
+		Name:      req.Name,
+		Email:     req.Email,
+		Password:  string(hashedPassword),
+		CreatedAt: time.Now(),
+		Valid:     true,
 	}
-
+	fmt.Printf("Creating user: %+v\n", user) // デバッグ用ログ出力
 	result := db.GetDB().Create(&user)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
@@ -108,6 +113,9 @@ func Register(c *gin.Context) {
 
 	// パスワードは返さない
 	user.Password = ""
+
+	// JWTをHttpOnly Cookieに設定
+	c.SetCookie("token", token, 60*60*24*7, "/", "", false, true) // 7日間有効、HttpOnly
 
 	c.JSON(http.StatusCreated, AuthResponse{
 		Token: token,
@@ -160,4 +168,10 @@ func GetCurrentUser(c *gin.Context) {
 	user.Password = ""
 
 	c.JSON(http.StatusOK, gin.H{"user": user})
+}
+
+func Logout(c *gin.Context) {
+	// Cookieからトークンを削除
+	c.SetCookie("token", "", -1, "/", "", false, true)
+	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }

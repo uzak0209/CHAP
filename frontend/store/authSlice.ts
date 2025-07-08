@@ -40,7 +40,7 @@ const initialState: AuthState = {
 export const login = createAsyncThunk(
   'auth/login',
   async ({ email, password }: { email: string; password: string }) => {
-    const response = await fetch('/api/v1/auth/login', {
+    const response = await fetch('http://localhost:8080/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -53,20 +53,33 @@ export const login = createAsyncThunk(
 export const register = createAsyncThunk(
   'auth/register',
   async ({ email, password, display_name }: { email: string; password: string; display_name: string }) => {
-    const response = await fetch('/api/v1/auth/register', {
+    const response = await fetch('http://localhost:8080/api/v1/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, display_name })
+      body: JSON.stringify({ 
+        email, 
+        password, 
+        name: display_name  // ← display_name を name として送信
+      })
     })
-    if (!response.ok) throw new Error('登録に失敗しました')
-    return response.json()
+    
+    if (!response.ok) {
+      // エラーレスポンスの内容を詳しく確認
+      const errorText = await response.text()
+      console.error('Register error:', errorText)
+      throw new Error(`登録に失敗しました: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    console.log('Register response:', data) // デバッグ用
+    return data
   }
 )
 
 export const logout = createAsyncThunk(
   'auth/logout',
   async () => {
-    const response = await fetch('/api/v1/auth/logout', {
+    const response = await fetch('http://localhost:8080/api/v1/auth/logout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     })

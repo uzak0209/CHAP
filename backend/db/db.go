@@ -21,12 +21,20 @@ func init() {
 	// Supabaseの接続文字列を直接使用
 	dsn := os.Getenv("SUPABASE_DB_URL")
 	fmt.Println("Using DSN:", dsn)
-	// DBに接続
+
+	if dsn == "" {
+		log.Fatal("SUPABASE_DB_URL is not set")
+	}
+
+	// DBに接続（タイムアウト設定追加）
+	fmt.Println("Attempting to connect to database...")
 	var err error
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
+
+	fmt.Println("Database connection successful!")
 
 	log.Println("Successfully connected to Supabase database via GORM")
 }

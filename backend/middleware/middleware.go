@@ -12,19 +12,27 @@ import (
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "authorization header required"})
-			c.Abort()
-			return
-		}
+		var tokenString string
 
-		// "Bearer TOKEN"形式から"TOKEN"部分を取得
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		if tokenString == authHeader {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header format"})
-			c.Abort()
-			return
+		// まずAuthorizationヘッダーをチェック
+		authHeader := c.GetHeader("Authorization")
+		if authHeader != "" {
+			// "Bearer TOKEN"形式から"TOKEN"部分を取得
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+			if tokenString == authHeader {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header format"})
+				c.Abort()
+				return
+			}
+		} else {
+			// Authorizationヘッダーがない場合、Cookieからトークンを取得
+			var err error
+			tokenString, err = c.Cookie("token")
+			if err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "authorization required"})
+				c.Abort()
+				return
+			}
 		}
 
 		// JWT Secret取得
