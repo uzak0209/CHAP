@@ -6,6 +6,7 @@ import { PostCard } from '@/components/Post/PostCard';
 import { PostFilters } from '@/components/Post/PostFilters';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { Post } from '@/types/types';
+import AuthGuard from '@/components/Auth/AuthGuard';
 
 import { fetchAroundPosts, fetchPost, postsActions } from '@/store/postsSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
@@ -18,6 +19,26 @@ export default function PostPage() {
   const dispatch = useAppDispatch();
   const { items: posts, loading, error } = useAppSelector(state => state.posts);
   const { current: location, loading: locationLoading } = useAppSelector(state => state.location);
+
+  return (
+    <AuthGuard>
+      <PostPageContent 
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        filter={filter}
+        setFilter={setFilter}
+        posts={posts}
+        loading={loading}
+        error={error}
+        location={location}
+        locationLoading={locationLoading}
+      />
+    </AuthGuard>
+  );
+}
+
+function PostPageContent({ sortBy, setSortBy, filter, setFilter, posts, loading, error, location, locationLoading }: any) {
+  const dispatch = useAppDispatch();
 
   // 位置情報取得と投稿データ取得
   useEffect(() => {

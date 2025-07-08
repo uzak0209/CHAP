@@ -22,7 +22,7 @@ export interface AuthState {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  token: null,
+  token: typeof window !== 'undefined' ? localStorage.getItem('authToken') : null,
   loading: {
     login: false,
     logout: false,
@@ -39,11 +39,11 @@ const initialState: AuthState = {
 
 export const login = createAsyncThunk(
   'auth/login',
-  async (credentials: { email: string; password: string }) => {
+  async ({ email, password }: { email: string; password: string }) => {
     const response = await fetch('/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials),
+      body: JSON.stringify({ email, password })
     })
     if (!response.ok) throw new Error('ログインに失敗しました')
     return response.json()
@@ -52,11 +52,11 @@ export const login = createAsyncThunk(
 
 export const register = createAsyncThunk(
   'auth/register',
-  async (userData: Omit<User, 'id' | 'likes'>) => {
+  async ({ email, password, display_name }: { email: string; password: string; display_name: string }) => {
     const response = await fetch('/api/v1/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
+      body: JSON.stringify({ email, password, display_name })
     })
     if (!response.ok) throw new Error('登録に失敗しました')
     return response.json()
@@ -68,6 +68,7 @@ export const logout = createAsyncThunk(
   async () => {
     const response = await fetch('/api/v1/auth/logout', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
     })
     if (!response.ok) throw new Error('ログアウトに失敗しました')
     return response.json()
@@ -90,11 +91,14 @@ const authSlice = createSlice({
       state.user = action.payload
       state.isAuthenticated = true
     },
-    clearAuth: (state) => {
+    clearUser: (state) => {
       state.user = null
       state.isAuthenticated = false
       state.token = null
-    },
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('authToken')
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -107,6 +111,10 @@ const authSlice = createSlice({
         state.user = action.payload.user
         state.token = action.payload.token
         state.isAuthenticated = true
+        // トークンをlocal storageに保存
+        if (typeof window !== 'undefined' && action.payload.token) {
+          localStorage.setItem('authToken', action.payload.token)
+        }
       })
       .addCase(login.rejected, (state, action) => {
         state.loading.login = false
@@ -122,6 +130,10 @@ const authSlice = createSlice({
         state.user = action.payload.user
         state.token = action.payload.token
         state.isAuthenticated = true
+        // トークンをlocal storageに保存
+        if (typeof window !== 'undefined' && action.payload.token) {
+          localStorage.setItem('authToken', action.payload.token)
+        }
       })
       .addCase(register.rejected, (state, action) => {
         state.loading.register = false
@@ -137,6 +149,10 @@ const authSlice = createSlice({
         state.user = null
         state.token = null
         state.isAuthenticated = false
+        // local storageからトークンを削除
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('authToken')
+        }
       })
       .addCase(logout.rejected, (state, action) => {
         state.loading.logout = false
@@ -146,4 +162,5 @@ const authSlice = createSlice({
 })
 
 export const authActions = authSlice.actions
+export const { clearAuthErrors, setUser, clearUser } = authSlice.actions
 export default authSlice.reducer

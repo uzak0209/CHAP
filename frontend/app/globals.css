@@ -66,4 +66,36 @@
   body {
     @apply bg-background text-foreground;
   }
-} 
+}
+
+/* Custom styles for login page */
+.login-input {
+  @apply transition-all duration-200 ease-in-out;
+  @apply focus:scale-[1.02] focus:shadow-lg;
+}
+
+.login-button {
+  @apply transform transition-all duration-200 ease-in-out;
+  @apply hover:scale-[1.02] active:scale-[0.98];
+}
+
+.auth-card {
+  @apply backdrop-blur-sm bg-white/80 border-0;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient animations */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.gradient-bg {
+  background: linear-gradient(-45deg, #e0f2fe, #e8eaf6, #f3e5f5, #fce4ec);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
