@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -29,12 +30,30 @@ func init() {
 	// DBに接続（タイムアウト設定追加）
 	fmt.Println("Attempting to connect to database...")
 	var err error
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{PrepareStmt: false})
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+		PrepareStmt: false, // prepared statementを無効化
+		NowFunc: func() time.Time {
+			return time.Now().UTC()
+		},
+	})
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
-	sqlDB, _ := db.DB()
-	sqlDB.Exec("DEALLOCATE ALL;")
+
+	// コネクションプールの設定
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatalf("failed to get database instance: %v", err)
+	}
+
+	// 既存のprepared statementをクリア
+	sqlDB.Exec("DEALLOCATE ALL")
+
+	// コネクションプールの設定
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
 	fmt.Println("Database connection successful!")
 
 	log.Println("Successfully connected to Supabase database via GORM")

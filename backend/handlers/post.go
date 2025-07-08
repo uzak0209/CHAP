@@ -51,13 +51,16 @@ func CreatePost(c *gin.Context) {
 
 	// JWT認証からuser_idを取得
 	userID := c.GetString("user_id")
-	// user_id is expected to be a UUID string, so parse it to uuid.UUID
 	uid, err := uuid.Parse(userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
 		return
 	}
+
+	// PostのIDは自動インクリメントなので設定しない
+	// UserIDのみ設定（他のフィールドはリクエストから取得）
 	post.UserID = uid
+	post.ID = 0 // 自動インクリメント用に0に設定
 
 	// GORMでSupabaseのPostgreSQLに保存
 	result := db.GetDB().Create(&post)

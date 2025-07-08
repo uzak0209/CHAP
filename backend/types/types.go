@@ -11,12 +11,12 @@ const AROUND = 0.01 // 検索範囲の定数
 
 // メッセージ用構造体
 type Post struct {
-	Coordinate  Coordinate     `json:"coordinate" gorm:"embedded"`
-	ID          string         `json:"id" gorm:"primaryKey"`
+	ID          uint           `json:"id" gorm:"primaryKey;autoIncrement"`
 	UserID      uuid.UUID      `json:"user_id" gorm:"type:uuid;not null"`
-	CreatedTime time.Time      `json:"created_time"`
-	DeletedTime time.Time      `json:"deleted_time"`
-	UpdatedTime time.Time      `json:"updated_time"`
+	Coordinate  Coordinate     `json:"coordinate" gorm:"embedded"`
+	CreatedTime time.Time      `json:"created_time" gorm:"autoCreateTime"`
+	UpdatedTime time.Time      `json:"updated_time" gorm:"autoUpdateTime"`
+	DeletedTime *time.Time     `json:"deleted_time,omitempty"`
 	Content     string         `json:"content"`
 	Valid       bool           `json:"valid"`
 	Parent      int            `json:"parent"`

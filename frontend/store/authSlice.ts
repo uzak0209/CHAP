@@ -22,7 +22,7 @@ export interface AuthState {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  token: typeof window !== 'undefined' ? localStorage.getItem('authToken') : null,
+  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
   loading: {
     login: false,
     logout: false,
@@ -126,7 +126,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true
         // トークンをlocal storageに保存
         if (typeof window !== 'undefined' && action.payload.token) {
-          localStorage.setItem('authToken', action.payload.token)
+          localStorage.setItem('token', action.payload.token)
         }
       })
       .addCase(login.rejected, (state, action) => {
