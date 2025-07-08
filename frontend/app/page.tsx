@@ -1,14 +1,14 @@
 'use client';
 
-
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const router = useRouter();
+
   useEffect(() => {
-    router.push('/login');
+    router.replace('/login'); // pushよりreplaceの方が適切な場合も
   }, [router]);
 
-  return null; // 遷移中は何も表示しない
+  return null;
 }

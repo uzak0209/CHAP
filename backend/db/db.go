@@ -29,7 +29,7 @@ func init() {
 	// DBに接続（タイムアウト設定追加）
 	fmt.Println("Attempting to connect to database...")
 	var err error
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{PrepareStmt: false})
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
