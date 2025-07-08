@@ -33,7 +33,8 @@ func init() {
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
-
+	sqlDB, _ := db.DB()
+	sqlDB.Exec("DEALLOCATE ALL;")
 	fmt.Println("Database connection successful!")
 
 	log.Println("Successfully connected to Supabase database via GORM")
