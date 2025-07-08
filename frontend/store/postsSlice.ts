@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Post } from '../types/types'
+import { get } from 'http';
 
 export interface PostsState {
   items: Post[];
@@ -46,13 +47,23 @@ export const fetchAroundPosts = createAsyncThunk(
     return response.json()
   }
 )
-
+const getAuthToken = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('authToken') || null;
+  }
+  return null;
+}
 export const createPost = createAsyncThunk(
   'posts/create',
   async (postData: Omit<Post, 'id' | 'created_time' | 'updated_at'>) => {
+    const token=getAuthToken();
+    const headers={
+      'Content-Type':'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` } )
+    }
     const response = await fetch('http://localhost:8080/api/v1/create/post', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(postData),
     })
     if (!response.ok) throw new Error('Failed to create post')
