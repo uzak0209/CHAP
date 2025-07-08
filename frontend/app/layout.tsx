@@ -4,12 +4,48 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Provider } from 'react-redux'
 import { store } from '@/store/store'
-import { useAuthInitializer } from '@/hooks/useAuthInitializer'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState, AppDispatch } from '@/store/store'
+import { setUser } from '@/store/authSlice'
 
 const inter = Inter({ subsets: ['latin'] })
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
-  useAuthInitializer();
+  const dispatch = useDispatch<AppDispatch>();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const storedToken = localStorage.getItem('authToken');
+      
+      if (storedToken && !isAuthenticated) {
+        try {
+          const response = await fetch('/api/v1/auth/me', {
+            headers: {
+              'Authorization': `Bearer ${storedToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            const userData = await response.json();
+            dispatch(setUser(userData.user));
+          } else {
+            localStorage.removeItem('authToken');
+          }
+        } catch (error) {
+          console.error('Auth initialization failed:', error);
+          localStorage.removeItem('authToken');
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      initializeAuth();
+    }
+  }, [dispatch, isAuthenticated]);
+
   return <>{children}</>;
 }
 

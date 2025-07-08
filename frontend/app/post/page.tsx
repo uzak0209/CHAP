@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Camera, MapPin, Hash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useLocation } from '@/hooks/useLocation';
 import { createPost, useAppDispatch,useAppSelector } from '@/store';
 import { v4 as uuidv4 } from 'uuid';
 export default function PostPage() {
