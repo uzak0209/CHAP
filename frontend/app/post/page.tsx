@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Camera, MapPin, Hash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createPost, useAppDispatch,useAppSelector } from '@/store';
-import { v4 as uuidv4 } from 'uuid';
+
 export default function PostPage() {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<File[]>([]);
@@ -22,21 +22,20 @@ export default function PostPage() {
   const router = useRouter();
 
   const handleSubmit = async () => {
-
     if (!content.trim()) return;
-    const userId = uuidv4();
+    
     setLoading(true);
     try {
       dispatch(createPost({
         content,
         tags,
-        user_id: "321dfb4c-0499-4413-a87d-c4400061c6f9", // TODO: Set the actual user_id here
         coordinate:
           location && location.lat !== null && location.lng !== null
             ? { lat: location.lat, lng: location.lng }
             : { lat: 0, lng: 0 },
         valid: true,
         like: 0,
+        updated_time: new Date().toISOString(),
       }));
       router.push('/');
     } catch (error) {
@@ -155,6 +154,7 @@ function TagsSection({
   onAddTag: () => void;
   onRemoveTag: (tag: string) => void;
 }) {
+  const dispatch = useAppDispatch();
   return (
     <div>
       <Label>タグ</Label>

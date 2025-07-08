@@ -49,13 +49,13 @@ export const fetchAroundPosts = createAsyncThunk(
 )
 const getAuthToken = () => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('authToken') || null;
+    return localStorage.getItem('token') || null;
   }
   return null;
 }
 export const createPost = createAsyncThunk(
   'posts/create',
-  async (postData: Omit<Post, 'id' | 'created_time' | 'updated_at'>) => {
+  async (postData: Omit<Post, 'id' | 'user_id' | 'created_time' | 'updated_at'>) => {
     const token=getAuthToken();
     const headers={
       'Content-Type':'application/json',
@@ -74,7 +74,7 @@ export const createPost = createAsyncThunk(
 
 export const fetchPost= createAsyncThunk(
   'posts/fetch',
-  async (id: string) => { // string に変更
+  async (id: number) => { // string に変更
     const response = await fetch(`http://localhost:8080/api/v1/post/${id}`)
     if (!response.ok) throw new Error('Failed to fetch post')
     return response.json()
@@ -83,7 +83,7 @@ export const fetchPost= createAsyncThunk(
 
 export const updatePost = createAsyncThunk(
   'posts/update',
-  async (id: string) => { // string に変更
+  async (id: number) => { // string に変更
     const response = await fetch(`http://localhost:8080/api/v1/update/post/${id}`)
     if (!response.ok) throw new Error('Failed to get post update data')
     return response.json()
@@ -92,7 +92,7 @@ export const updatePost = createAsyncThunk(
 
 export const editPost = createAsyncThunk(
   'posts/edit',
-  async ({ id, data }: { id: string; data: Partial<Post> }) => { // string に変更
+  async ({ id, data }: { id: number; data: Partial<Post> }) => { // string に変更
     const response = await fetch(`http://localhost:8080/api/v1/edit/post/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -105,7 +105,7 @@ export const editPost = createAsyncThunk(
 
 export const deletePost = createAsyncThunk(
   'posts/delete',
-  async (id: string): Promise<string> => { // string に変更
+  async (id: number): Promise<number> => { // string に変更
     const response = await fetch(`http://localhost:8080/api/v1/delete/post/${id}`, {
       method: 'DELETE',
     })

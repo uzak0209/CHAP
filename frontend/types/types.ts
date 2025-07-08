@@ -1,6 +1,6 @@
 // Goのtypes.goに合わせた正しい型定義
 export interface Post {
-  id: string;           // UUIDの文字列
+  id: number;           // 自動インクリメントのID
   user_id: string;      // UUIDの文字列
   coordinate: {
     lat: number;
@@ -8,7 +8,7 @@ export interface Post {
   };
   created_time: string;
   deleted_time?: string;
-  updated_at: string;
+  updated_time: string;
   content: string;
   valid: boolean;
   parent?: number;      // int
