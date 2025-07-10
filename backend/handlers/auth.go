@@ -113,9 +113,6 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// パスワードは返さない
-	user.Password = ""
-
 	// JWTをHttpOnly Cookieに設定
 	c.SetCookie("token", token, 60*60*24*7, "/", "", false, true) // 7日間有効、HttpOnly
 
