@@ -24,6 +24,8 @@ const initialState: LocationState = {
 export const getCurrentLocation = createAsyncThunk(
   'location/getCurrent',
   async () => {
+    console.log('getCurrentLocation called');
+    // Check if geolocation is supported
     return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
       if (!navigator.geolocation) {
         reject(new Error('Geolocation is not supported by this browser.'))
