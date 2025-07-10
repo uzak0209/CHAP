@@ -21,7 +21,7 @@ export interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  isAuthenticated: false,
+  isAuthenticated: typeof window !== 'undefined' ? !!localStorage.getItem('token') : false,
   token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
   loading: {
     login: false,
@@ -69,9 +69,11 @@ export const register = createAsyncThunk(
       console.error('Register error:', errorText)
       throw new Error(`登録に失敗しました: ${response.status}`)
     }
+    console.log('Register request sent:', { email, password, display_name }) // デバッグ用
     
     const data = await response.json()
     console.log('Register response:', data) // デバッグ用
+
     return data
   }
 )
@@ -85,6 +87,32 @@ export const logout = createAsyncThunk(
     })
     if (!response.ok) throw new Error('ログアウトに失敗しました')
     return response.json()
+  }
+)
+
+export const verifyToken = createAsyncThunk(
+  'auth/verifyToken',
+  async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) {
+      throw new Error('No token found');
+    }
+
+    const response = await fetch('http://localhost:8080/api/v1/auth/me', {
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    
+    if (!response.ok) {
+      // トークンが無効な場合はlocalStorageから削除
+      localStorage.removeItem('token');
+      throw new Error('Token verification failed');
+    }
+    
+    return response.json();
   }
 )
 
@@ -170,6 +198,26 @@ const authSlice = createSlice({
       .addCase(logout.rejected, (state, action) => {
         state.loading.logout = false
         state.error.logout = action.error.message || 'ログアウトに失敗しました'
+      })
+
+      .addCase(verifyToken.pending, (state) => {
+        state.loading.refresh = true
+        state.error.refresh = null
+      })
+      .addCase(verifyToken.fulfilled, (state, action) => {
+        state.loading.refresh = false
+        state.user = action.payload.user || action.payload
+        state.isAuthenticated = true
+      })
+      .addCase(verifyToken.rejected, (state, action) => {
+        state.loading.refresh = false
+        state.error.refresh = action.error.message || 'Token verification failed'
+        state.user = null
+        state.token = null
+        state.isAuthenticated = false
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token')
+        }
       })
   }
 })

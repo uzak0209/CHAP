@@ -6,7 +6,6 @@ import { PostCard } from '@/components/Post/PostCard';
 import { PostFilters } from '@/components/Post/PostFilters';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { Post } from '@/types/types';
-import AuthGuard from '@/components/Auth/AuthGuard';
 
 import { fetchAroundPosts, fetchPost, postsActions } from '@/store/postsSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
@@ -19,42 +18,23 @@ export default function PostPage() {
   const dispatch = useAppDispatch();
   const { items: posts, loading, error } = useAppSelector(state => state.posts);
   const { current: location, loading: locationLoading } = useAppSelector(state => state.location);
-
-  return (
-    <AuthGuard>
-      <PostPageContent 
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        filter={filter}
-        setFilter={setFilter}
-        posts={posts}
-        loading={loading}
-        error={error}
-        location={location}
-        locationLoading={locationLoading}
-      />
-    </AuthGuard>
-  );
-}
-
-function PostPageContent({ sortBy, setSortBy, filter, setFilter, posts, loading, error, location, locationLoading }: any) {
-  const dispatch = useAppDispatch();
-
   // 位置情報取得と投稿データ取得
   useEffect(() => {
     // 位置情報がまだ取得されていない場合は取得
-    if (!location.lat || !location.lng) {
+    if (!location || !location.lat || !location.lng) {
       dispatch(getCurrentLocation());
     }
-  }, [dispatch, location.lat, location.lng]);
+  }, [dispatch, location]);
 
   useEffect(() => {
-    // 位置情報が取得できたら周辺投稿を取得
-    if (location.lat && location.lng) {
-      dispatch(fetchPost("1"));
+    // 位置情報が取得できて、位置情報の読み込みが完了したら周辺投稿を取得
+    if (location && location.lat && location.lng && !locationLoading) {
+      console.log('Fetching posts around:', location);
+      dispatch(fetchAroundPosts({lat: location.lat, lng: location.lng}));
     }
-  }, [dispatch, location.lat, location.lng]);
-
+  }, [dispatch, location, locationLoading]);
+  
+  console.log('Location state:', { location, locationLoading });
 
 
   // エラー処理
@@ -77,14 +57,42 @@ function PostPageContent({ sortBy, setSortBy, filter, setFilter, posts, loading,
   }
 
   // ローディング状態
-  if (loading.fetch || locationLoading) {
+  if (locationLoading) {
     return (
       <AppLayout title="タイムライン">
         <div className="flex justify-center items-center min-h-64">
           <LoadingSpinner />
-          <span className="ml-2">
-            {locationLoading ? '位置情報を取得中...' : '投稿を読み込み中...'}
-          </span>
+          <span className="ml-2">位置情報を取得中...</span>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (loading.fetch) {
+    return (
+      <AppLayout title="タイムライン">
+        <div className="flex justify-center items-center min-h-64">
+          <LoadingSpinner />
+          <span className="ml-2">投稿を読み込み中...</span>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // 位置情報が取得できない場合
+  if (!location || !location.lat || !location.lng) {
+    return (
+      <AppLayout title="タイムライン">
+        <div className="p-4 max-w-2xl mx-auto">
+          <div className="text-center text-gray-500 mt-8">
+            <p>位置情報の取得に失敗しました</p>
+            <button 
+              onClick={() => dispatch(getCurrentLocation())}
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+            >
+              再試行
+            </button>
+          </div>
         </div>
       </AppLayout>
     );
@@ -112,14 +120,14 @@ function PostPageContent({ sortBy, setSortBy, filter, setFilter, posts, loading,
         <div className="mt-6 text-center">
           <button
             onClick={() => {
-              if (location.lat && location.lng) {
+              if (location && location.lat && location.lng) {
                 dispatch(fetchAroundPosts({
                   lat: location.lat,
                   lng: location.lng
                 }));
               }
             }}
-            disabled={loading.fetch || !location.lat || !location.lng}
+            disabled={loading.fetch || locationLoading || !location || !location.lat || !location.lng}
             className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
           >
             {loading.fetch ? '更新中...' : '更新'}

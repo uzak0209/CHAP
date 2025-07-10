@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/store/store';
-import { login, register, clearAuthErrors } from '@/store/authSlice';
+import { login, register, clearAuthErrors, verifyToken } from '@/store/authSlice';
 import { cn } from '@/lib/utils';
 
 type AuthMode = 'login' | 'register';
@@ -24,6 +24,8 @@ export default function LoginPage() {
   const router = useRouter();
   
   const { isAuthenticated, loading, error } = useSelector((state: RootState) => state.auth);
+
+
 
   // ログイン成功時のリダイレクト処理
   useEffect(() => {
@@ -48,6 +50,7 @@ export default function LoginPage() {
         return;
       }
       dispatch(register({ email, password, display_name: displayName }));
+
     }
   };
 

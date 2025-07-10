@@ -37,7 +37,7 @@ export default function PostPage() {
         like: 0,
         updated_time: new Date().toISOString(),
       }));
-      router.push('/');
+      router.push('/posts');
     } catch (error) {
       console.error('Post submission error:', error);
     } finally {
