@@ -15,6 +15,7 @@ func SetupRoutes(r *gin.Engine) {
 		// 認証関連（認証不要）
 		v1.POST("/auth/login", handlers.Login)
 		v1.POST("/auth/register", handlers.Register)
+		v1.POST("/auth/google", handlers.GoogleLogin) // Googleログインエンドポイント追加
 
 		// ユーザー関連（認証不要）
 		v1.GET("/user/:id", handlers.GetUserByID)

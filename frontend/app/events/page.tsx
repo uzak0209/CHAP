@@ -179,7 +179,7 @@ export default function EventsPage() {
         </div>
       );
     }
-
+    console.log("Sorted Events:", sortedEvents);
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sortedEvents.map((event) => (

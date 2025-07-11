@@ -4,7 +4,6 @@ import (
 	"api/db"
 	"api/types"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,18 +11,16 @@ import (
 // GetUserByID handles GET /user/:id
 func GetUserByID(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
-		return
-	}
 
 	var user types.User
-	result := db.GetDB().First(&user, id)
+	result := db.SafeDB().Where("id = ?", idStr).First(&user)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
 	}
+
+	// パスワードをレスポンスから除外
+	user.Password = ""
 
 	c.JSON(http.StatusOK, user)
 }

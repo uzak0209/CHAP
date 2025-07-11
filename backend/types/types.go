@@ -49,14 +49,14 @@ type Event struct {
 }
 
 type User struct {
-	ID           uuid.UUID `json:"id" gorm:"type:uuid;primaryKey"`
-	Name         string    `json:"name" gorm:"not null"`
-	Image        string    `json:"image"`
-	Email        string    `json:"email" gorm:"not null;unique"`
-	CreatedAt    time.Time `json:"created_at" gorm:"autoCreateTime"`
-	Valid        bool      `json:"valid" gorm:"default:true"`
-	Password     string    `json:"password" gorm:"not null"`
-	LoginService string    `json:"login_service"`
+	ID        uuid.UUID `json:"id" gorm:"type:uuid;primaryKey"`
+	Name      string    `json:"name" gorm:"not null"`
+	Image     string    `json:"image"`
+	Email     string    `json:"email" gorm:"not null;unique"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+	Valid     bool      `json:"valid" gorm:"default:true"`
+	Password  string    `json:"password" gorm:"not null"`
+	LoginType string    `json:"login_type " gorm:"default:'email'"`
 }
 type PostLikes struct {
 	UserID uuid.UUID `json:"user_id" gorm:"type:uuid;not null;primaryKey"`
@@ -74,4 +74,15 @@ type EventLikes struct {
 type Coordinate struct {
 	Lat float64 `json:"lat"`
 	Lng float64 `json:"lng"`
+}
+type EmailLogin struct {
+	UserID   uuid.UUID `json:"user_id" gorm:"type:uuid;primaryKey"`
+	Email    string    `json:"email" gorm:"not null;unique"`
+	Password string    `json:"password" gorm:"not null"`
+}
+type GoogleLogin struct {
+	UserID      uuid.UUID `json:"user_id" gorm:"type:uuid;primaryKey"`
+	AccessToken string    `json:"access_token" gorm:"not null"`
+	Email       string    `json:"email" gorm:"not null;unique"`
+	Name        string    `json:"name" gorm:"not null"`
 }
