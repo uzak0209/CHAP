@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Plus, MessageCircle, Bell, User, Map, Settings, Flag } from 'lucide-react';
+import { Home, Plus, MessageCircle, Bell, User, Map, Settings, Flag, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
@@ -13,7 +13,7 @@ const navigation = [
   { name: '通知', href: '/notifications', icon: Bell },
   { name: 'プロフィール', href: '/profile', icon: User },
   { name: 'イベント', href: '/events', icon: Flag },
-  { name: 'スレッド', href: '/threads', icon: Flag }
+  { name: 'スレッド', href: '/threads', icon: MessageSquare }
 ];
 
 export function BottomNavigation() {

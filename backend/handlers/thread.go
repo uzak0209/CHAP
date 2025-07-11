@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -62,16 +63,25 @@ func CreateThread(c *gin.Context) {
 		return
 	}
 
-	result := db.GetDB().Create(&thread)
+	// JWT認証からuser_idを取得
+	userID := c.GetString("user_id")
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
+		return
+	}
+
+	// ThreadのUserIDを設定（他のフィールドはリクエストから取得）
+	thread.UserID = uid
+	thread.ID = 0 // 自動インクリメント用に0に設定
+	// GORMでSupabaseのPostgreSQLに保存
+	result := db.SafeDB().Create(&thread)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create thread"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"status":    "success",
-		"thread_id": thread.ID,
-	})
+	c.JSON(http.StatusCreated, gin.H{"thread": thread})
 }
 func GetAroundAllThread(c *gin.Context) {
 	var req types.Coordinate
@@ -80,7 +90,7 @@ func GetAroundAllThread(c *gin.Context) {
 		return
 	}
 	var threads []types.Thread
-	dbConn := db.GetDB()
+	dbConn := db.SafeDB()
 	if err := dbConn.Where("lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?",
 		req.Lat-types.AROUND, req.Lat+types.AROUND,
 		req.Lng-types.AROUND, req.Lng+types.AROUND,
@@ -106,7 +116,7 @@ func GetUpdateThread(c *gin.Context) {
 	}
 
 	// 条件に合う投稿を取得（updated_at > from）
-	if err := db.GetDB().
+	if err := db.SafeDB().
 		Where("updated_at > ?", time.Unix(fromTime, 0)).
 		Find(&threads).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch updated threads"})
@@ -119,13 +129,13 @@ func DeleteThread(c *gin.Context) {
 	id := c.Param("id")
 	var thread types.Thread
 
-	result := db.GetDB().First(&thread, id)
+	result := db.SafeDB().Where("id = ?", id).First(&thread)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
 		return
 	}
 
-	if err := db.GetDB().Delete(&thread).Error; err != nil {
+	if err := db.SafeDB().Delete(&thread).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete thread"})
 		return
 	}

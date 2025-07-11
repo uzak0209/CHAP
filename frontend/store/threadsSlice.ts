@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Thread } from '../types/types'
+import { getAuthToken } from './authSlice';
 
 export interface ThreadsState {
   items: Thread[];
@@ -37,7 +38,7 @@ const initialState: ThreadsState = {
 export const fetchAroundThreads = createAsyncThunk(
   'threads/fetchAround',
   async (params: { lat: number; lng: number }) => {
-    const response = await fetch('/api/v1/around/thread', {
+    const response = await fetch('http://localhost:8080/api/v1/around/thread', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
@@ -50,9 +51,18 @@ export const fetchAroundThreads = createAsyncThunk(
 export const createThread = createAsyncThunk(
   'threads/create',
   async (threadData: Omit<Thread, 'id' | 'created_time' | 'updated_at'>) => {
-    const response = await fetch('/api/v1/create/thread', {
+    const token=getAuthToken();
+          
+      const headers={
+        'Content-Type':'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` } )
+      }
+    const response = await fetch('http://localhost:8080/api/v1/create/thread', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(threadData),
     })
     if (!response.ok) throw new Error('Failed to create thread')
@@ -60,11 +70,10 @@ export const createThread = createAsyncThunk(
     return result.thread || result
   }
 )
-
 export const fetchThread = createAsyncThunk(
   'threads/fetch',
   async (id: string) => { // string に変更
-    const response = await fetch(`/api/v1/thread/${id}`)
+    const response = await fetch(`http://localhost:8080/api/v1/thread/${id}`)
     if (!response.ok) throw new Error('Failed to fetch thread')
     return response.json()
   }
@@ -73,7 +82,7 @@ export const fetchThread = createAsyncThunk(
 export const updateThread = createAsyncThunk(
   'threads/update',
   async (id: string) => { // string に変更
-    const response = await fetch(`/api/v1/update/thread/${id}`)
+    const response = await fetch(`http://localhost:8080/api/v1/update/thread/${id}`)
     if (!response.ok) throw new Error('Failed to get thread update data')
     return response.json()
   }
@@ -82,9 +91,13 @@ export const updateThread = createAsyncThunk(
 export const editThread = createAsyncThunk(
   'threads/edit',
   async ({ id, data }: { id: string; data: Partial<Thread> }) => { // string に変更
-    const response = await fetch(`/api/v1/edit/thread/${id}`, {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const response = await fetch(`http://localhost:8080/api/v1/edit/thread/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(data),
     })
     if (!response.ok) throw new Error('Failed to edit thread')
@@ -95,8 +108,12 @@ export const editThread = createAsyncThunk(
 export const deleteThread = createAsyncThunk(
   'threads/delete',
   async (id: string): Promise<string> => { // string に変更
-    const response = await fetch(`/api/v1/delete/thread/${id}`, {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const response = await fetch(`http://localhost:8080/api/v1/delete/thread/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     })
     if (!response.ok) throw new Error('Failed to delete thread')
     return id
