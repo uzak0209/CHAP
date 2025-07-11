@@ -30,8 +30,17 @@ func init() {
 	// DBに接続（タイムアウト設定追加）
 	fmt.Println("Attempting to connect to database...")
 	var err error
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-		PrepareStmt: false, // prepared statementを無効化
+
+	// PostgreSQLドライバーの設定を強化
+	config := postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true, // Simple protocolを使用してprepared statementを回避
+	}
+
+	db, err = gorm.Open(postgres.New(config), &gorm.Config{
+		PrepareStmt:                              false, // prepared statementを無効化
+		DisableForeignKeyConstraintWhenMigrating: true,
+		SkipDefaultTransaction:                   true, // デフォルトトランザクションをスキップ
 		NowFunc: func() time.Time {
 			return time.Now().UTC()
 		},
@@ -47,12 +56,20 @@ func init() {
 	}
 
 	// 既存のprepared statementをクリア
-	sqlDB.Exec("DEALLOCATE ALL")
+	if _, err := sqlDB.Exec("DEALLOCATE ALL"); err != nil {
+		log.Printf("Warning: Failed to deallocate prepared statements: %v", err)
+	}
 
-	// コネクションプールの設定
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetConnMaxLifetime(time.Hour)
+	// PostgreSQL固有の設定でprepared statementを無効化
+	if _, err := sqlDB.Exec("SET SESSION prepared_statements = false"); err != nil {
+		log.Printf("Warning: Failed to disable prepared statements: %v", err)
+	}
+
+	// コネクションプールの詳細設定
+	sqlDB.SetMaxIdleConns(2)                   // アイドル接続数をさらに減らす
+	sqlDB.SetMaxOpenConns(5)                   // 最大接続数をさらに制限
+	sqlDB.SetConnMaxLifetime(time.Minute * 15) // 接続の生存時間をさらに短く
+	sqlDB.SetConnMaxIdleTime(time.Minute * 2)  // アイドル時間をさらに短く
 
 	fmt.Println("Database connection successful!")
 
@@ -71,4 +88,33 @@ func Initialize() error {
 		return fmt.Errorf("database not initialized")
 	}
 	return nil
+}
+
+// SafeDB は prepared statement エラーを回避するためのヘルパー関数
+func SafeDB() *gorm.DB {
+	return db.Session(&gorm.Session{
+		PrepareStmt:            false,
+		SkipDefaultTransaction: true,
+	})
+}
+
+// SafeTransaction は安全なトランザクションを実行する
+func SafeTransaction(fn func(*gorm.DB) error) error {
+	tx := SafeDB().Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := fn(tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }

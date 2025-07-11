@@ -89,7 +89,12 @@ export const logout = createAsyncThunk(
     return response.json()
   }
 )
-
+export const getAuthToken = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('token') || null;
+  }
+  return null;
+}
 export const verifyToken = createAsyncThunk(
   'auth/verifyToken',
   async () => {
@@ -208,6 +213,7 @@ const authSlice = createSlice({
         state.loading.refresh = false
         state.user = action.payload.user || action.payload
         state.isAuthenticated = true
+        console.log('Token verified successfully:', state.isAuthenticated)
       })
       .addCase(verifyToken.rejected, (state, action) => {
         state.loading.refresh = false

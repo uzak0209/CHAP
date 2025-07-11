@@ -14,6 +14,7 @@ export default function Home() {
       // トークンの有効性を検証
       dispatch(verifyToken()).then((result) => {
         if (result.type === 'auth/verifyToken/fulfilled') {
+
           router.push('/posts');
         }else{
           router.replace('/login');

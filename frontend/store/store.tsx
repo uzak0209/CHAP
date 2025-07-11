@@ -2,14 +2,14 @@ import { configureStore } from '@reduxjs/toolkit'
 
 // Import all reducers
 import authReducer, { AuthState } from './authSlice'
-import locationReducer, { LocationState } from './locationSlice'
+import locationReducer from './locationSlice'
 import postsReducer, { PostsState } from './postsSlice'
 import threadsReducer, { ThreadsState } from './threadsSlice'
 import eventsReducer, { EventsState } from './eventsSlice'
 import filtersReducer, { FiltersState } from './filtersSlice'
 import uiReducer, { UIState } from './uiSlice'
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux'
-
+import { LocationState } from '../types/types'
 // Re-export actions
 export { authActions } from './authSlice'
 export { locationActions, getCurrentLocation } from './locationSlice'

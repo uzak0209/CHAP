@@ -1,89 +1,73 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { LatLng ,Status,LocationState} from "@/types/types";
 
-export interface LocationState {
-  current: {
-    lat: number | null;
-    lng: number | null;
-  };
-  permission: 'granted' | 'denied' | 'prompt' | null;
-  loading: boolean;
-  error: string | null;
-}
 
 const initialState: LocationState = {
-  current: {
-    lat: null,
-    lng: null,
-  },
-  permission: null,
-  loading: false,
-  error: null,
-}
+  state: Status.IDLE,
+  location: { lat: 0, lng: 0 }, // デフォルト値として0,0を設定
+  error: undefined,
+};
 
 // Async Thunk
-export const getCurrentLocation = createAsyncThunk(
-  'location/getCurrent',
-  async () => {
-    console.log('getCurrentLocation called');
-    // Check if geolocation is supported
-    return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported by this browser.'))
-        return
+export const getCurrentLocation = createAsyncThunk<
+  LatLng,
+  void,
+  { rejectValue: string }
+>("location/getCurrent", async (_, { rejectWithValue }) => {
+  return new Promise<LatLng>((resolve, reject) => {
+    if (!navigator.geolocation) {
+      return rejectWithValue("Geolocation is not supported by this browser.");
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log("位置情報を取得しました");
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      (error) => {
+        return rejectWithValue(error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000,
       }
+    );
+  });
+});
 
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          })
-        },
-        (error) => {
-          reject(new Error(error.message))
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 60000,
-        }
-      )
-    })
-  }
-)
-
+// location slice
 const locationSlice = createSlice({
-  name: 'location',
+  name: "location",
   initialState,
-  reducers: {
-    setLocation: (state, action: PayloadAction<{ lat: number; lng: number }>) => {
-      state.current = action.payload
-    },
-    setPermission: (state, action: PayloadAction<'granted' | 'denied' | 'prompt'>) => {
-      state.permission = action.payload
-    },
-    clearLocationError: (state) => {
-      state.error = null
-    },
-  },
+  reducers: {},
+
   extraReducers: (builder) => {
     builder
       .addCase(getCurrentLocation.pending, (state) => {
-        state.loading = true
-        state.error = null
+        state.state = Status.LOADING;
+        // locationはそのまま保持（undefinedにしない）
+        state.error = undefined;
       })
       .addCase(getCurrentLocation.fulfilled, (state, action) => {
-        state.loading = false
-        state.current = action.payload
-        state.permission = 'granted'
+        state.state = Status.LOADED;
+        state.location = action.payload;
+        state.error = undefined;
+        console.log("位置情報を取得しました", state.location);
       })
       .addCase(getCurrentLocation.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.error.message || '位置情報の取得に失敗しました'
-        state.permission = 'denied'
-      })
-  }
+        state.state = Status.ERROR;
+        // locationはそのまま保持（undefinedにしない）
+        state.error =
+          action.payload ??
+          action.error.message ??
+          "位置情報の取得に失敗しました";
+      });
+  },
 })
 
-export const locationActions = locationSlice.actions
-export default locationSlice.reducer
+export const locationActions = locationSlice.actions;
+export default locationSlice.reducer;

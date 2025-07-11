@@ -21,7 +21,6 @@ export function AppLayout({
   // Special pages that don't need navigation
   const noNavPages = ['/login', '/onboarding', '/admin'];
   const shouldShowNav = showNavigation && !noNavPages.some(page => pathname.startsWith(page));
-
   return (
     <div className="min-h-screen bg-gray-50">
       {showTopBar && <TopNavigation title={title} />}

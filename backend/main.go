@@ -2,6 +2,7 @@ package main
 
 import (
 	"api/db"
+	"api/routes"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,13 +24,14 @@ func main() {
 	// Ginエンジンの作成
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000"},
+		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
+	routes.SetupRoutes(r)
 	// サーバー起動
 	log.Println("Starting server on :8080...")
 	if err := r.Run(":8080"); err != nil {

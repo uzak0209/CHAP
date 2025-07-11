@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Post } from '../types/types'
 import { get } from 'http';
+import { getAuthToken } from './authSlice';
 
 export interface PostsState {
   items: Post[];
@@ -47,12 +48,7 @@ export const fetchAroundPosts = createAsyncThunk(
     return response.json()
   }
 )
-const getAuthToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('token') || null;
-  }
-  return null;
-}
+
 export const createPost = createAsyncThunk(
   'posts/create',
   async (postData: Omit<Post, 'id' | 'user_id' | 'created_time' | 'updated_at'>) => {

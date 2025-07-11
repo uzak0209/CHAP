@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Event } from '../types/types'
-
+import { getAuthToken } from './authSlice';
+import { Lateef } from 'next/font/google';
+import { Status,LocationState } from '../types/types';
 export interface EventsState {
   items: Event[];
   loading: {
@@ -35,8 +37,8 @@ const initialState: EventsState = {
 
 export const fetchAroundEvents = createAsyncThunk(
   'events/fetchAround',
-  async (params: { lat: string; lng: string }) => {
-    const response = await fetch('/api/v1/around/event', {
+  async (params: { lat: number; lng: number }) => {
+    const response = await fetch('http://localhost:8080/api/v1/around/event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
@@ -48,7 +50,7 @@ export const fetchAroundEvents = createAsyncThunk(
 export const fetchEvent = createAsyncThunk(
   'events/fetch',
   async (id: string) => {
-    const response = await fetch(`/api/v1/event/${id}`)
+    const response = await fetch(`http://localhost:8080/api/v1/event/${id}`)
     if (!response.ok) throw new Error('Failed to fetch event')
     return response.json()
   }
@@ -56,9 +58,14 @@ export const fetchEvent = createAsyncThunk(
 export const createEvent = createAsyncThunk(
   'events/create',
   async (eventData: Omit<Event, 'id' | 'created_time'>) => {
-    const response = await fetch('/api/v1/create/event', {
+    const token=getAuthToken();
+    const headers={
+      'Content-Type':'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` } )
+    }
+    const response = await fetch('http://localhost:8080/api/v1/create/event', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(eventData),
     })
     if (!response.ok) throw new Error('Failed to create event')
@@ -70,7 +77,7 @@ export const createEvent = createAsyncThunk(
 export const updateEvent = createAsyncThunk(
   'events/update',
   async ({ id, data }: { id: string; data: Partial<Event> }) => {
-    const response = await fetch(`/api/v1/update/event/${id}`, {
+    const response = await fetch(`http://localhost:8080/api/v1/update/event/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -83,8 +90,13 @@ export const updateEvent = createAsyncThunk(
 export const deleteEvent= createAsyncThunk(
   'events/delete',
   async (id: string): Promise<void> => {
-    const response = await fetch(`/api/v1/delete/event/${id}`, {
+    const token = getAuthToken();
+    const response = await fetch(`http://localhost:8080/api/v1/delete/event/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }
     })
     if (!response.ok) throw new Error('Failed to delete event')
   }

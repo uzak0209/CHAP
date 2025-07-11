@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Camera, MapPin, Hash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createPost, useAppDispatch,useAppSelector } from '@/store';
+import { LatLng ,Status,LocationState} from '@/types/types';
 
 export default function PostPage() {
   const [content, setContent] = useState('');
@@ -18,9 +19,9 @@ export default function PostPage() {
   const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
-  const location = useAppSelector((state) => state.location.current);
+  const {state, location, error } = useAppSelector((state) => state.location);
   const router = useRouter();
-
+  
   const handleSubmit = async () => {
     if (!content.trim()) return;
     
@@ -29,10 +30,7 @@ export default function PostPage() {
       dispatch(createPost({
         content,
         tags,
-        coordinate:
-          location && location.lat !== null && location.lng !== null
-            ? { lat: location.lat, lng: location.lng }
-            : { lat: 0, lng: 0 },
+        coordinate: state===Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
         valid: true,
         like: 0,
         updated_time: new Date().toISOString(),
@@ -75,7 +73,7 @@ export default function PostPage() {
               onRemoveTag={(tag) => setTags(tags.filter(t => t !== tag))}
             />
             
-            <LocationInfo location={location} />
+            <LocationInfo location={location} locationState={state} />
             
             <PostActions
               onSubmit={handleSubmit}
@@ -185,15 +183,16 @@ function TagsSection({
 }
 
 function LocationInfo({ 
-  location 
+  location, locationState
 }: { 
-  location: { lat: number | null; lng: number | null } | null 
+  location: { lat: number; lng: number }; 
+  locationState: Status;
 }) {
   return (
     <div className="flex items-center gap-2 text-sm text-gray-600">
       <MapPin className="w-4 h-4" />
       <span>
-        {location ? '現在地付近' : '位置情報を取得中...'}
+        {locationState === Status.LOADED ? '現在地付近' : '位置情報を取得中...'}
       </span>
     </div>
   );
