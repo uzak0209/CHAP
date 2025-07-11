@@ -9,20 +9,16 @@ export default function Home() {
   const dispatch = useAppDispatch();
   // 初回ロード時にトークンチェック
   useEffect(() => {
-    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (storedToken) {
-      // トークンの有効性を検証
       dispatch(verifyToken()).then((result) => {
         if (result.type === 'auth/verifyToken/fulfilled') {
+
           router.push('/posts');
         }else{
           router.replace('/login');
         }
       });
-    }else{
-      router.replace('/login');
-    }
-  }, [dispatch, router]);
+
+  }, [dispatch]);
 
   return null;
 }

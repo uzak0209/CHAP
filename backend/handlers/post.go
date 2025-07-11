@@ -17,7 +17,7 @@ func EditPost(c *gin.Context) {
 	var post types.Post
 
 	// GORMで投稿を取得
-	result := db.GetDB().First(&post, id)
+	result := db.SafeDB().First(&post, id)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "post not found"})
 		return
@@ -33,7 +33,7 @@ func EditPost(c *gin.Context) {
 	post.UpdatedTime = time.Now()
 
 	// GORMで更新
-	if err := db.GetDB().Save(&post).Error; err != nil {
+	if err := db.SafeDB().Save(&post).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update post"})
 		return
 	}
@@ -63,7 +63,7 @@ func CreatePost(c *gin.Context) {
 	post.ID = 0 // 自動インクリメント用に0に設定
 
 	// GORMでSupabaseのPostgreSQLに保存
-	result := db.GetDB().Create(&post)
+	result := db.SafeDB().Create(&post)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create post"})
 		return
@@ -77,7 +77,7 @@ func GetPost(c *gin.Context) {
 	id := c.Param("id")
 	var post types.Post
 
-	result := db.GetDB().First(&post, id)
+	result := db.SafeDB().First(&post, id)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "post not found"})
 		return
@@ -93,7 +93,7 @@ func GetAroundAllPost(c *gin.Context) {
 		return
 	}
 	var posts []types.Post
-	dbConn := db.GetDB()
+	dbConn := db.SafeDB()
 	if err := dbConn.Where("lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?",
 		req.Lat-types.AROUND, req.Lat+types.AROUND,
 		req.Lng-types.AROUND, req.Lng+types.AROUND,
@@ -119,7 +119,7 @@ func GetUpdatePost(c *gin.Context) {
 	}
 
 	// 条件に合う投稿を取得（updated_at > from）
-	if err := db.GetDB().
+	if err := db.SafeDB().
 		Where("updated_at > ? or created_at > ?", time.Unix(fromTime, 0), time.Unix(fromTime, 0)).
 		Find(&posts).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch updated posts"})

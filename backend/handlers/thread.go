@@ -16,7 +16,7 @@ func EditThread(c *gin.Context) {
 	var thread types.Thread
 
 	// GORMでスレッドを取得
-	result := db.GetDB().First(&thread, id)
+	result := db.SafeDB().Where("id = ?", id).First(&thread)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
 		return
@@ -32,7 +32,7 @@ func EditThread(c *gin.Context) {
 	thread.UpdatedTime = time.Now()
 
 	// GORMで更新
-	if err := db.GetDB().Save(&thread).Error; err != nil {
+	if err := db.SafeDB().Save(&thread).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update thread"})
 		return
 	}
@@ -45,7 +45,7 @@ func GetThread(c *gin.Context) {
 	id := c.Param("id")
 	var thread types.Thread
 
-	result := db.GetDB().First(&thread, id)
+	result := db.SafeDB().Where("id = ?", id).First(&thread)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
 		return

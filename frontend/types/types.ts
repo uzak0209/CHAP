@@ -74,3 +74,25 @@ export interface Coordinate {
   lat: number;
   lng: number;
 }
+export type LatLng = { lat: number; lng: number };
+
+// Immerと互換性のある型定義に修正
+export type LocationState = {
+  state: Status;
+  location: LatLng;
+  error: string | undefined;
+
+};
+export enum Permission {
+  GRANTED = "granted",
+  DENIED = "denied",
+  PROMPT = "prompt",
+  UNKNOWN = "unknown",
+}
+
+export enum Status {
+  LOADING = "loading",
+  LOADED = "loaded",
+  ERROR = "error",
+  IDLE = "idle",
+}

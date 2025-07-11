@@ -16,7 +16,7 @@ func EditEvent(c *gin.Context) {
 	var event types.Event
 
 	// GORMでイベントを取得
-	result := db.GetDB().First(&event, id)
+	result := db.SafeDB().Where("id = ?", id).First(&event)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "event not found"})
 		return
@@ -32,7 +32,7 @@ func EditEvent(c *gin.Context) {
 	event.UpdatedTime = time.Now()
 
 	// GORMで更新
-	if err := db.GetDB().Save(&event).Error; err != nil {
+	if err := db.SafeDB().Save(&event).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update event"})
 		return
 	}
@@ -45,7 +45,7 @@ func GetEvent(c *gin.Context) {
 	id := c.Param("id")
 	var event types.Event
 
-	result := db.GetDB().First(&event, id)
+	result := db.SafeDB().Where("id = ?", id).First(&event)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "event not found"})
 		return
@@ -62,15 +62,14 @@ func CreateEvent(c *gin.Context) {
 		return
 	}
 
-	result := db.GetDB().Create(&event)
+	result := db.SafeDB().Create(&event)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create event"})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"status":   "success",
-		"event_id": event.ID,
+		"event": event,
 	})
 }
 
@@ -81,7 +80,7 @@ func GetAroundAllEvent(c *gin.Context) {
 		return
 	}
 	var events []types.Event
-	dbConn := db.GetDB()
+	dbConn := db.SafeDB()
 	if err := dbConn.Where("lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?",
 		req.Lat-types.AROUND, req.Lat+types.AROUND,
 		req.Lng-types.AROUND, req.Lng+types.AROUND,
@@ -100,13 +99,13 @@ func DeleteEvent(c *gin.Context) {
 	id := c.Param("id")
 	var event types.Event
 
-	result := db.GetDB().First(&event, id)
+	result := db.SafeDB().Where("id = ?", id).First(&event)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "event not found"})
 		return
 	}
 
-	if err := db.GetDB().Delete(&event).Error; err != nil {
+	if err := db.SafeDB().Delete(&event).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete event"})
 		return
 	}
@@ -126,7 +125,7 @@ func GetUpdateEvent(c *gin.Context) {
 	}
 
 	// 条件に合う投稿を取得（updated_at > from）
-	if err := db.GetDB().
+	if err := db.SafeDB().
 		Where("updated_at > ?", time.Unix(fromTime, 0)).
 		Find(&events).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch updated events"})

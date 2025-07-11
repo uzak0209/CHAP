@@ -5,11 +5,12 @@ import { AppLayout } from '@/components/Layout/AppLayout';
 import { PostCard } from '@/components/Post/PostCard';
 import { PostFilters } from '@/components/Post/PostFilters';
 import { LoadingSpinner } from '@/components/ui/loading';
-import { Post } from '@/types/types';
+import { Post, Status } from '@/types/types';
 
-import { fetchAroundPosts, fetchPost, postsActions } from '@/store/postsSlice';
+import { fetchAroundPosts, postsActions } from '@/store/postsSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
 import { useAppDispatch, useAppSelector } from '@/store';
+
 
 export default function PostPage() {
   const [sortBy, setSortBy] = useState<'time' | 'distance'>('time');
@@ -17,24 +18,26 @@ export default function PostPage() {
   
   const dispatch = useAppDispatch();
   const { items: posts, loading, error } = useAppSelector(state => state.posts);
-  const { current: location, loading: locationLoading } = useAppSelector(state => state.location);
+  const { state, location, error: locationError } = useAppSelector(state => state.location);
   // 位置情報取得と投稿データ取得
   useEffect(() => {
+    console.log(state);
     // 位置情報がまだ取得されていない場合は取得
-    if (!location || !location.lat || !location.lng) {
+    if (state===Status.IDLE || state===Status.ERROR) {
       dispatch(getCurrentLocation());
     }
-  }, [dispatch, location]);
+
+  }, [dispatch]);
 
   useEffect(() => {
-    // 位置情報が取得できて、位置情報の読み込みが完了したら周辺投稿を取得
-    if (location && location.lat && location.lng && !locationLoading) {
-      console.log('Fetching posts around:', location);
-      dispatch(fetchAroundPosts({lat: location.lat, lng: location.lng}));
-    }
-  }, [dispatch, location, locationLoading]);
+    if (state ===Status.LOADED) {
+      dispatch(fetchAroundPosts({
+        lat: location.lat,
+        lng: location.lng
+      }));
+    } 
+  }, [dispatch, state]);
   
-  console.log('Location state:', { location, locationLoading });
 
 
   // エラー処理
@@ -57,7 +60,7 @@ export default function PostPage() {
   }
 
   // ローディング状態
-  if (locationLoading) {
+  if (state === Status.LOADING) {
     return (
       <AppLayout title="タイムライン">
         <div className="flex justify-center items-center min-h-64">
@@ -68,7 +71,7 @@ export default function PostPage() {
     );
   }
 
-  if (loading.fetch) {
+  if (loading.fetch ) {
     return (
       <AppLayout title="タイムライン">
         <div className="flex justify-center items-center min-h-64">
@@ -78,9 +81,7 @@ export default function PostPage() {
       </AppLayout>
     );
   }
-
-  // 位置情報が取得できない場合
-  if (!location || !location.lat || !location.lng) {
+  if (state === Status.ERROR) {
     return (
       <AppLayout title="タイムライン">
         <div className="p-4 max-w-2xl mx-auto">
@@ -97,7 +98,6 @@ export default function PostPage() {
       </AppLayout>
     );
   }
-
   return (
     <AppLayout title="タイムライン">
       <div className="p-4 max-w-2xl mx-auto">
@@ -120,14 +120,13 @@ export default function PostPage() {
         <div className="mt-6 text-center">
           <button
             onClick={() => {
-              if (location && location.lat && location.lng) {
-                dispatch(fetchAroundPosts({
-                  lat: location.lat,
-                  lng: location.lng
-                }));
-              }
+              if (loading.fetch) return;
+              dispatch(fetchAroundPosts({
+                lat: location.lat,
+                lng: location.lng
+              }));
             }}
-            disabled={loading.fetch || locationLoading || !location || !location.lat || !location.lng}
+            disabled={loading.fetch}
             className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
           >
             {loading.fetch ? '更新中...' : '更新'}

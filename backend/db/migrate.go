@@ -14,6 +14,8 @@ func AutoMigrate() error {
 		&types.PostLikes{},
 		&types.ThreadLikes{},
 		&types.EventLikes{},
+		&types.EmailLogin{},
+		&types.GoogleLogin{},
 	)
 
 	if err != nil {

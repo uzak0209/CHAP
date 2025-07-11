@@ -52,14 +52,15 @@ export const login = createAsyncThunk(
 
 export const register = createAsyncThunk(
   'auth/register',
-  async ({ email, password, display_name }: { email: string; password: string; display_name: string }) => {
+  async ({ email, password, display_name, logintype }: { email: string; password: string; display_name: string; logintype: string }) => {
     const response = await fetch('http://localhost:8080/api/v1/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        email, 
-        password, 
-        name: display_name  // ← display_name を name として送信
+        email,
+        password,
+        name: display_name,  // ← display_name を name として送信
+        login_type: logintype // ← logintype を login_type として送信
       })
     })
     
@@ -89,11 +90,17 @@ export const logout = createAsyncThunk(
     return response.json()
   }
 )
-
+export const getAuthToken = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('authtoken') || null;
+  }
+  return null;
+}
 export const verifyToken = createAsyncThunk(
   'auth/verifyToken',
   async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    console.log('Verifying token...');
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authtoken') : null;
     if (!token) {
       throw new Error('No token found');
     }
@@ -108,7 +115,7 @@ export const verifyToken = createAsyncThunk(
     
     if (!response.ok) {
       // トークンが無効な場合はlocalStorageから削除
-      localStorage.removeItem('token');
+      localStorage.removeItem('authtoken');
       throw new Error('Token verification failed');
     }
     
@@ -154,7 +161,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true
         // トークンをlocal storageに保存
         if (typeof window !== 'undefined' && action.payload.token) {
-          localStorage.setItem('token', action.payload.token)
+          localStorage.setItem('authtoken', action.payload.token)
         }
       })
       .addCase(login.rejected, (state, action) => {
@@ -173,7 +180,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true
         // トークンをlocal storageに保存
         if (typeof window !== 'undefined' && action.payload.token) {
-          localStorage.setItem('authToken', action.payload.token)
+          localStorage.setItem('authtoken', action.payload.token)
         }
       })
       .addCase(register.rejected, (state, action) => {
@@ -192,7 +199,7 @@ const authSlice = createSlice({
         state.isAuthenticated = false
         // local storageからトークンを削除
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('authToken')
+          localStorage.removeItem('authtoken')
         }
       })
       .addCase(logout.rejected, (state, action) => {
@@ -208,6 +215,7 @@ const authSlice = createSlice({
         state.loading.refresh = false
         state.user = action.payload.user || action.payload
         state.isAuthenticated = true
+        console.log('Token verified successfully:', state.isAuthenticated)
       })
       .addCase(verifyToken.rejected, (state, action) => {
         state.loading.refresh = false
@@ -216,7 +224,7 @@ const authSlice = createSlice({
         state.token = null
         state.isAuthenticated = false
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('token')
+          localStorage.removeItem('authtoken')
         }
       })
   }

@@ -49,7 +49,7 @@ export default function LoginPage() {
         alert('パスワードが一致しません');
         return;
       }
-      dispatch(register({ email, password, display_name: displayName }));
+      dispatch(register({ email, password, display_name: displayName, logintype: 'email' }));
 
     }
   };
