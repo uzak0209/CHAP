@@ -40,7 +40,7 @@ const initialState: AuthState = {
 export const login = createAsyncThunk(
   'auth/login',
   async ({ email, password }: { email: string; password: string }) => {
-    const response = await fetch('http://localhost:8080/api/v1/auth/login', {
+    const response = await fetch('http://15.168.15.237:8080/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -53,7 +53,7 @@ export const login = createAsyncThunk(
 export const register = createAsyncThunk(
   'auth/register',
   async ({ email, password, display_name, logintype }: { email: string; password: string; display_name: string; logintype: string }) => {
-    const response = await fetch('http://localhost:8080/api/v1/auth/register', {
+    const response = await fetch('http://15.168.15.237:8080/api/v1/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -82,7 +82,7 @@ export const register = createAsyncThunk(
 export const logout = createAsyncThunk(
   'auth/logout',
   async () => {
-    const response = await fetch('http://localhost:8080/api/v1/auth/logout', {
+    const response = await fetch('http://15.168.15.237:8080/api/v1/auth/logout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     })
@@ -105,7 +105,7 @@ export const verifyToken = createAsyncThunk(
       throw new Error('No token found');
     }
 
-    const response = await fetch('http://localhost:8080/api/v1/auth/me', {
+    const response = await fetch('http://15.168.15.237:8080/api/v1/auth/me', {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',

@@ -38,7 +38,7 @@ const initialState: ThreadsState = {
 export const fetchAroundThreads = createAsyncThunk(
   'threads/fetchAround',
   async (params: { lat: number; lng: number }) => {
-    const response = await fetch('http://localhost:8080/api/v1/around/thread', {
+    const response = await fetch('http://15.168.15.237:8080/api/v1/around/thread', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
@@ -57,7 +57,7 @@ export const createThread = createAsyncThunk(
         'Content-Type':'application/json',
         ...(token && { 'Authorization': `Bearer ${token}` } )
       }
-    const response = await fetch('http://localhost:8080/api/v1/create/thread', {
+    const response = await fetch('http://15.168.15.237:8080/api/v1/create/thread', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ export const createThread = createAsyncThunk(
 export const fetchThread = createAsyncThunk(
   'threads/fetch',
   async (id: string) => { // string に変更
-    const response = await fetch(`http://localhost:8080/api/v1/thread/${id}`)
+    const response = await fetch(`http://15.168.15.237:8080/api/v1/thread/${id}`)
     if (!response.ok) throw new Error('Failed to fetch thread')
     return response.json()
   }
@@ -82,7 +82,7 @@ export const fetchThread = createAsyncThunk(
 export const updateThread = createAsyncThunk(
   'threads/update',
   async (id: string) => { // string に変更
-    const response = await fetch(`http://localhost:8080/api/v1/update/thread/${id}`)
+    const response = await fetch(`http://15.168.15.237:8080/api/v1/update/thread/${id}`)
     if (!response.ok) throw new Error('Failed to get thread update data')
     return response.json()
   }
@@ -92,7 +92,7 @@ export const editThread = createAsyncThunk(
   'threads/edit',
   async ({ id, data }: { id: string; data: Partial<Thread> }) => { // string に変更
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    const response = await fetch(`http://localhost:8080/api/v1/edit/thread/${id}`, {
+    const response = await fetch(`http://15.168.15.237:8080/api/v1/edit/thread/${id}`, {
       method: 'PUT',
       headers: { 
         'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ export const deleteThread = createAsyncThunk(
   'threads/delete',
   async (id: string): Promise<string> => { // string に変更
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    const response = await fetch(`http://localhost:8080/api/v1/delete/thread/${id}`, {
+    const response = await fetch(`http://15.168.15.237:8080/api/v1/delete/thread/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`

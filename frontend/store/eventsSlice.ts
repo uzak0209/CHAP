@@ -38,7 +38,7 @@ const initialState: EventsState = {
 export const fetchAroundEvents = createAsyncThunk(
   'events/fetchAround',
   async (params: { lat: number; lng: number }) => {
-    const response = await fetch('http://localhost:8080/api/v1/around/event', {
+    const response = await fetch('http://15.168.15.237:8080/api/v1/around/event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
@@ -50,7 +50,7 @@ export const fetchAroundEvents = createAsyncThunk(
 export const fetchEvent = createAsyncThunk(
   'events/fetch',
   async (id: string) => {
-    const response = await fetch(`http://localhost:8080/api/v1/event/${id}`)
+    const response = await fetch(`http://15.168.15.237:8080/api/v1/event/${id}`)
     if (!response.ok) throw new Error('Failed to fetch event')
     return response.json()
   }
@@ -63,7 +63,7 @@ export const createEvent = createAsyncThunk(
       'Content-Type':'application/json',
       ...(token && { 'Authorization': `Bearer ${token}` } )
     }
-    const response = await fetch('http://localhost:8080/api/v1/create/event', {
+    const response = await fetch('http://15.168.15.237:8080/api/v1/create/event', {
       method: 'POST',
       headers,
       body: JSON.stringify(eventData),
@@ -77,7 +77,7 @@ export const createEvent = createAsyncThunk(
 export const updateEvent = createAsyncThunk(
   'events/update',
   async ({ id, data }: { id: string; data: Partial<Event> }) => {
-    const response = await fetch(`http://localhost:8080/api/v1/update/event/${id}`, {
+    const response = await fetch(`http://15.168.15.237:8080/api/v1/update/event/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -91,7 +91,7 @@ export const deleteEvent= createAsyncThunk(
   'events/delete',
   async (id: string): Promise<void> => {
     const token = getAuthToken();
-    const response = await fetch(`http://localhost:8080/api/v1/delete/event/${id}`, {
+    const response = await fetch(`http://15.168.15.237:8080/api/v1/delete/event/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
