@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'ホーム', href: '/', icon: Home },
-  { name: 'マップ', href: '/map', icon: Map },
+  { name: 'マップ', href: '/map-back', icon: Map },
   { name: '投稿', href: '/post', icon: Plus },
   { name: 'チャット', href: '/chat', icon: MessageCircle },
   { name: '通知', href: '/notifications', icon: Bell },
