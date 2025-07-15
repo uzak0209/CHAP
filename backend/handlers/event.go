@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -61,6 +62,17 @@ func CreateEvent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid json format"})
 		return
 	}
+	// JWT認証からuser_idを取得
+	userID := c.GetString("user_id")
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
+		return
+	}
+
+	// PostのIDは自動インクリメントなので設定しない
+	// UserIDのみ設定（他のフィールドはリクエストから取得）
+	event.UserID = uid
 
 	result := db.SafeDB().Create(&event)
 	if result.Error != nil {
