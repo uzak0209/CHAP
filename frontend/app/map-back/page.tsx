@@ -15,14 +15,16 @@ const MapboxExample = () => {
     // https://account.mapbox.com
     const accessToken = process.env.NEXT_PUBLIC_MAP_API_TOKEN;
     
+    console.log('Access token:', accessToken ? 'Found' : 'Not found');
+    console.log('Token length:', accessToken ? accessToken.length : 0);
+    
     if (!accessToken) {
-      console.error('Mapbox access token is not defined');
+      console.error('Mapbox access token is not defined. Please check your .env.local file.');
       return;
     }
     
     mapboxgl.accessToken = accessToken;
 
-    
     if (!mapContainerRef.current) {
       console.error('Map container ref is not available');
       return;
