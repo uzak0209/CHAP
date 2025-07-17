@@ -2,7 +2,11 @@
 
 //useRefはdomを操作する
 import React, { useEffect, useRef, useState } from 'react';
+import { createRoot } from 'react-dom/client';
 import CircleButton from "@/components/ui/circle-button"
+import Post from "@/components/ui/post"
+import Thread from "@/components/ui/thread"
+import ThreadDetail from "@/components/ui/thread-detail"
 import mapboxgl from 'mapbox-gl';
 
 
@@ -14,6 +18,216 @@ const MapboxExample = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   // 3D/2D切り替えの状態管理
   const [is3D, setIs3D] = useState(true);
+
+  // スレッドデータ
+  const threadsData = [
+    {
+      id: 1,
+      coordinates: [136.918320, 35.157171] as [number, number],
+      message: "こんちには",
+      author: "ユーザー1",
+      timestamp: "14:30:25",
+      replyCount: 3,
+      replies: [
+        { id: 1, message: "こんにちは！", author: "ユーザーA", timestamp: "14:31:10" },
+        { id: 2, message: "今日は良い天気ですね", author: "ユーザーB", timestamp: "14:32:15" },
+        { id: 3, message: "はじめまして", author: "ユーザーC", timestamp: "14:33:20" }
+      ]
+    },
+    {
+      id: 2,
+      coordinates: [136.920320, 35.158171] as [number, number],
+      message: "名古屋駅周辺はとても便利ですね！",
+      author: "ユーザー2",
+      timestamp: "14:35:12",
+      replyCount: 1,
+      replies: [
+        { id: 1, message: "本当にそうですね！交通の便が良いです", author: "ユーザーD", timestamp: "14:36:05" }
+      ]
+    },
+    {
+      id: 3,
+      coordinates: [136.916320, 35.156171] as [number, number],
+      message: "今日は良い天気です☀️",
+      author: "ユーザー3",
+      timestamp: "14:40:33",
+      replyCount: 5,
+      replies: [
+        { id: 1, message: "本当に気持ちいいですね", author: "ユーザーE", timestamp: "14:41:00" },
+        { id: 2, message: "散歩日和です", author: "ユーザーF", timestamp: "14:41:30" },
+        { id: 3, message: "写真撮影にも最適", author: "ユーザーG", timestamp: "14:42:00" },
+        { id: 4, message: "外に出たくなります", author: "ユーザーH", timestamp: "14:42:30" },
+        { id: 5, message: "青空が綺麗です", author: "ユーザーI", timestamp: "14:43:00" }
+      ]
+    },
+    {
+      id: 4,
+      coordinates: [136.919320, 35.159171] as [number, number],
+      message: "お疲れ様です！",
+      author: "ユーザー4",
+      timestamp: "14:45:10",
+      replyCount: 0,
+      replies: []
+    },
+    {
+      id: 5,
+      coordinates: [136.917320, 35.155171] as [number, number],
+      message: "この場所おすすめです✨",
+      author: "ユーザー5",
+      timestamp: "14:50:45",
+      replyCount: 2,
+      replies: [
+        { id: 1, message: "どんなところがおすすめですか？", author: "ユーザーJ", timestamp: "14:51:00" },
+        { id: 2, message: "今度行ってみます！", author: "ユーザーK", timestamp: "14:51:30" }
+      ]
+    }
+  ];
+
+  // カスタムポップアップスタイル
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .custom-popup .mapboxgl-popup-content {
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        max-width: none !important;
+      }
+      .custom-popup .mapboxgl-popup-tip {
+        display: none !important;
+      }
+      .detail-popup .mapboxgl-popup-content {
+        max-width: 500px !important;
+        max-height: 600px !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
+  // 複数のスレッドを地図上に表示する関数
+  const displayThreads = () => {
+    if (!mapRef.current) return;
+    
+    threadsData.forEach((thread) => {
+      const popupContainer = document.createElement('div');
+      const root = createRoot(popupContainer);
+      
+      // スレッドの詳細を表示する関数
+      const showThreadDetail = () => {
+        console.log('showThreadDetail called for thread:', thread.id);
+        // 元のスレッドポップアップを一時的に非表示にする
+        popup.remove();
+        
+        const detailContainer = document.createElement('div');
+        const detailRoot = createRoot(detailContainer);
+        
+        detailRoot.render(
+          <ThreadDetail 
+            message={thread.message}
+            author={thread.author}
+            timestamp={thread.timestamp}
+            replies={thread.replies}
+            onClose={() => {
+              detailPopup.remove();
+              detailRoot.unmount();
+              
+              // 詳細ポップアップを閉じたら元のスレッドポップアップを再表示
+              const newPopupContainer = document.createElement('div');
+              const newRoot = createRoot(newPopupContainer);
+              
+              newRoot.render(
+                <Thread 
+                  message={thread.message} 
+                  author={thread.author} 
+                  timestamp={thread.timestamp}
+                  replyCount={thread.replyCount}
+                  onThreadClick={showThreadDetail}
+                  onClose={() => {
+                    newPopup.remove();
+                    newRoot.unmount();
+                  }}
+                />
+              );
+              
+              const newPopup = new mapboxgl.Popup({
+                closeButton: false,
+                closeOnClick: false,
+                anchor: 'bottom',
+                offset: [0, -10],
+                className: 'custom-popup'
+              })
+                .setLngLat(thread.coordinates)
+                .setDOMContent(newPopupContainer)
+                .addTo(mapRef.current!);
+
+              newPopup.on('close', () => {
+                newRoot.unmount();
+              });
+            }}
+          />
+        );
+        
+        // 画面の中央座標を取得
+        const mapCenter = mapRef.current!.getCenter();
+        
+        const detailPopup = new mapboxgl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          anchor: 'center',
+          offset: [0, 0],
+          className: 'custom-popup detail-popup'
+        })
+          .setLngLat(mapCenter)
+          .setDOMContent(detailContainer)
+          .addTo(mapRef.current!);
+
+        console.log('Detail popup created and added to map center');
+
+        detailPopup.on('close', () => {
+          detailRoot.unmount();
+        });
+      };
+      
+      // Threadコンポーネントをレンダリング
+      console.log('Rendering Thread component with showThreadDetail:', !!showThreadDetail);
+      root.render(
+        <Thread 
+          message={thread.message} 
+          author={thread.author} 
+          timestamp={thread.timestamp}
+          replyCount={thread.replyCount}
+          onThreadClick={showThreadDetail}
+          onClose={() => {
+            popup.remove();
+            root.unmount();
+          }}
+        />
+      );
+      
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        anchor: 'bottom',
+        offset: [0, -10],
+        className: 'custom-popup'
+      })
+        .setLngLat(thread.coordinates)
+        .setDOMContent(popupContainer)
+        .addTo(mapRef.current!);
+
+      // ポップアップが閉じられたときのクリーンアップ
+      popup.on('close', () => {
+        root.unmount();
+      });
+    });
+  };
+
 
   useEffect(() => {
     const accessToken = process.env.NEXT_PUBLIC_MAP_API_TOKEN;
@@ -193,47 +407,8 @@ const MapboxExample = () => {
       // 地図の照明を夕暮れモードに変更
       mapRef.current.setConfigProperty('basemap', 'lightPreset', 'dusk');
 
-      // 指定したポリゴン領域内の建物やシンボルを「消去」する機能（名古屋駅周辺に調整）
-      mapRef.current.addSource('eraser', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: [
-            {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                coordinates: [
-                  [
-                    [136.917320, 35.158171],
-                    [136.919320, 35.158171],
-                    [136.919320, 35.156171],
-                    [136.917320, 35.156171],
-                    [136.917320, 35.158171]
-                  ]
-                ],
-                type: 'Polygon'
-              }
-            }
-          ]
-        }
-      });
-
-      //3Dタワーモデル（.glbファイル）を特定の位置に配置（名古屋駅周辺に調整）
-      // モデルの回転、スケール、影、発光強度などを設定
-      mapRef.current.addSource('model', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: {
-            'model-uri': 'https://docs.mapbox.com/mapbox-gl-js/assets/tower.glb'
-          },
-          geometry: {
-            coordinates: [136.918320, 35.157171],
-            type: 'Point'
-          }
-        }
-      });
+      // 複数のスレッドを地図上に表示
+      displayThreads();
 
       mapRef.current.addLayer({
         id: 'eraser',
@@ -243,26 +418,6 @@ const MapboxExample = () => {
 
           'clip-layer-types': ['symbol', 'model'],
           'clip-layer-scope': ['basemap']
-        }
-      });
-
-    
-      mapRef.current.addLayer({
-        id: 'tower',
-        type: 'model',
-        slot: 'middle',
-        source: 'model',
-        minzoom: 15,
-        layout: {
-          'model-id': ['get', 'model-uri']
-        },
-        paint: {
-          'model-opacity': 1,
-          'model-rotation': [0.0, 0.0, 35.0],
-          'model-scale': [0.8, 0.8, 1.2],
-          'model-color-mix-intensity': 0,
-          'model-cast-shadows': true,
-          'model-emissive-strength': 0.8
         }
       });
     });
@@ -297,6 +452,101 @@ const MapboxExample = () => {
     setIs3D(!is3D);
   };
   
+  const ChangeMapView = (view: number) => {
+    if (!mapRef.current || !mapContainerRef.current) return;
+    
+    // 既存のマップを削除
+    mapRef.current.remove();
+    
+    switch(view){
+      case 1:
+          // マップインスタンスを作成
+          mapRef.current = new mapboxgl.Map({
+            container: mapContainerRef.current,
+            center: [136.918320, 35.157171], // [経度, 緯度] の順番
+            zoom: 15.27,
+            pitch: 42,
+            bearing: -50,
+            style: 'mapbox://styles/mapbox/standard',
+            minZoom: 15,
+            maxZoom: 16,
+            // ローカライズ設定
+            localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
+            // 言語設定を日本語に
+            language: 'ja'
+          });
+          break;
+      case 2:
+            // マップインスタンスを作成
+          mapRef.current = new mapboxgl.Map({
+            container: mapContainerRef.current,
+            center: [136.918320, 35.157171], // [経度, 緯度] の順番
+            zoom: 5.100,
+            pitch: 42,
+            bearing: -50,
+            style: 'mapbox://styles/mapbox/standard',
+            minZoom: 5,
+            maxZoom: 100,
+            // ローカライズ設定
+            localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
+            // 言語設定を日本語に
+            language: 'ja'
+          });
+
+          // 道路表示を消すための設定
+          mapRef.current.on('style.load', () => {
+            if (!mapRef.current) return;
+            
+            // まず、すべてのレイヤーを取得してコンソールに表示
+            const style = mapRef.current.getStyle();
+            const allLayers = style.layers.map(layer => layer.id);
+            console.log('All layers:', allLayers);
+            
+            // 道路関連のレイヤーを幅広く検索して非表示にする
+            allLayers.forEach(layerId => {
+              if (layerId.includes('road') || 
+                  layerId.includes('street') || 
+                  layerId.includes('highway') ||
+                  layerId.includes('motorway') ||
+                  layerId.includes('primary') ||
+                  layerId.includes('secondary') ||
+                  layerId.includes('tertiary') ||
+                  layerId.includes('trunk') ||
+                  layerId.includes('bridge') ||
+                  layerId.includes('tunnel') ||
+                  layerId.includes('path') ||
+                  layerId.includes('pedestrian') ||
+                  layerId.includes('rail') ||
+                  layerId.includes('transit')) {
+                try {
+                  mapRef.current!.setLayoutProperty(layerId, 'visibility', 'none');
+                  console.log(`Hidden layer: ${layerId}`);
+                } catch (error) {
+                  console.warn(`Could not hide layer: ${layerId}`, error);
+                }
+              }
+            });
+          });
+          break;
+      case 3:
+        // マップインスタンスを作成
+          mapRef.current = new mapboxgl.Map({
+            container: mapContainerRef.current,
+            center: [136.918320, 35.157171], // [経度, 緯度] の順番
+            zoom: 15.27,
+            pitch: 42,
+            bearing: -50,
+            style: 'mapbox://styles/mapbox/standard',
+            minZoom: 15,
+            maxZoom: 16,
+            // ローカライズ設定
+            localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
+            // 言語設定を日本語に
+            language: 'ja'
+          });
+          break;
+    }
+  };
   //マップのサイズ
   return (
     <div style={{ height: '100vh', width: '100%', position: 'relative' }}>
@@ -305,7 +555,7 @@ const MapboxExample = () => {
       {/* 円形ボタンの例 */}
       <CircleButton
         position={{ top: '80px', right: '20px' }}
-        onClick={() => alert('ボタン1がクリックされました')}
+        onClick={() => ChangeMapView(1)}
         size="md"
         variant="default"
       >
@@ -314,7 +564,7 @@ const MapboxExample = () => {
 
       <CircleButton
         position={{ top: '160px', right: '20px' }}
-        onClick={() => alert('ボタン1がクリックされました')}
+        onClick={() => ChangeMapView(2)}
         size="md"
         variant="default"
       >
@@ -323,7 +573,7 @@ const MapboxExample = () => {
 
       <CircleButton
         position={{ top: '240px', right: '20px' }}
-        onClick={() => alert('ボタン1がクリックされました')}
+        onClick={() => ChangeMapView(3)}
         size="md"
         variant="default"
       >
