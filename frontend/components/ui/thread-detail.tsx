@@ -66,7 +66,7 @@ const ThreadDetail: React.FC<ThreadDetailProps> = ({
       <div className="max-h-48 overflow-y-auto">
         {replies.map((reply) => (
           <div key={reply.id} className="p-3 border-b border-gray-100 last:border-b-0">
-            <div className="flex items-start space-x-2">
+            {/* <div className="flex items-start space-x-2">
               <Reply className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1 space-y-1">
                 <p className="text-sm text-gray-800">{reply.message}</p>
@@ -75,13 +75,13 @@ const ThreadDetail: React.FC<ThreadDetailProps> = ({
                   <span>{reply.timestamp}</span>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         ))}
       </div>
 
       {/* フッター */}
-      <CardFooter className="bg-gray-50 p-3">
+      {/* <CardFooter className="bg-gray-50 p-3">
         <div className="flex items-center justify-between w-full text-xs text-gray-500">
           <span>{replies.length}件の返信</span>
           <Button 
@@ -92,7 +92,7 @@ const ThreadDetail: React.FC<ThreadDetailProps> = ({
             返信する
           </Button>
         </div>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   );
 };

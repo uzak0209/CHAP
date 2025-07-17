@@ -53,11 +53,11 @@ const MapboxExample = () => {
       timestamp: "14:40:33",
       replyCount: 5,
       replies: [
-        { id: 1, message: "本当に気持ちいいですね", author: "ユーザーE", timestamp: "14:41:00" },
-        { id: 2, message: "散歩日和です", author: "ユーザーF", timestamp: "14:41:30" },
-        { id: 3, message: "写真撮影にも最適", author: "ユーザーG", timestamp: "14:42:00" },
-        { id: 4, message: "外に出たくなります", author: "ユーザーH", timestamp: "14:42:30" },
-        { id: 5, message: "青空が綺麗です", author: "ユーザーI", timestamp: "14:43:00" }
+        { id: 1, message: "本当に気持ちいいですね", author: "ユーザーX", timestamp: "14:41:00" },
+        { id: 2, message: "散歩日和です", author: "ユーザーY", timestamp: "14:41:30" },
+        { id: 3, message: "写真撮影にも最適", author: "ユーザーZ", timestamp: "14:42:00" },
+        { id: 4, message: "外に出たくなります", author: "ユーザーW", timestamp: "14:42:30" },
+        { id: 5, message: "青空が綺麗です", author: "ユーザーV", timestamp: "14:43:00" }
       ]
     },
     {
@@ -409,17 +409,6 @@ const MapboxExample = () => {
 
       // 複数のスレッドを地図上に表示
       displayThreads();
-
-      mapRef.current.addLayer({
-        id: 'eraser',
-        type: 'clip',
-        source: 'eraser',
-        layout: {
-
-          'clip-layer-types': ['symbol', 'model'],
-          'clip-layer-scope': ['basemap']
-        }
-      });
     });
 
     // クリーンアップ関数

@@ -62,7 +62,7 @@ const Thread: React.FC<ThreadProps> = ({ message, author, timestamp, className, 
         </p>
       </CardContent>
       
-      {(author || timestamp || replyCount > 0) && (
+      {/* {(author || timestamp || replyCount > 0) && (
         <CardFooter className="px-3 py-1 bg-blue-100/50 border-t border-blue-200 rounded-b-2xl">
           <div className="flex justify-between items-center w-full text-xs text-blue-600">
             <div className="flex items-center space-x-2">
@@ -76,7 +76,7 @@ const Thread: React.FC<ThreadProps> = ({ message, author, timestamp, className, 
             {timestamp && <span>{timestamp}</span>}
           </div>
         </CardFooter>
-      )}
+      )} */}
     </Card>
   );
 };
