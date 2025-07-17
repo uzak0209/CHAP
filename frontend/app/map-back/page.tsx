@@ -7,8 +7,12 @@ import CircleButton from "@/components/ui/circle-button"
 import Post from "@/components/ui/post"
 import Thread from "@/components/ui/thread"
 import ThreadDetail from "@/components/ui/thread-detail"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import mapboxgl from 'mapbox-gl';
-
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -111,122 +115,311 @@ const MapboxExample = () => {
   }, []);
 
   // 複数のスレッドを地図上に表示する関数
-  const displayThreads = () => {
-    if (!mapRef.current) return;
+const displayThreads = () => {
+  if (!mapRef.current) return;
+
+  // 現在のズームレベルを取得
+  const currentZoom = mapRef.current.getZoom();
+  
+  // ズームレベルに応じた重複判定の閾値を設定（画面上のピクセル距離）
+  const getOverlapThreshold = (zoom: number) => {
+    // ズームレベルが低い（引いている）ほど閾値を大きく
+    if (zoom < 10) return 100; // 100px以内なら重複
+    if (zoom < 13) return 80;  // 80px以内なら重複
+    if (zoom < 15) return 60;  // 60px以内なら重複
+    if (zoom < 17) return 40;  // 40px以内なら重複
+    return 20; // 20px以内なら重複
+  };
+
+  const PIXEL_THRESHOLD = getOverlapThreshold(currentZoom);
+
+  // 2つの座標間の画面上のピクセル距離を計算する関数
+  const calculatePixelDistance = (coord1: [number, number], coord2: [number, number]) => {
+    const point1 = mapRef.current!.project(coord1);
+    const point2 = mapRef.current!.project(coord2);
     
-    threadsData.forEach((thread) => {
-      const popupContainer = document.createElement('div');
-      const root = createRoot(popupContainer);
+    const dx = point1.x - point2.x;
+    const dy = point1.y - point2.y;
+    
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // 重複するコメントをグループ化する関数
+  const groupOverlappingThreads = (threads: typeof threadsData) => {
+    const groups: Array<{
+      mainThread: typeof threadsData[0];
+      overlappingCount: number;
+      allThreads: typeof threadsData;
+    }> = [];
+    
+    const processed = new Set<number>();
+
+    threads.forEach((thread, index) => {
+      if (processed.has(index)) return;
+
+      const overlappingThreads = [thread];
+      processed.add(index);
+
+      // 他のスレッドと画面上の距離を比較
+      threads.forEach((otherThread, otherIndex) => {
+        if (otherIndex === index || processed.has(otherIndex)) return;
+
+        const pixelDistance = calculatePixelDistance(thread.coordinates, otherThread.coordinates);
+        if (pixelDistance < PIXEL_THRESHOLD) {
+          overlappingThreads.push(otherThread);
+          processed.add(otherIndex);
+        }
+      });
+
+      // 最新のコメントを代表として選ぶ（後でいいね順に変更予定）
+      const mainThread = overlappingThreads.sort((a, b) => 
+        new Date(`2024-01-01 ${b.timestamp}`).getTime() - 
+        new Date(`2024-01-01 ${a.timestamp}`).getTime()
+      )[0];
+
+      groups.push({
+        mainThread,
+        overlappingCount: overlappingThreads.length,
+        allThreads: overlappingThreads
+      });
+    });
+
+    return groups;
+  };
+
+  const threadGroups = groupOverlappingThreads(threadsData);
+  
+  threadGroups.forEach((group) => {
+    const { mainThread, overlappingCount, allThreads } = group;
+    
+    const popupContainer = document.createElement('div');
+    popupContainer.style.position = 'relative';
+    const root = createRoot(popupContainer);
+
+    // 重複コメント数の表示要素（shadcn/ui Badge使用）
+    if (overlappingCount > 1) {
+      const badgeContainer = document.createElement('div');
+      badgeContainer.style.cssText = `
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        z-index: 1000;
+      `;
       
-      // スレッドの詳細を表示する関数
-      const showThreadDetail = () => {
-        console.log('showThreadDetail called for thread:', thread.id);
-        // 元のスレッドポップアップを一時的に非表示にする
-        popup.remove();
-        
-        const detailContainer = document.createElement('div');
-        const detailRoot = createRoot(detailContainer);
-        
-        detailRoot.render(
-          <ThreadDetail 
-            message={thread.message}
-            author={thread.author}
-            timestamp={thread.timestamp}
-            replies={thread.replies}
-            onClose={() => {
-              detailPopup.remove();
-              detailRoot.unmount();
-              
-              // 詳細ポップアップを閉じたら元のスレッドポップアップを再表示
-              const newPopupContainer = document.createElement('div');
-              const newRoot = createRoot(newPopupContainer);
-              
-              newRoot.render(
-                <Thread 
-                  message={thread.message} 
-                  author={thread.author} 
-                  timestamp={thread.timestamp}
-                  replyCount={thread.replyCount}
-                  onThreadClick={showThreadDetail}
-                  onClose={() => {
-                    newPopup.remove();
-                    newRoot.unmount();
-                  }}
-                />
-              );
-              
-              const newPopup = new mapboxgl.Popup({
-                closeButton: false,
-                closeOnClick: false,
-                anchor: 'bottom',
-                offset: [0, -10],
-                className: 'custom-popup'
-              })
-                .setLngLat(thread.coordinates)
-                .setDOMContent(newPopupContainer)
-                .addTo(mapRef.current!);
-
-              newPopup.on('close', () => {
-                newRoot.unmount();
-              });
-            }}
-          />
-        );
-        
-        // 画面の中央座標を取得
-        const mapCenter = mapRef.current!.getCenter();
-        
-        const detailPopup = new mapboxgl.Popup({
-          closeButton: false,
-          closeOnClick: false,
-          anchor: 'center',
-          offset: [0, 0],
-          className: 'custom-popup detail-popup'
-        })
-          .setLngLat(mapCenter)
-          .setDOMContent(detailContainer)
-          .addTo(mapRef.current!);
-
-        console.log('Detail popup created and added to map center');
-
-        detailPopup.on('close', () => {
-          detailRoot.unmount();
-        });
-      };
+      const badgeRoot = createRoot(badgeContainer);
+      badgeRoot.render(
+        <Badge variant="destructive" className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold">
+          {overlappingCount}
+        </Badge>
+      );
       
-      // Threadコンポーネントをレンダリング
-      console.log('Rendering Thread component with showThreadDetail:', !!showThreadDetail);
-      root.render(
-        <Thread 
-          message={thread.message} 
-          author={thread.author} 
+      popupContainer.appendChild(badgeContainer);
+    }
+
+    // ...existing code for showIndividualThreadDetail, displaySingleThread, and showThreadDetail functions...
+    
+    // 個別のスレッド詳細を表示する関数
+    const showIndividualThreadDetail = (thread: typeof mainThread) => {
+      const detailContainer = document.createElement('div');
+      const detailRoot = createRoot(detailContainer);
+      
+      detailRoot.render(
+        <ThreadDetail 
+          message={thread.message}
+          author={thread.author}
           timestamp={thread.timestamp}
-          replyCount={thread.replyCount}
-          onThreadClick={showThreadDetail}
+          replies={thread.replies}
           onClose={() => {
-            popup.remove();
-            root.unmount();
+            detailPopup.remove();
+            detailRoot.unmount();
+            // 元のポップアップを再表示
+            displaySingleThread(group);
           }}
         />
       );
+
+      const mapCenter = mapRef.current!.getCenter();
       
-      const popup = new mapboxgl.Popup({
+      const detailPopup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        anchor: 'center',
+        offset: [0, 0],
+        className: 'custom-popup detail-popup'
+      })
+        .setLngLat(mapCenter)
+        .setDOMContent(detailContainer)
+        .addTo(mapRef.current!);
+
+      detailPopup.on('close', () => {
+        detailRoot.unmount();
+      });
+    };
+
+    // 単一スレッドを表示する関数
+    const displaySingleThread = (group: typeof threadGroups[0]) => {
+      const newPopupContainer = document.createElement('div');
+      newPopupContainer.style.position = 'relative';
+      
+      const newRoot = createRoot(newPopupContainer);
+      
+      // 重複数バッジを再追加
+      if (group.overlappingCount > 1) {
+        const newBadgeContainer = document.createElement('div');
+        newBadgeContainer.style.cssText = `
+          position: absolute;
+          top: -8px;
+          right: -8px;
+          z-index: 1000;
+        `;
+        
+        const newBadgeRoot = createRoot(newBadgeContainer);
+        newBadgeRoot.render(
+          <Badge variant="destructive" className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold">
+            {group.overlappingCount}
+          </Badge>
+        );
+        
+        newPopupContainer.appendChild(newBadgeContainer);
+      }
+
+      newRoot.render(
+        <Thread 
+          message={group.mainThread.message} 
+          author={group.mainThread.author} 
+          timestamp={group.mainThread.timestamp}
+          replyCount={group.mainThread.replyCount}
+          onThreadClick={showThreadDetail}
+          onClose={() => {
+            newPopup.remove();
+            newRoot.unmount();
+          }}
+        />
+      );
+
+      const newPopup = new mapboxgl.Popup({
         closeButton: false,
         closeOnClick: false,
         anchor: 'bottom',
         offset: [0, -10],
         className: 'custom-popup'
       })
-        .setLngLat(thread.coordinates)
-        .setDOMContent(popupContainer)
+        .setLngLat(group.mainThread.coordinates)
+        .setDOMContent(newPopupContainer)
         .addTo(mapRef.current!);
 
-      // ポップアップが閉じられたときのクリーンアップ
-      popup.on('close', () => {
-        root.unmount();
+      newPopup.on('close', () => {
+        newRoot.unmount();
       });
+    };
+
+    // スレッドの詳細を表示する関数
+    const showThreadDetail = () => {
+      console.log('showThreadDetail called for thread:', mainThread.id);
+      
+      if (overlappingCount > 1) {
+        popup.remove();
+        
+        const selectionContainer = document.createElement('div');
+        const selectionRoot = createRoot(selectionContainer);
+        
+        selectionRoot.render(
+          <Card className="w-80 max-h-96 overflow-hidden">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">重複するコメント</CardTitle>
+              <CardDescription>
+                {overlappingCount}件のコメントが重複しています
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 max-h-60 overflow-y-auto">
+              {allThreads.map((thread, index) => (
+                <Card 
+                  key={thread.id}
+                  className="cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
+                  onClick={() => {
+                    selectionPopup.remove();
+                    selectionRoot.unmount();
+                    showIndividualThreadDetail(thread);
+                  }}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-medium text-sm">{thread.author}</span>
+                      <span className="text-xs text-muted-foreground">{thread.timestamp}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {thread.message.length > 50 ? `${thread.message.substring(0, 50)}...` : thread.message}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+              <Separator />
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  selectionPopup.remove();
+                  selectionRoot.unmount();
+                  displaySingleThread(group);
+                }}
+              >
+                戻る
+              </Button>
+            </CardContent>
+          </Card>
+        );
+
+        const selectionPopup = new mapboxgl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          anchor: 'center',
+          offset: [0, 0],
+          className: 'custom-popup detail-popup'
+        })
+          .setLngLat(mainThread.coordinates)
+          .setDOMContent(selectionContainer)
+          .addTo(mapRef.current!);
+
+        selectionPopup.on('close', () => {
+          selectionRoot.unmount();
+        });
+      } else {
+        showIndividualThreadDetail(mainThread);
+      }
+    };
+    
+    // Threadコンポーネントをレンダリング
+    root.render(
+      <Thread 
+        message={mainThread.message} 
+        author={mainThread.author} 
+        timestamp={mainThread.timestamp}
+        replyCount={mainThread.replyCount}
+        onThreadClick={showThreadDetail}
+        onClose={() => {
+          popup.remove();
+          root.unmount();
+        }}
+      />
+    );
+      
+    const popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      anchor: 'bottom',
+      offset: [0, -10],
+      className: 'custom-popup'
+    })
+      .setLngLat(mainThread.coordinates)
+      .setDOMContent(popupContainer)
+      .addTo(mapRef.current!);
+
+    popup.on('close', () => {
+      root.unmount();
     });
-  };
+  });
+};
 
 
   useEffect(() => {
@@ -256,8 +449,8 @@ const MapboxExample = () => {
       pitch: 42,
       bearing: -50,
       style: 'mapbox://styles/mapbox/standard',
-      minZoom: 15,
-      maxZoom: 16,
+      minZoom: 5,
+      maxZoom: 50,
       // ローカライズ設定
       localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
       // 言語設定を日本語に
@@ -409,6 +602,15 @@ const MapboxExample = () => {
 
       // 複数のスレッドを地図上に表示
       displayThreads();
+
+      mapRef.current!.on('zoomend', () => {
+        // 既存のポップアップを削除
+        const existingPopups = document.querySelectorAll('.mapboxgl-popup');
+        existingPopups.forEach(popup => popup.remove());
+        
+        // 新しいズームレベルでスレッドを再表示
+        displayThreads();
+      });
     });
 
     // クリーンアップ関数
