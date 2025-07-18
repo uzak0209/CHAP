@@ -9,3 +9,4 @@ nginx/ssl
 /my-terraform
 /supabase
 /CHAP.pem
+frontend/.env.local
