@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
-import { MAPBOX_CONFIG } from '@/constants/map';
+import { MAPBOX_CONFIG } from '../constants/map';
 import { 
   initializeMapboxToken, 
   createMapInstance, 
@@ -8,7 +8,7 @@ import {
   setupMapStyle, 
   hideRoadLayers,
   createMapStyles 
-} from '@/utils/mapbox';
+} from '../utils/mapbox';
 
 export const useMapbox = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);

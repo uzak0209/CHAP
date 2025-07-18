@@ -1,15 +1,15 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import mapboxgl from 'mapbox-gl';
-import { Thread, ThreadGroup } from '@/types/thread';
-import { POPUP_CONFIG } from '@/constants/map';
-import { groupOverlappingThreads } from '@/utils/threadGrouping';
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import ThreadComponent from "@/components/ui/thread";
-import ThreadDetail from "@/components/ui/thread-detail";
+import { Thread, ThreadGroup } from '../types/thread';
+import { POPUP_CONFIG } from '../constants/map';
+import { groupOverlappingThreads } from '../utils/threadGrouping';
+import { Badge } from "../components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Separator } from "../components/ui/separator";
+import ThreadComponent from "../components/ui/thread";
+import ThreadDetail from "../components/ui/thread-detail";
 
 export const createThreadDisplay = (map: mapboxgl.Map, threads: Thread[]) => {
   const threadGroups = groupOverlappingThreads(threads, map);
