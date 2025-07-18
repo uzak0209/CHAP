@@ -11,7 +11,7 @@ const MapboxExample = () => {
   useThreads(mapRef);
 
   return (
-    <div style={{ height: '100vh', width: '100%', position: 'relative' }}>
+    <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
       <div id="map" style={{ height: '100%', width: '100%' }} ref={mapContainerRef} />
       
       <MapControls
