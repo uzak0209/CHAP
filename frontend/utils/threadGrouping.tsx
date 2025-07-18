@@ -1,5 +1,5 @@
 import mapboxgl from 'mapbox-gl';
-import { Thread, ThreadGroup } from '@/types/thread';
+import { Thread, ThreadGroup } from '../types/thread';
 
 export const getOverlapThreshold = (zoom: number): number => {
   if (zoom < 10) return 100;
