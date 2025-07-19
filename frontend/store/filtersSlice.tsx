@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { PostCategory } from '@/types/thread'
 
 export interface FiltersState {
   contentType: 'MESSAGE' | 'THREAD' | 'EVENT' | 'ALL';
@@ -8,6 +9,7 @@ export interface FiltersState {
     to: Date | null;
   };
   tags: string[];
+  selectedCategory: PostCategory;
   showValid: boolean;
 }
 
@@ -19,6 +21,7 @@ const initialState: FiltersState = {
     to: null,
   },
   tags: [],
+  selectedCategory: 'entertainment', // デフォルトは娯楽目的
   showValid: true,
 }
 
@@ -45,6 +48,10 @@ const filtersSlice = createSlice({
     },
     clearTags: (state) => {
       state.tags = []
+    },
+    setSelectedCategory: (state, action: PayloadAction<PostCategory>) => {
+      console.log('Redux: Setting category to', action.payload);
+      state.selectedCategory = action.payload
     },
     setShowValid: (state, action: PayloadAction<boolean>) => {
       state.showValid = action.payload

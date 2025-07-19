@@ -3,6 +3,8 @@
 import React from 'react';
 import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { Provider } from 'react-redux';
+import { store } from '@/store';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { open } = useSidebar();
@@ -31,8 +33,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
-      <LayoutContent>{children}</LayoutContent>
-    </SidebarProvider>
+    <Provider store={store}>
+      <SidebarProvider>
+        <LayoutContent>{children}</LayoutContent>
+      </SidebarProvider>
+    </Provider>
   );
 }
