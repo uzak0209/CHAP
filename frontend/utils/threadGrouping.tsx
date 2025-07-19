@@ -40,6 +40,9 @@ export const groupOverlappingThreads = (threads: Thread[], map: mapboxgl.Map): T
     threads.forEach((otherThread, otherIndex) => {
       if (otherIndex === index || processed.has(otherIndex)) return;
 
+      // ★カテゴリが同じ場合のみグループ化
+      if (thread.category !== otherThread.category) return;
+
       const pixelDistance = calculatePixelDistance(map, thread.coordinates, otherThread.coordinates);
       if (pixelDistance < PIXEL_THRESHOLD) {
         overlappingThreads.push(otherThread);

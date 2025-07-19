@@ -6,14 +6,20 @@ import { useThreads } from '@/hooks/useThreads';
 import MapControls from '@/components/Map/MapControls';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-const MapboxExample = () => {
+export default function MapBackPage() {
   const { mapContainerRef, mapRef, is3D, toggle3D, changeMapView } = useMapbox();
-  useThreads(mapRef);
+  const { displayThreads } = useThreads(mapRef);
 
   return (
-    <div style={{ height: '100vh', width: '100%', position: 'relative' }}>
-      <div id="map" style={{ height: '100%', width: '100%' }} ref={mapContainerRef} />
+    <div className="h-full w-full relative">
+      {/* マップコンテナ */}
+      <div 
+        id="map" 
+        className="h-full w-full" 
+        ref={mapContainerRef} 
+      />
       
+      {/* マップコントロール */}
       <MapControls
         is3D={is3D}
         onToggle3D={toggle3D}
@@ -21,6 +27,4 @@ const MapboxExample = () => {
       />
     </div>
   );
-};
-
-export default MapboxExample;
+}

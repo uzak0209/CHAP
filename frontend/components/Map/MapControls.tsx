@@ -44,7 +44,7 @@ const MapControls: React.FC<MapControlsProps> = ({ is3D, onToggle3D, onChangeMap
         style={{
           position: 'absolute',
           top: '20px',
-          right: '20px',
+          right: '80px',
           padding: '10px 20px',
           backgroundColor: is3D ? '#007cbf' : '#4a90e2',
           color: 'white',
@@ -72,8 +72,8 @@ const MapControls: React.FC<MapControlsProps> = ({ is3D, onToggle3D, onChangeMap
       <div
         style={{
           position: 'absolute',
-          top: '20px',
-          left: '20px',
+          bottom: '20px',
+          left: '70px',
           padding: '8px 16px',
           backgroundColor: 'rgba(0,0,0,0.7)',
           color: 'white',

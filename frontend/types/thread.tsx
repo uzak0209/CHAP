@@ -1,3 +1,5 @@
+export type PostCategory = 'entertainment' | 'community' | 'disaster';
+
 export interface Reply {
   id: number;
   message: string;
@@ -12,6 +14,8 @@ export interface Thread {
   author: string;
   timestamp: string;
   replyCount: number;
+  category: PostCategory;
+  like: number;
   replies: Reply[];
 }
 

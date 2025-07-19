@@ -12,12 +12,13 @@ interface ThreadProps {
   onClose?: () => void;
   replyCount?: number;
   onThreadClick?: () => void;
+  like?: number; // いいね数を追加
 }
 
-const Thread: React.FC<ThreadProps> = ({ message, author, timestamp, className, onClose, replyCount = 0, onThreadClick }) => {
+const Thread: React.FC<ThreadProps> = ({ message, author, timestamp, className, onClose, replyCount = 0, onThreadClick, like = 0 }) => {
   return (
     <Card className={cn(
-      "relative max-w-sm bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 shadow-lg rounded-2xl",
+      "relative max-w-sm bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 shadow-lg rounded-2xl overflow-hidden",
       className
     )}>
       {/* 吹き出しの矢印 */}
@@ -57,9 +58,18 @@ const Thread: React.FC<ThreadProps> = ({ message, author, timestamp, className, 
       
       {/* メッセージコンテンツ */}
       <CardContent className="p-4 pt-8">
-        <p className="text-sm text-blue-900 leading-relaxed">
+        <p className="text-sm text-blue-900 leading-relaxed mb-3">
           {message}
         </p>
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-red-500 font-medium">❤️ {like} いいね</span>
+          {author && timestamp && (
+            <div className="text-blue-600">
+              <span className="font-medium">{author}</span>
+              <span className="ml-2">{timestamp}</span>
+            </div>
+          )}
+        </div>
       </CardContent>
       
       {/* {(author || timestamp || replyCount > 0) && (

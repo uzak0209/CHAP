@@ -1,24 +1,36 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import mapboxgl from 'mapbox-gl';
-import { Thread, ThreadGroup } from '@/types/thread';
-import { POPUP_CONFIG } from '@/constants/map';
-import { groupOverlappingThreads } from '@/utils/threadGrouping';
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import ThreadComponent from "@/components/ui/thread";
-import ThreadDetail from "@/components/ui/thread-detail";
+import { Thread, ThreadGroup } from '../types/thread';
+import { POPUP_CONFIG } from '../constants/map';
+import { groupOverlappingThreads } from '../utils/threadGrouping';
+import { Badge } from "../components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Separator } from "../components/ui/separator";
+import ThreadComponent from "../components/ui/thread";
+import ThreadDetail from "../components/ui/thread-detail";
 
 export const createThreadDisplay = (map: mapboxgl.Map, threads: Thread[]) => {
-  const threadGroups = groupOverlappingThreads(threads, map);
+  console.log('Creating thread display...');
   
-  threadGroups.forEach((group) => {
+  // マップインスタンスを設定
+  setMapInstance(map);
+  
+  // 既存のポップアップを確実にクリア
+  clearExistingPopups();
+  
+  const threadGroups = groupOverlappingThreads(threads, map);
+  console.log(`Created ${threadGroups.length} thread groups from ${threads.length} threads`);
+  
+  threadGroups.forEach((group, index) => {
+    console.log(`Rendering group ${index + 1}:`, group);
     const { mainThread, overlappingCount, allThreads } = group;
     
     const popupContainer = document.createElement('div');
     popupContainer.style.position = 'relative';
+    popupContainer.setAttribute('data-thread-root', 'true');
+    popupContainer.className = 'custom-thread-container';
     const root = createRoot(popupContainer);
 
     // 重複コメント数の表示要素
@@ -51,10 +63,14 @@ export const createThreadDisplay = (map: mapboxgl.Map, threads: Thread[]) => {
           message={thread.message}
           author={thread.author}
           timestamp={thread.timestamp}
+          like={thread.like}
           replies={thread.replies}
           onClose={() => {
             detailPopup.remove();
-            detailRoot.unmount();
+            // 非同期でアンマウントしてレースコンディションを回避
+            setTimeout(() => {
+              detailRoot.unmount();
+            }, 0);
             displaySingleThread(group);
           }}
         />
@@ -73,8 +89,30 @@ export const createThreadDisplay = (map: mapboxgl.Map, threads: Thread[]) => {
         .setDOMContent(detailContainer)
         .addTo(map);
 
+      // ポップアップの吹き出しを確実に除去
+      setTimeout(() => {
+        const popupElement = detailPopup.getElement();
+        if (popupElement) {
+          const tip = popupElement.querySelector('.mapboxgl-popup-tip');
+          if (tip) {
+            tip.remove();
+          }
+        }
+      }, 0);
+
+      // ポップアップを追跡リストに追加
+      allPopups.push(detailPopup);
+
       detailPopup.on('close', () => {
-        detailRoot.unmount();
+        // 非同期でアンマウントしてレースコンディションを回避
+        setTimeout(() => {
+          detailRoot.unmount();
+        }, 0);
+        // 追跡リストから削除
+        const index = allPopups.indexOf(detailPopup);
+        if (index > -1) {
+          allPopups.splice(index, 1);
+        }
       });
     };
 
@@ -114,7 +152,10 @@ export const createThreadDisplay = (map: mapboxgl.Map, threads: Thread[]) => {
           onThreadClick={showThreadDetail}
           onClose={() => {
             newPopup.remove();
-            newRoot.unmount();
+            // 非同期でアンマウントしてレースコンディションを回避
+            setTimeout(() => {
+              newRoot.unmount();
+            }, 0);
           }}
         />
       );
@@ -130,8 +171,30 @@ export const createThreadDisplay = (map: mapboxgl.Map, threads: Thread[]) => {
         .setDOMContent(newPopupContainer)
         .addTo(map);
 
+      // ポップアップの吹き出しを確実に除去
+      setTimeout(() => {
+        const popupElement = newPopup.getElement();
+        if (popupElement) {
+          const tip = popupElement.querySelector('.mapboxgl-popup-tip');
+          if (tip) {
+            tip.remove();
+          }
+        }
+      }, 0);
+
+      // ポップアップを追跡リストに追加
+      allPopups.push(newPopup);
+
       newPopup.on('close', () => {
-        newRoot.unmount();
+        // 非同期でアンマウントしてレースコンディションを回避
+        setTimeout(() => {
+          newRoot.unmount();
+        }, 0);
+        // 追跡リストから削除
+        const index = allPopups.indexOf(newPopup);
+        if (index > -1) {
+          allPopups.splice(index, 1);
+        }
       });
     };
 
@@ -203,8 +266,30 @@ export const createThreadDisplay = (map: mapboxgl.Map, threads: Thread[]) => {
           .setDOMContent(selectionContainer)
           .addTo(map);
 
+        // ポップアップの吹き出しを確実に除去
+        setTimeout(() => {
+          const popupElement = selectionPopup.getElement();
+          if (popupElement) {
+            const tip = popupElement.querySelector('.mapboxgl-popup-tip');
+            if (tip) {
+              tip.remove();
+            }
+          }
+        }, 0);
+
+        // ポップアップを追跡リストに追加
+        allPopups.push(selectionPopup);
+
         selectionPopup.on('close', () => {
-          selectionRoot.unmount();
+          // 非同期でアンマウントしてレースコンディションを回避
+          setTimeout(() => {
+            selectionRoot.unmount();
+          }, 0);
+          // 追跡リストから削除
+          const index = allPopups.indexOf(selectionPopup);
+          if (index > -1) {
+            allPopups.splice(index, 1);
+          }
         });
       } else {
         showIndividualThreadDetail(mainThread);
@@ -218,10 +303,14 @@ export const createThreadDisplay = (map: mapboxgl.Map, threads: Thread[]) => {
         author={mainThread.author} 
         timestamp={mainThread.timestamp}
         replyCount={mainThread.replyCount}
+        like={mainThread.like}
         onThreadClick={showThreadDetail}
         onClose={() => {
           popup.remove();
-          root.unmount();
+          // 非同期でアンマウントしてレースコンディションを回避
+          setTimeout(() => {
+            root.unmount();
+          }, 0);
         }}
       />
     );
@@ -237,13 +326,83 @@ export const createThreadDisplay = (map: mapboxgl.Map, threads: Thread[]) => {
       .setDOMContent(popupContainer)
       .addTo(map);
 
+    // ポップアップの吹き出しを確実に除去
+    setTimeout(() => {
+      const popupElement = popup.getElement();
+      if (popupElement) {
+        const tip = popupElement.querySelector('.mapboxgl-popup-tip');
+        if (tip) {
+          tip.remove();
+        }
+      }
+    }, 0);
+
+    // ポップアップを追跡リストに追加
+    allPopups.push(popup);
+
     popup.on('close', () => {
-      root.unmount();
+      // 非同期でアンマウントしてレースコンディションを回避
+      setTimeout(() => {
+        root.unmount();
+      }, 0);
+      // 追跡リストから削除
+      const index = allPopups.indexOf(popup);
+      if (index > -1) {
+        allPopups.splice(index, 1);
+      }
     });
   });
 };
 
+// Mapboxインスタンスを保持（ポップアップ管理用）
+let mapInstance: mapboxgl.Map | null = null;
+let allPopups: mapboxgl.Popup[] = [];
+
+export const setMapInstance = (map: mapboxgl.Map) => {
+  mapInstance = map;
+  console.log('Map instance set for popup management');
+};
+
 export const clearExistingPopups = () => {
+  console.log('Clearing existing popups and markers...');
+  
+  // Mapboxのポップアップを確実に削除
+  if (mapInstance) {
+    try {
+      // 記録されたポップアップを削除
+      allPopups.forEach(popup => {
+        try {
+          popup.remove();
+        } catch (e) {
+          console.warn('Error removing tracked popup:', e);
+        }
+      });
+      allPopups = [];
+      console.log('Cleared all tracked popups via Mapbox API');
+    } catch (error) {
+      console.warn('Error clearing popups via Mapbox API:', error);
+    }
+  }
+  
+  // DOM要素として存在するポップアップを削除
   const existingPopups = document.querySelectorAll('.mapboxgl-popup');
+  console.log(`Found ${existingPopups.length} existing popup DOM elements`);
   existingPopups.forEach(popup => popup.remove());
+  
+  // ポップアップの吹き出し要素を確実に削除
+  const existingTips = document.querySelectorAll('.mapboxgl-popup-tip');
+  console.log(`Found ${existingTips.length} existing popup tips`);
+  existingTips.forEach(tip => tip.remove());
+  
+  // Reactのrootコンテナをクリア
+  const existingRoots = document.querySelectorAll('[data-thread-root]');
+  console.log(`Found ${existingRoots.length} existing thread roots`);
+  existingRoots.forEach(root => root.remove());
+  
+  // カスタムポップアップコンテナをクリア
+  const existingContainers = document.querySelectorAll('.custom-thread-container');
+  console.log(`Found ${existingContainers.length} existing thread containers`);
+  existingContainers.forEach(container => container.remove());
+  
+  console.log('Cleanup completed');
 };
