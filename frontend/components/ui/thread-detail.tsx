@@ -15,6 +15,7 @@ interface ThreadDetailProps {
   message: string;
   author: string;
   timestamp: string;
+  like: number;
   replies: ThreadReply[];
   onClose: () => void;
   className?: string;
@@ -23,14 +24,15 @@ interface ThreadDetailProps {
 const ThreadDetail: React.FC<ThreadDetailProps> = ({ 
   message, 
   author, 
-  timestamp, 
+  timestamp,
+  like,
   replies, 
   onClose, 
   className 
 }) => {
   return (
     <Card className={cn(
-      "w-80 max-h-96 bg-white border border-blue-200 shadow-xl rounded-2xl overflow-hidden",
+      "w-80 max-h-96 bg-transparent border-none shadow-none rounded-2xl overflow-hidden",
       className
     )}>
       {/* ヘッダー */}
@@ -43,7 +45,7 @@ const ThreadDetail: React.FC<ThreadDetailProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-white hover:bg-white/20 rounded-full"
+            className="h-6 w-6 p-0 text-white bg:white rounded-full"
             onClick={onClose}
           >
             <X className="h-4 w-4" />
@@ -52,21 +54,24 @@ const ThreadDetail: React.FC<ThreadDetailProps> = ({
       </CardHeader>
 
       {/* メインメッセージ */}
-      <CardContent className="p-4 border-b border-gray-200">
+      <CardContent className="p-4 border-none bg-transparent">
         <div className="space-y-2">
           <p className="text-sm text-gray-900 leading-relaxed">{message}</p>
-          <div className="flex justify-between items-center text-xs text-gray-500">
-            <span className="font-medium">{author}</span>
-            <span>{timestamp}</span>
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-red-500 font-medium">❤️ {like} いいね</span>
+            <div className="text-gray-500">
+              <span className="font-medium">{author}</span>
+              <span className="ml-2">{timestamp}</span>
+            </div>
           </div>
         </div>
       </CardContent>
 
       {/* 返信一覧 */}
-      <div className="max-h-48 overflow-y-auto">
+      <div className="max-h-48 overflow-y-auto bg-transparent">
         {replies.map((reply) => (
-          <div key={reply.id} className="p-3 border-b border-gray-100 last:border-b-0">
-            {/* <div className="flex items-start space-x-2">
+          <div key={reply.id} className="p-3 border-none bg-transparent last:border-b-0">
+            <div className="flex items-start space-x-2">
               <Reply className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1 space-y-1">
                 <p className="text-sm text-gray-800">{reply.message}</p>
@@ -75,24 +80,24 @@ const ThreadDetail: React.FC<ThreadDetailProps> = ({
                   <span>{reply.timestamp}</span>
                 </div>
               </div>
-            </div> */}
+            </div>
           </div>
         ))}
       </div>
 
       {/* フッター */}
-      {/* <CardFooter className="bg-gray-50 p-3">
+      <CardFooter className="bg-transparent p-3 border-none">
         <div className="flex items-center justify-between w-full text-xs text-gray-500">
           <span>{replies.length}件の返信</span>
           <Button 
             variant="outline" 
             size="sm"
-            className="h-6 px-2 text-xs"
+            className="h-6 px-2 text-xs bg-transparent border-gray-300"
           >
             返信する
           </Button>
         </div>
-      </CardFooter> */}
+      </CardFooter>
     </Card>
   );
 };

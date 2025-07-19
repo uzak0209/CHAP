@@ -2,7 +2,7 @@ import { useEffect, useCallback, useMemo } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Thread } from '@/types/thread';
 import { THREADS_DATA } from '@/constants/map';
-import { createThreadDisplay, clearExistingPopups } from '@/utils/threadDisplay';
+import { createThreadDisplay, clearExistingPopups, setMapInstance } from '@/utils/threadDisplay';
 import { useAppSelector } from '@/store';
 
 export const useThreads = (mapRef: React.RefObject<mapboxgl.Map | null>) => {
@@ -37,6 +37,9 @@ export const useThreads = (mapRef: React.RefObject<mapboxgl.Map | null>) => {
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
+
+    // マップインスタンスを設定
+    setMapInstance(map);
 
     const onStyleLoad = () => {
       displayThreads();

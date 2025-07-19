@@ -13,8 +13,8 @@ export const MAPBOX_CONFIG = {
 } as const;
 
 export const POPUP_CONFIG = {
-  ANCHOR: 'bottom' as const,
-  OFFSET: [0, -10] as [number, number],
+  ANCHOR: 'center' as const,
+  OFFSET: [0, 0] as [number, number],
   CLOSE_BUTTON: false,
   CLOSE_ON_CLICK: false,
   CLASS_NAME: 'custom-popup'

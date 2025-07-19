@@ -41,7 +41,11 @@ export const useMapbox = () => {
       'country-label',
       'state-label',
       'settlement-major-label',
-      'settlement-minor-label'
+      'settlement-minor-label',
+      'place-label',
+      'poi-label',
+      'transit-label',
+      'road-label'
     ];
 
     labelLayers.forEach(layerId => {
@@ -49,13 +53,14 @@ export const useMapbox = () => {
         // レイヤーが存在するかチェック
         const layer = map.getLayer(layerId);
         if (layer) {
-          map.setLayoutProperty(layerId, 'text-field', ['get', 'name_ja']);
-          console.log(`Successfully set Japanese labels for ${layerId}`);
+          // デフォルトラベルを非表示にしてカスタムコメントとの競合を防ぐ
+          map.setLayoutProperty(layerId, 'visibility', 'none');
+          console.log(`Hidden default label layer: ${layerId}`);
         } else {
           console.warn(`Layer ${layerId} does not exist in the current style`);
         }
       } catch (error) {
-        console.warn(`Could not set labels for ${layerId}:`, error);
+        console.warn(`Could not hide labels for ${layerId}:`, error);
       }
     });
   };
@@ -109,12 +114,19 @@ export const useMapbox = () => {
     const style = document.createElement('style');
     style.textContent = `
       .mapboxgl-popup-content {
-        padding: 0;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        max-width: none !important;
       }
       .mapboxgl-popup-tip {
-        border-top-color: white;
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
       }
       .custom-marker {
         cursor: pointer;
@@ -122,6 +134,17 @@ export const useMapbox = () => {
       }
       .custom-marker:hover {
         transform: scale(1.1);
+      }
+      /* すべてのMapboxポップアップの吹き出しを非表示 */
+      .mapboxgl-popup-tip-top,
+      .mapboxgl-popup-tip-bottom,
+      .mapboxgl-popup-tip-left,
+      .mapboxgl-popup-tip-right {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
       }
     `;
     document.head.appendChild(style);

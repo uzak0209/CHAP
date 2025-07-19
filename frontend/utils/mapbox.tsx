@@ -100,12 +100,47 @@ export const createMapStyles = () => {
       padding: 0 !important;
       max-width: none !important;
     }
+    /* すべてのMapboxポップアップコンテンツを透明にする */
+    .mapboxgl-popup-content {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
     .custom-popup .mapboxgl-popup-tip {
       display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    .mapboxgl-popup-tip {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      width: 0 !important;
+      height: 0 !important;
     }
     .detail-popup .mapboxgl-popup-content {
+      background: transparent !important;
       max-width: 500px !important;
       max-height: 600px !important;
+    }
+    .detail-popup .mapboxgl-popup-tip {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+    /* すべてのMapboxポップアップの吹き出しを非表示 */
+    .mapboxgl-popup-tip-top,
+    .mapboxgl-popup-tip-bottom,
+    .mapboxgl-popup-tip-left,
+    .mapboxgl-popup-tip-right {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      width: 0 !important;
+      height: 0 !important;
     }
   `;
   document.head.appendChild(style);
