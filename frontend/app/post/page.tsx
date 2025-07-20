@@ -7,13 +7,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Camera, MapPin, Hash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createPost, useAppDispatch,useAppSelector } from '@/store';
-import { LatLng ,Status,LocationState} from '@/types/types';
+import { LatLng ,Status,LocationState, PostCategory} from '@/types/types';
 
 export default function PostPage() {
   const [content, setContent] = useState('');
+  const [category, setCategory] = useState<PostCategory | ''>('');
   const [images, setImages] = useState<File[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
@@ -21,14 +23,22 @@ export default function PostPage() {
   const dispatch = useAppDispatch();
   const {state, location, error } = useAppSelector((state) => state.location);
   const router = useRouter();
+
+  const categoryOptions = [
+    { value: 'entertainment', label: 'エンターテイメント' },
+    { value: 'community', label: '地域住民コミュニケーション' },
+    { value: 'information', label: '情報共有' },
+    { value: 'disaster', label: '災害情報' }
+  ];
   
   const handleSubmit = async () => {
-    if (!content.trim()) return;
+    if (!content.trim() || !category) return;
     
     setLoading(true);
     try {
       dispatch(createPost({
         content,
+        category: category as PostCategory,
         tags,
         coordinate: state===Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
         valid: true,
@@ -60,6 +70,11 @@ export default function PostPage() {
               onContentChange={setContent}
             />
             
+            <CategorySection
+              category={category}
+              onCategoryChange={setCategory}
+            />
+            
             <ImageUploadSection
               images={images}
               onImagesChange={setImages}
@@ -79,12 +94,45 @@ export default function PostPage() {
               onSubmit={handleSubmit}
               onCancel={() => router.back()}
               loading={loading}
-              disabled={!content.trim()}
+              disabled={!content.trim() || !category}
             />
           </CardContent>
         </Card>
       </div>
     </AppLayout>
+  );
+}
+
+function CategorySection({ 
+  category, 
+  onCategoryChange 
+}: { 
+  category: PostCategory | ''; 
+  onCategoryChange: (value: PostCategory | '') => void;
+}) {
+  const categoryOptions = [
+    { value: 'entertainment', label: 'エンターテイメント' },
+    { value: 'community', label: '地域住民コミュニケーション' },
+    { value: 'information', label: '情報共有' },
+    { value: 'disaster', label: '災害情報' }
+  ];
+
+  return (
+    <div>
+      <Label htmlFor="category">カテゴリ</Label>
+      <Select value={category} onValueChange={(value: PostCategory) => onCategoryChange(value)}>
+        <SelectTrigger className="mt-2">
+          <SelectValue placeholder="カテゴリを選択してください" />
+        </SelectTrigger>
+        <SelectContent>
+          {categoryOptions.map(option => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
 

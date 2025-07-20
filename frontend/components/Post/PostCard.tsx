@@ -1,4 +1,4 @@
-import { Heart, MessageCircle } from 'lucide-react';
+import { Heart, MessageCircle, Tag } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistance, formatTime } from '@/lib/format';
 import { Post } from '@/types/types';
@@ -14,6 +14,7 @@ export function PostCard({ post }: PostCardProps) {
       <CardContent className="p-4">
         <PostHeader userId={String(post.user_id)} />
         <PostContent content={post.content} />
+        {post.category && <PostCategoryDisplay category={post.category} />}
         {post.tags && <PostTags tags={post.tags} />}
         <PostFooter
           createdAt={post.created_time}
@@ -43,6 +44,37 @@ function PostContent({ content, images }: { content: string; images?: string[] }
         />
       )}
     </>
+  );
+}
+
+function PostCategoryDisplay({ category }: { category: string }) {
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'entertainment': return 'エンターテイメント';
+      case 'community': return '地域住民コミュニケーション';
+      case 'information': return '情報共有';
+      case 'disaster': return '災害情報';
+      default: return category;
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'entertainment': return 'bg-pink-100 text-pink-800';
+      case 'community': return 'bg-blue-100 text-blue-800';
+      case 'information': return 'bg-green-100 text-green-800';
+      case 'disaster': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <div className="mb-3">
+      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(category)}`}>
+        <Tag className="h-3 w-3" />
+        {getCategoryLabel(category)}
+      </span>
+    </div>
   );
 }
 

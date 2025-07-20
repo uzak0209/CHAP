@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
+import { MultiModalFAB } from '@/components/ui/multi-modal-fab';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 // サンプルポイント（東京周辺）
@@ -145,5 +146,10 @@ export default function GraphicHeatmapPage() {
     };
   }, []);
 
-  return <div ref={mapContainer} style={{ width: '100%', height: '100vh' }} />;
+  return (
+    <div className="relative w-full h-screen">
+      <div ref={mapContainer} style={{ width: '100%', height: '100vh' }} />
+      <MultiModalFAB />
+    </div>
+  );
 }

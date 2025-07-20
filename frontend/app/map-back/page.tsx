@@ -4,6 +4,7 @@ import React from 'react';
 import { useMapbox } from '@/hooks/useMapbox';
 import { useThreads } from '@/hooks/useThreads';
 import MapControls from '@/components/Map/MapControls';
+import { MultiModalFAB } from '@/components/ui/multi-modal-fab';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 export default function MapBackPage() {
@@ -25,6 +26,9 @@ export default function MapBackPage() {
         onToggle3D={toggle3D}
         onChangeMapView={changeMapView}
       />
+      
+      {/* フローティング投稿ボタン */}
+      <MultiModalFAB />
     </div>
   );
 }
