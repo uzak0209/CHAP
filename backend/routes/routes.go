@@ -37,6 +37,7 @@ func SetupRoutes(r *gin.Engine) {
 		// 個別取得（認証不要）
 		v1.GET("/post/:id", handlers.GetPost)
 		v1.GET("/thread/:id", handlers.GetThread)
+		v1.GET("/thread/:id/details", handlers.GetThreadWithReplies)
 		v1.GET("/event/:id", handlers.GetEvent)
 
 		// デバッグ用（認証不要）- 開発時のみ使用
@@ -59,6 +60,7 @@ func SetupRoutes(r *gin.Engine) {
 
 			// スレッド関連
 			auth.POST("/create/thread", handlers.CreateThread)
+			auth.POST("/thread/:id/reply", handlers.CreateThreadReply)
 			auth.GET("/update/thread/:id", handlers.GetUpdateThread)
 			auth.PUT("/edit/thread/:id", handlers.EditThread)
 			auth.DELETE("/delete/thread/:id", handlers.DeleteThread)
