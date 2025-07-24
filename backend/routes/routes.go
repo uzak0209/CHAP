@@ -9,6 +9,15 @@ import (
 
 // SetupRoutes configures all API routes
 func SetupRoutes(r *gin.Engine) {
+	// プリフライトリクエスト（OPTIONS）の明示的なハンドリング
+	r.OPTIONS("/*path", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Requested-With")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Status(204)
+	})
+
 	// API v1グループ
 	v1 := r.Group("/api/v1")
 	{

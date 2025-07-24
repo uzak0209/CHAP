@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -21,6 +22,23 @@ func main() {
 
 	// Ginエンジンの作成
 	r := gin.Default()
+
+	// CORS設定
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{
+		"http://localhost:3000",
+		"http://localhost:3001",
+		"http://127.0.0.1:3000",
+		"http://127.0.0.1:3001",
+	}
+	config.AllowMethods = []string{
+		"GET", "POST", "PUT", "DELETE", "OPTIONS",
+	}
+	config.AllowHeaders = []string{
+		"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With",
+	}
+	config.AllowCredentials = true
+	r.Use(cors.New(config))
 
 	routes.SetupRoutes(r)
 	// サーバー起動

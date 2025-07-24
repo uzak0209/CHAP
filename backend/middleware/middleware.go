@@ -12,6 +12,12 @@ import (
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// OPTIONSリクエスト（プリフライト）は認証をスキップ
+		if c.Request.Method == "OPTIONS" {
+			c.Next()
+			return
+		}
+
 		var tokenString string
 
 		// まずAuthorizationヘッダーをチェック
