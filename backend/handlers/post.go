@@ -3,6 +3,7 @@ package handlers
 import (
 	"api/db"
 	"api/types"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -44,15 +45,22 @@ func EditPost(c *gin.Context) {
 // CreatePost handles POST /post
 func CreatePost(c *gin.Context) {
 	var post types.Post
+	log.Printf("[CreatePost] Received request")
+
 	if err := c.ShouldBindJSON(&post); err != nil {
+		log.Printf("[CreatePost] JSON bind error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid json format"})
 		return
 	}
+	log.Printf("[CreatePost] Parsed post data: %+v", post)
 
 	// JWT認証からuser_idを取得
 	userID := c.GetString("user_id")
+	log.Printf("[CreatePost] User ID from JWT: %s", userID)
+
 	uid, err := uuid.Parse(userID)
 	if err != nil {
+		log.Printf("[CreatePost] UUID parse error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
 		return
 	}
@@ -61,14 +69,17 @@ func CreatePost(c *gin.Context) {
 	// UserIDのみ設定（他のフィールドはリクエストから取得）
 	post.UserID = uid
 	post.ID = 0 // 自動インクリメント用に0に設定
+	log.Printf("[CreatePost] Final post data before save: %+v", post)
 
 	// GORMでSupabaseのPostgreSQLに保存
 	result := db.SafeDB().Create(&post)
 	if result.Error != nil {
+		log.Printf("[CreatePost] Database save error: %v", result.Error)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create post"})
 		return
 	}
 
+	log.Printf("[CreatePost] Post created successfully with ID: %d", post.ID)
 	c.JSON(http.StatusCreated, gin.H{"post": post})
 }
 
@@ -166,4 +177,19 @@ func GetAround(c *gin.Context) {
 	).Find(&posts)
 
 	c.JSON(http.StatusOK, posts)
+}
+
+// GetAllPosts - デバッグ用：全ての投稿を取得
+func GetAllPosts(c *gin.Context) {
+	var posts []types.Post
+	log.Printf("[GetAllPosts] Fetching all posts from database")
+
+	if err := db.SafeDB().Find(&posts).Error; err != nil {
+		log.Printf("[GetAllPosts] Database error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch posts"})
+		return
+	}
+
+	log.Printf("[GetAllPosts] Found %d posts", len(posts))
+	c.JSON(http.StatusOK, gin.H{"posts": posts, "count": len(posts)})
 }

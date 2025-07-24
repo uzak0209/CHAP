@@ -39,6 +39,9 @@ func SetupRoutes(r *gin.Engine) {
 		v1.GET("/thread/:id", handlers.GetThread)
 		v1.GET("/event/:id", handlers.GetEvent)
 
+		// デバッグ用（認証不要）- 開発時のみ使用
+		v1.GET("/debug/posts", handlers.GetAllPosts)
+
 		// 認証が必要なエンドポイント
 		auth := v1.Group("")
 		auth.Use(middleware.AuthMiddleware())
