@@ -9,6 +9,15 @@ import (
 
 // SetupRoutes configures all API routes
 func SetupRoutes(r *gin.Engine) {
+	// プリフライトリクエスト（OPTIONS）の明示的なハンドリング
+	r.OPTIONS("/*path", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Requested-With")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Status(204)
+	})
+
 	// API v1グループ
 	v1 := r.Group("/api/v1")
 	{
@@ -28,7 +37,11 @@ func SetupRoutes(r *gin.Engine) {
 		// 個別取得（認証不要）
 		v1.GET("/post/:id", handlers.GetPost)
 		v1.GET("/thread/:id", handlers.GetThread)
+		v1.GET("/thread/:id/details", handlers.GetThreadWithReplies)
 		v1.GET("/event/:id", handlers.GetEvent)
+
+		// デバッグ用（認証不要）- 開発時のみ使用
+		v1.GET("/debug/posts", handlers.GetAllPosts)
 
 		// 認証が必要なエンドポイント
 		auth := v1.Group("")
@@ -47,6 +60,7 @@ func SetupRoutes(r *gin.Engine) {
 
 			// スレッド関連
 			auth.POST("/create/thread", handlers.CreateThread)
+			auth.POST("/thread/:id/reply", handlers.CreateThreadReply)
 			auth.GET("/update/thread/:id", handlers.GetUpdateThread)
 			auth.PUT("/edit/thread/:id", handlers.EditThread)
 			auth.DELETE("/delete/thread/:id", handlers.DeleteThread)

@@ -1,4 +1,6 @@
 // Goのtypes.goに合わせた正しい型定義
+export type PostCategory = 'entertainment' | 'community' | 'information' | 'disaster';
+
 export interface Post {
   id: number;           // 自動インクリメントのID
   user_id: string;      // UUIDの文字列
@@ -14,6 +16,7 @@ export interface Post {
   parent?: number;      // int
   like: number;         // int
   tags: string[];
+  category?: string;    // カテゴリフィールドを追加（オプショナル）
 }
 
 export interface Thread {
@@ -30,6 +33,7 @@ export interface Thread {
   valid: boolean;
   like: number;         // int
   tags: string[];
+  category?: string;    // カテゴリフィールドを追加（オプショナル）
 }
 
 export interface Event {

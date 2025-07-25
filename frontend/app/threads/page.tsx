@@ -7,6 +7,7 @@ import { LoadingSpinner } from '@/components/ui/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { MessageCircle, MapPin, Users, Tag } from 'lucide-react';
 
 import { fetchAroundThreads, threadsActions } from '@/store/threadsSlice';
@@ -15,49 +16,59 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import { Thread, Status } from '@/types/types';
 
 // スレッドカードコンポーネント
-const ThreadCard = ({ thread }: { thread: Thread }) => (
-  <Card className="w-full transition-all hover:shadow-lg hover:-translate-y-1">
-    <CardHeader>
-      <CardTitle className="text-xl font-bold">{thread.content}</CardTitle>
-      <CardDescription className="flex items-center text-sm text-gray-500 pt-2">
-        <Users className="w-4 h-4 mr-2" />
-        <span>作成者: {thread.user_id.substring(0, 8)}...</span>
-      </CardDescription>
-    </CardHeader>
-    <CardContent className="grid gap-4">
-      <div className="flex items-center">
-        <MessageCircle className="w-5 h-5 mr-3 text-gray-600" />
-        <div>
-          <p className="font-semibold">作成日時</p>
-          <p>{new Date(thread.created_time).toLocaleString()}</p>
-        </div>
-      </div>
-      <div className="flex items-center">
-        <MapPin className="w-5 h-5 mr-3 text-gray-600" />
-        <div>
-          <p className="font-semibold">場所</p>
-          <p>緯度: {thread.coordinate.lat.toFixed(4)}, 経度: {thread.coordinate.lng.toFixed(4)}</p>
-        </div>
-      </div>
-      {thread.tags && thread.tags.length > 0 && (
+const ThreadCard = ({ thread }: { thread: Thread }) => {
+  const router = useRouter();
+  
+  return (
+    <Card className="w-full transition-all hover:shadow-lg hover:-translate-y-1">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold">{thread.content}</CardTitle>
+        <CardDescription className="flex items-center text-sm text-gray-500 pt-2">
+          <Users className="w-4 h-4 mr-2" />
+          <span>作成者: {thread.user_id.substring(0, 8)}...</span>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-4">
         <div className="flex items-center">
-          <Tag className="w-5 h-5 mr-3 text-gray-600" />
-          <div className="flex flex-wrap gap-2">
-            {thread.tags.map(tag => (
-              <span key={tag} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                #{tag}
-              </span>
-            ))}
+          <MessageCircle className="w-5 h-5 mr-3 text-gray-600" />
+          <div>
+            <p className="font-semibold">作成日時</p>
+            <p>{new Date(thread.created_time).toLocaleString()}</p>
           </div>
         </div>
-      )}
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-500">❤️ {thread.like} いいね</span>
-        <Button variant="outline" size="sm">詳細を見る</Button>
-      </div>
-    </CardContent>
-  </Card>
-);
+        <div className="flex items-center">
+          <MapPin className="w-5 h-5 mr-3 text-gray-600" />
+          <div>
+            <p className="font-semibold">場所</p>
+            <p>緯度: {thread.coordinate.lat.toFixed(4)}, 経度: {thread.coordinate.lng.toFixed(4)}</p>
+          </div>
+        </div>
+        {thread.tags && thread.tags.length > 0 && (
+          <div className="flex items-center">
+            <Tag className="w-5 h-5 mr-3 text-gray-600" />
+            <div className="flex flex-wrap gap-2">
+              {thread.tags.map(tag => (
+                <span key={tag} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-500">❤️ {thread.like} いいね</span>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => router.push(`/threads/${thread.id}`)}
+          >
+            詳細を見る
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 export default function ThreadsPage() {
   const [sortBy, setSortBy] = useState<'time' | 'distance'>('time');
@@ -172,6 +183,9 @@ export default function ThreadsPage() {
           {renderContent()}
         </main>
       </div>
+      
+      {/* フローティングスレッド作成ボタン */}
+      <FloatingActionButton href="/threads/create" />
     </AppLayout>
   );
 }

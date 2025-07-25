@@ -1,141 +1,144 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import mapboxgl from 'mapbox-gl';
-
+import React from 'react';
+import { useMapbox } from '@/hooks/useMapbox';
+import { useThreads } from '@/hooks/useThreads';
+import { useAppSelector } from '@/store';
+import MapControls from '@/components/Map/MapControls';
+import { MultiModalFAB } from '@/components/ui/multi-modal-fab';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-const MapboxExample = () => {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-
-  useEffect(() => {
-    // TO MAKE THE MAP APPEAR YOU MUST
-    // ADD YOUR ACCESS TOKEN FROM
-    // https://account.mapbox.com
-    const accessToken = process.env.NEXT_PUBLIC_MAP_API_TOKEN;
-    
-    console.log('Access token:', accessToken ? 'Found' : 'Not found');
-    console.log('Token length:', accessToken ? accessToken.length : 0);
-    
-    if (!accessToken) {
-      console.error('Mapbox access token is not defined. Please check your .env.local file.');
-      return;
-    }
-    
-    mapboxgl.accessToken = accessToken;
-
-    if (!mapContainerRef.current) {
-      console.error('Map container ref is not available');
-      return;
-    }
-
-    mapRef.current = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      center: [-0.126326, 51.533582],
-      zoom: 15.27,
-      pitch: 42,
-      bearing: -50,
-      style: 'mapbox://styles/mapbox/standard',
-      minZoom: 15,
-      maxZoom: 16
-    });
-
-    mapRef.current.on('style.load', () => {
-      if (!mapRef.current) return;
-      
-      // set the light preset to be in dusk mode.
-      mapRef.current.setConfigProperty('basemap', 'lightPreset', 'dusk');
-
-      // add a geojson source with a polygon to be used in the clip layer.
-      mapRef.current.addSource('eraser', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: [
-            {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                coordinates: [
-                  [
-                    [-0.12573, 51.53222],
-                    [-0.12458, 51.53219],
-                    [-0.12358, 51.53492],
-                    [-0.12701, 51.53391],
-                    [-0.12573, 51.53222]
-                  ]
-                ],
-                type: 'Polygon'
-              }
-            }
-          ]
-        }
-      });
-
-      // add a geojson source which specifies the custom model to be used by the model layer.
-      mapRef.current.addSource('model', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: {
-            'model-uri': 'https://docs.mapbox.com/mapbox-gl-js/assets/tower.glb'
-          },
-          geometry: {
-            coordinates: [-0.12501974, 51.5332374],
-            type: 'Point'
-          }
-        }
-      });
-
-      // add the clip layer and configure it to also remove symbols and trees.
-      // `clip-layer-scope` layout property is used to specify that only models from the Mapbox Standard Style should be clipped.
-      // this will prevent the newly added model from getting clipped.
-      mapRef.current.addLayer({
-        id: 'eraser',
-        type: 'clip',
-        source: 'eraser',
-        layout: {
-          // specify the layer types to be removed by this clip layer
-          'clip-layer-types': ['symbol', 'model'],
-          'clip-layer-scope': ['basemap']
-        }
-      });
-
-      // add the model layer and specify the appropriate `slot` to ensure the symbols are rendered correctly.
-      mapRef.current.addLayer({
-        id: 'tower',
-        type: 'model',
-        slot: 'middle',
-        source: 'model',
-        minzoom: 15,
-        layout: {
-          'model-id': ['get', 'model-uri']
-        },
-        paint: {
-          'model-opacity': 1,
-          'model-rotation': [0.0, 0.0, 35.0],
-          'model-scale': [0.8, 0.8, 1.2],
-          'model-color-mix-intensity': 0,
-          'model-cast-shadows': true,
-          'model-emissive-strength': 0.8
-        }
-      });
-    });
-
-    // クリーンアップ関数
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-      }
-    };
-  }, []);
+export default function MapBackPage() {
+  const { mapContainerRef, mapRef, is3D, toggle3D, changeMapView } = useMapbox();
+  const { displayThreads } = useThreads(mapRef);
+  const { items: posts } = useAppSelector(state => state.posts);
 
   return (
-    <div style={{ height: '100vh', width: '100%' }}>
-      <div id="map" style={{ height: '100%', width: '100%' }} ref={mapContainerRef} />
+    <div className="h-full w-full relative">
+      {/* マップコンテナ */}
+      <div 
+        id="map" 
+        className="h-full w-full" 
+        ref={mapContainerRef} 
+      />
+      
+      {/* マップコントロール */}
+      <MapControls
+        is3D={is3D}
+        onToggle3D={toggle3D}
+        onChangeMapView={changeMapView}
+      />
+      
+      {/* ポップアップ診断パネル */}
+      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg z-10">
+        <div className="text-xs text-gray-600 mb-2">ポップアップ診断</div>
+        
+        <button 
+          onClick={() => {
+            console.log('🔍 ポップアップ状態チェック開始');
+            
+            // DOM上のポップアップ要素を確認
+            const popupElements = document.querySelectorAll('.mapboxgl-popup');
+            const markerElements = document.querySelectorAll('.mapboxgl-marker');
+            
+            console.log(`📍 マーカー数: ${markerElements.length}`);
+            console.log(`📌 ポップアップ数: ${popupElements.length}`);
+            
+            let visibleCount = 0;
+            popupElements.forEach((popup, index) => {
+              const htmlElement = popup as HTMLElement;
+              const isVisible = htmlElement.style.display !== 'none' && 
+                               htmlElement.style.visibility !== 'hidden' &&
+                               !htmlElement.classList.contains('mapboxgl-popup-close');
+              if (isVisible) visibleCount++;
+              console.log(`📌 ポップアップ${index}: ${isVisible ? '表示中' : '非表示'}`);
+            });
+            
+            alert(`ポップアップ診断結果:\n・マーカー数: ${markerElements.length}\n・ポップアップ数: ${popupElements.length}\n・表示中: ${visibleCount}`);
+          }}
+          className="mb-2 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors w-full"
+        >
+          状態確認
+        </button>
+        
+        <button 
+          onClick={() => {
+            console.log('🔄 全ポップアップ強制表示開始');
+            
+            // useMapboxフックから取得したマーカーに直接アクセス
+            const mapInstance = mapRef.current;
+            if (!mapInstance) {
+              alert('地図が初期化されていません');
+              return;
+            }
+            
+            setTimeout(() => {
+              // 1. DOM操作で既存のポップアップを表示
+              const popupElements = document.querySelectorAll('.mapboxgl-popup');
+              console.log(`📌 DOM上のポップアップ: ${popupElements.length}個`);
+              
+              let forceDisplayCount = 0;
+              popupElements.forEach((popup, index) => {
+                const htmlElement = popup as HTMLElement;
+                htmlElement.style.display = 'block';
+                htmlElement.style.visibility = 'visible';
+                htmlElement.style.opacity = '1';
+                htmlElement.style.pointerEvents = 'auto';
+                forceDisplayCount++;
+                console.log(`📌 ポップアップ${index}を強制表示`);
+              });
+              
+              // 2. 全てのマーカーのポップアップを開く（JavaScriptから直接操作）
+              const markerElements = document.querySelectorAll('.mapboxgl-marker');
+              console.log(`📍 マーカー要素: ${markerElements.length}個`);
+              
+              // 3. 地図インスタンスから直接ポップアップを作成（フォールバック）
+              // Reduxから投稿データを取得してポップアップを再作成
+              console.log(`📊 Redux投稿データ: ${posts.length}件`);
+              
+              posts.forEach((post, index) => {
+                if (post.coordinate && post.coordinate.lat && post.coordinate.lng) {
+                  try {
+                    const popup = new (window as any).mapboxgl.Popup({
+                      closeButton: false,
+                      closeOnClick: false,
+                      closeOnMove: false,
+                      offset: 25
+                    })
+                    .setLngLat([post.coordinate.lng, post.coordinate.lat])
+                    .setHTML(`
+                      <div class="p-2 bg-white rounded shadow">
+                        <div class="text-xs font-bold">${post.category || 'その他'}</div>
+                        <div class="text-xs">${post.content.substring(0, 30)}...</div>
+                      </div>
+                    `)
+                    .addTo(mapInstance);
+                    
+                    forceDisplayCount++;
+                    console.log(`✅ 投稿${post.id}のポップアップを再作成`);
+                  } catch (error) {
+                    console.error(`❌ 投稿${post.id}のポップアップ作成エラー:`, error);
+                  }
+                }
+              });
+              
+              // 閉じるボタンを非表示にする
+              const closeButtons = document.querySelectorAll('.mapboxgl-popup-close-button');
+              closeButtons.forEach(btn => {
+                (btn as HTMLElement).style.display = 'none';
+              });
+              
+              alert(`${forceDisplayCount}個のポップアップを強制表示しました\n・既存: ${popupElements.length}個\n・新規作成: ${forceDisplayCount - popupElements.length}個`);
+            }, 100);
+          }}
+          className="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors w-full"
+        >
+          強制表示
+        </button>
+      </div>
+      
+      {/* フローティング投稿ボタン */}
+      <MultiModalFAB />
     </div>
   );
-};
-
-export default MapboxExample;
+}
