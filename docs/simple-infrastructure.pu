@@ -1,0 +1,93 @@
+@startuml Simple Infrastructure Diagram
+
+title CHAP Application - AWS Infrastructure
+
+' Define styles
+skinparam rectangle {
+    BackgroundColor<<internet>> LightBlue
+    BackgroundColor<<public>> LightGreen
+    BackgroundColor<<private>> LightYellow
+    BackgroundColor<<database>> LightCoral
+}
+
+' Internet
+rectangle "Internet" as internet <<internet>>
+
+' VPC Container
+package "AWS VPC (10.0.0.0/16)" as vpc {
+    
+    ' Internet Gateway
+    rectangle "Internet Gateway" as igw
+    
+    ' Public Subnet
+    package "Public Subnet (10.0.1.0/24)\nap-northeast-3a" as public_subnet <<public>> {
+        rectangle "EC2 Instance\n(API Server)" as ec2 {
+            - **Type:** t2.micro
+            - **Public IP:** 56.155.98.63
+            - **Private IP:** 10.0.1.170
+            - **Port:** 8080 (Go API)
+            - **SSH:** Port 22
+        }
+    }
+    
+    ' Private Subnets
+    package "Private Subnets" as private_subnets <<private>> {
+        rectangle "Private Subnet A\n(10.0.2.0/24)\nap-northeast-3a" as private_a
+        rectangle "Private Subnet B\n(10.0.5.0/24)\nap-northeast-3c" as private_b
+        
+        rectangle "RDS PostgreSQL" as rds <<database>> {
+            - **Engine:** PostgreSQL 17.2
+            - **Instance:** db.t3.micro
+            - **Database:** appdb
+            - **User:** uzak
+            - **Port:** 5432
+            - **Endpoint:** terraform-20250725...
+        }
+    }
+    
+    ' Security Groups
+    rectangle "Security Groups" as security {
+        rectangle "EC2 SG" as ec2_sg {
+            **Inbound:**
+            - SSH (22) from 0.0.0.0/0
+            - HTTP (8080) from 0.0.0.0/0
+            **Outbound:**
+            - All traffic
+        }
+        
+        rectangle "RDS SG" as rds_sg {
+            **Inbound:**
+            - PostgreSQL (5432) from EC2 SG
+            **Outbound:**
+            - All traffic
+        }
+    }
+}
+
+' Connections
+internet --> igw : "HTTPS/HTTP\nRequests"
+igw --> ec2 : "Route to\nPublic Subnet"
+ec2 --> rds : "Database\nConnection\n(5432)"
+ec2_sg --> ec2 : "Protects"
+rds_sg --> rds : "Protects"
+rds -.-> private_a : "Deployed in"
+rds -.-> private_b : "Multi-AZ"
+
+' Notes
+note right of ec2
+**Applications:**
+- Go Gin API Server
+- JWT Authentication
+- CORS Enabled
+- Database Migrations
+end note
+
+note bottom of rds
+**Features:**
+- Private subnet deployment
+- Multi-AZ for high availability
+- Automated backups
+- Security group protection
+end note
+
+@enduml

@@ -3,7 +3,6 @@ package db
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -20,12 +19,8 @@ func init() {
 	}
 
 	// Supabaseの接続文字列を直接使用
-	dsn := os.Getenv("SUPABASE_DB_URL")
+	dsn := "host=terraform-20250725215706850000000002.cta6geu24oet.ap-northeast-3.rds.amazonaws.com user=uzak password=Skakki0209 dbname=appdb port=5432 sslmode=require"
 	fmt.Println("Using DSN:", dsn)
-
-	if dsn == "" {
-		log.Fatal("SUPABASE_DB_URL is not set")
-	}
 
 	// DBに接続（タイムアウト設定追加）
 	fmt.Println("Attempting to connect to database...")

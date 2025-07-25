@@ -1,5 +1,16 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { User } from '../types/types'
+import { apiClient, API_ENDPOINTS } from '../lib/api'
+
+// API Response types
+interface AuthResponse {
+  user: User;
+  token: string;
+}
+
+interface VerifyResponse {
+  user: User;
+}
 
 export interface AuthState {
   user: User | null;
@@ -37,57 +48,29 @@ const initialState: AuthState = {
   },
 }
 
-export const login = createAsyncThunk(
+export const login = createAsyncThunk<AuthResponse, { email: string; password: string }>(
   'auth/login',
-  async ({ email, password }: { email: string; password: string }) => {
-    const response = await fetch('http://localhost:8080/api/v1/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    })
-    if (!response.ok) throw new Error('ログインに失敗しました')
-    return response.json()
+  async ({ email, password }) => {
+    return await apiClient.post<AuthResponse>(API_ENDPOINTS.auth.login, { email, password });
   }
 )
 
-export const register = createAsyncThunk(
+export const register = createAsyncThunk<AuthResponse, { email: string; password: string; display_name: string; logintype: string }>(
   'auth/register',
-  async ({ email, password, display_name, logintype }: { email: string; password: string; display_name: string; logintype: string }) => {
-    const response = await fetch('http://localhost:8080/api/v1/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        email,
-        password,
-        name: display_name,  // ← display_name を name として送信
-        login_type: logintype // ← logintype を login_type として送信
-      })
-    })
-    
-    if (!response.ok) {
-      // エラーレスポンスの内容を詳しく確認
-      const errorText = await response.text()
-      console.error('Register error:', errorText)
-      throw new Error(`登録に失敗しました: ${response.status}`)
-    }
-    console.log('Register request sent:', { email, password, display_name }) // デバッグ用
-    
-    const data = await response.json()
-    console.log('Register response:', data) // デバッグ用
-
-    return data
+  async ({ email, password, display_name, logintype }) => {
+    return await apiClient.post<AuthResponse>(API_ENDPOINTS.auth.register, { 
+      email,
+      password,
+      name: display_name,  // ← display_name を name として送信
+      login_type: logintype // ← logintype を login_type として送信
+    });
   }
 )
 
-export const logout = createAsyncThunk(
+export const logout = createAsyncThunk<void, void>(
   'auth/logout',
   async () => {
-    const response = await fetch('http://localhost:8080/api/v1/auth/logout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    if (!response.ok) throw new Error('ログアウトに失敗しました')
-    return response.json()
+    await apiClient.post(API_ENDPOINTS.auth.logout);
   }
 )
 export const getAuthToken = () => {
@@ -96,7 +79,7 @@ export const getAuthToken = () => {
   }
   return null;
 }
-export const verifyToken = createAsyncThunk(
+export const verifyToken = createAsyncThunk<VerifyResponse, void>(
   'auth/verifyToken',
   async () => {
     console.log('Verifying token...');
@@ -105,21 +88,7 @@ export const verifyToken = createAsyncThunk(
       throw new Error('No token found');
     }
 
-    const response = await fetch('http://localhost:8080/api/v1/auth/me', {
-      method: 'GET',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    
-    if (!response.ok) {
-      // トークンが無効な場合はlocalStorageから削除
-      localStorage.removeItem('authtoken');
-      throw new Error('Token verification failed');
-    }
-    
-    return response.json();
+    return await apiClient.get<VerifyResponse>(API_ENDPOINTS.auth.verify);
   }
 )
 
