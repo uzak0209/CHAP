@@ -53,7 +53,7 @@ export const refreshLocation = createAsyncThunk<
       },
       {
         enableHighAccuracy: true,
-        timeout: 15000,
+        timeout: 10000,
         maximumAge: 0, // キャッシュを使用しない
       }
     );
@@ -142,7 +142,7 @@ export const getCurrentLocation = createAsyncThunk<
       },
       {
         enableHighAccuracy: true,  // GPS優先
-        timeout: 30000,           // 30秒でタイムアウト
+        timeout: 10000,           // 10秒でタイムアウト
         maximumAge: 0,            // キャッシュを使用しない
       }
     );

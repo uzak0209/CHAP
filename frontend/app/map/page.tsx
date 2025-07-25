@@ -479,7 +479,7 @@ export default function MapPage() {
                         console.error('位置情報診断エラー:', error);
                         alert(`位置情報エラー:\n${error.message}\n(コード: ${error.code})`);
                       },
-                      { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+                      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                     );
                   }
                 }}
@@ -573,7 +573,7 @@ export default function MapPage() {
                         },
                         { 
                           enableHighAccuracy: true, 
-                          timeout: 15000, 
+                          timeout: 10000, 
                           maximumAge: 0 
                         }
                       );

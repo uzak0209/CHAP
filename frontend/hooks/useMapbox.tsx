@@ -33,10 +33,48 @@ export const useMapbox = () => {
     })
       .setLngLat([location.lng, location.lat])
       .setPopup(
-        new mapboxgl.Popup({ offset: 25 })
+        new mapboxgl.Popup({ 
+          offset: 25,
+          closeButton: false,   // 閉じるボタンを非表示
+          closeOnClick: false,  // クリックで閉じることを無効
+          closeOnMove: false    // 地図移動で閉じることを無効
+        })
           .setHTML('<div class="p-2 text-sm font-semibold">📍 現在地</div>')
       )
       .addTo(mapRef.current!);
+
+    // 現在地ポップアップも常時表示
+    setTimeout(() => {
+      try {
+        const popup = currentLocationMarkerRef.current?.getPopup();
+        if (popup) {
+          if (!popup.isOpen()) {
+            currentLocationMarkerRef.current?.togglePopup();
+            console.log('📍 現在地ポップアップを表示');
+          } else {
+            console.log('📍 現在地ポップアップは既に表示済み');
+          }
+          
+          // 状態確認
+          setTimeout(() => {
+            const isStillOpen = popup.isOpen();
+            console.log(`📍 現在地ポップアップ状態確認: ${isStillOpen ? '表示中' : '非表示'}`);
+            if (!isStillOpen) {
+              console.warn('📍 現在地ポップアップが閉じられました - 再表示を試行');
+              try {
+                currentLocationMarkerRef.current?.togglePopup();
+              } catch (retryError) {
+                console.error('📍 現在地ポップアップ再表示エラー:', retryError);
+              }
+            }
+          }, 200);
+        } else {
+          console.error('📍 現在地ポップアップオブジェクトが見つかりません');
+        }
+      } catch (error) {
+        console.error('📍 現在地ポップアップ表示エラー:', error);
+      }
+    }, 600); // 投稿ポップアップより遅く表示
 
     console.log('現在地マーカーを追加:', [location.lng, location.lat]);
   };
@@ -74,27 +112,56 @@ export const useMapbox = () => {
         color: getMarkerColor(post.category || 'other'),
         scale: 0.8
       })
-        .setLngLat([post.coordinate.lng, post.coordinate.lat])
-        .setPopup(
-          new mapboxgl.Popup({ 
-            offset: 25,
-            closeButton: true,
-            closeOnClick: false 
-          })
-          .setHTML(`
-            <div class="p-3 max-w-sm bg-white rounded-lg">
-              <div class="font-semibold text-sm mb-2 text-blue-600">${post.category || 'その他'}</div>
-              <div class="text-sm text-gray-700 mb-2 line-clamp-3">${post.content}</div>
-              <div class="text-xs text-gray-500 flex items-center justify-between">
-                <span>👍 ${post.like || 0}</span>
-                <span>${new Date(post.created_time || '').toLocaleDateString()}</span>
-              </div>
-            </div>
-          `)
-        )
-        .addTo(mapRef.current!);
+        .setLngLat([post.coordinate.lng, post.coordinate.lat]);
 
+      // ポップアップを個別に作成
+      const popup = new mapboxgl.Popup({ 
+        offset: 25,
+        closeButton: false,   // 閉じるボタンを非表示
+        closeOnClick: false,  // クリックで閉じることを無効
+        closeOnMove: false,   // 地図移動で閉じることを無効
+        anchor: 'bottom'      // アンカー位置を明示的に指定
+      })
+      .setLngLat([post.coordinate.lng, post.coordinate.lat])
+      .setHTML(`
+        <div class="p-3 max-w-sm bg-white rounded-lg shadow-lg" data-post-id="${post.id}">
+          <div class="font-semibold text-sm mb-2 text-blue-600">${post.category || 'その他'}</div>
+          <div class="text-sm text-gray-700 mb-2 line-clamp-3">${post.content}</div>
+          <div class="text-xs text-gray-500 flex items-center justify-between">
+            <span>👍 ${post.like || 0}</span>
+            <span>${new Date(post.created_time || '').toLocaleDateString()}</span>
+          </div>
+        </div>
+      `);
+
+      // マーカーにポップアップを設定してから地図に追加
+      marker.setPopup(popup).addTo(mapRef.current!);
+
+      // マーカーをリストに追加
       markersRef.current.push(marker);
+
+      console.log(`📌 マーカー${markersRef.current.length}を作成: 投稿ID=${post.id}`);
+
+      // ポップアップを即座に表示
+      setTimeout(() => {
+        try {
+          // ポップアップを地図に直接追加して表示
+          popup.addTo(mapRef.current!);
+          console.log(`✅ 投稿${post.id}のポップアップを直接表示`);
+          
+          // さらにマーカーのポップアップも確認
+          setTimeout(() => {
+            const markerPopup = marker.getPopup();
+            if (markerPopup && !markerPopup.isOpen()) {
+              marker.togglePopup();
+              console.log(`� 投稿${post.id}のマーカーポップアップも表示`);
+            }
+          }, 100);
+          
+        } catch (error) {
+          console.error(`❌ 投稿${post.id}のポップアップ表示エラー:`, error);
+        }
+      }, post === posts[0] ? 200 : 200 + markersRef.current.length * 50); // マーカーごとに少しずつ遅延
     });
 
     console.log('投稿マーカー追加完了:', markersRef.current.length, '個');
@@ -306,6 +373,47 @@ export const useMapbox = () => {
       setupMapStyle(mapRef.current);
     });
 
+    // ズーム・移動・スタイル変更時にポップアップを再表示
+    const restorePopups = () => {
+      console.log('🔄 地図変更検出 - ポップアップを復元中...');
+      
+      setTimeout(() => {
+        // 投稿マーカーのポップアップを復元
+        markersRef.current.forEach((marker, index) => {
+          try {
+            const popup = marker.getPopup();
+            if (popup && !popup.isOpen()) {
+              marker.togglePopup();
+              console.log(`📌 投稿マーカー${index}のポップアップを復元`);
+            }
+          } catch (error) {
+            console.error(`📌 投稿マーカー${index}のポップアップ復元エラー:`, error);
+          }
+        });
+
+        // 現在地マーカーのポップアップを復元
+        if (currentLocationMarkerRef.current) {
+          try {
+            const popup = currentLocationMarkerRef.current.getPopup();
+            if (popup && !popup.isOpen()) {
+              currentLocationMarkerRef.current.togglePopup();
+              console.log('📍 現在地マーカーのポップアップを復元');
+            }
+          } catch (error) {
+            console.error('📍 現在地マーカーのポップアップ復元エラー:', error);
+          }
+        }
+      }, 300); // 地図の更新が完了してから実行
+    };
+
+    // 地図イベントリスナーを追加
+    mapRef.current.on('zoomend', restorePopups);
+    mapRef.current.on('moveend', restorePopups);
+    mapRef.current.on('styledata', restorePopups);
+    mapRef.current.on('sourcedata', restorePopups);
+    
+    console.log('🎯 地図イベントリスナーを設定完了');
+
     // クリーンアップ関数
     return () => {
       // 投稿マーカーを削除
@@ -319,6 +427,12 @@ export const useMapbox = () => {
       }
       
       if (mapRef.current) {
+        // イベントリスナーを削除
+        mapRef.current.off('zoomend', restorePopups);
+        mapRef.current.off('moveend', restorePopups);
+        mapRef.current.off('styledata', restorePopups);
+        mapRef.current.off('sourcedata', restorePopups);
+        
         mapRef.current.remove();
       }
       removeStyles();
@@ -346,6 +460,45 @@ export const useMapbox = () => {
       addPostMarkers();
     }
   }, [posts]);
+
+  // ポップアップを定期的にチェックして常時表示を維持
+  useEffect(() => {
+    const popupInterval = setInterval(() => {
+      if (!mapRef.current || markersRef.current.length === 0) return;
+
+      console.log('🔄 ポップアップ状態を定期チェック中...');
+      
+      // 投稿マーカーのポップアップをチェック
+      markersRef.current.forEach((marker, index) => {
+        try {
+          const popup = marker.getPopup();
+          if (popup && !popup.isOpen()) {
+            console.log(`📌 投稿マーカー${index}のポップアップが閉じています - 再表示`);
+            marker.togglePopup();
+          }
+        } catch (error) {
+          console.error(`📌 投稿マーカー${index}のポップアップチェックエラー:`, error);
+        }
+      });
+
+      // 現在地マーカーのポップアップをチェック
+      if (currentLocationMarkerRef.current) {
+        try {
+          const popup = currentLocationMarkerRef.current.getPopup();
+          if (popup && !popup.isOpen()) {
+            console.log('📍 現在地マーカーのポップアップが閉じています - 再表示');
+            currentLocationMarkerRef.current.togglePopup();
+          }
+        } catch (error) {
+          console.error('📍 現在地マーカーのポップアップチェックエラー:', error);
+        }
+      }
+    }, 3000); // 3秒ごとにチェック
+
+    return () => {
+      clearInterval(popupInterval);
+    };
+  }, [posts, locationState]); // postsと位置情報の状態に依存
 
   const toggle3D = () => {
     if (!mapRef.current) return;
