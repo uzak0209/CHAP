@@ -44,7 +44,12 @@ export default function OnboardingPage() {
             setLocationPermission('granted');
             router.push('/');
           },
-          () => setLocationPermission('denied')
+          () => setLocationPermission('denied'),
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          }
         );
       }
     } catch (error) {
