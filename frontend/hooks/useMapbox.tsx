@@ -1,11 +1,144 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { MAPBOX_CONFIG } from '@/constants/map';
+import { useAppSelector } from '@/store';
+import { Status, Post } from '@/types/types';
 
 export const useMapbox = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const [is3D, setIs3D] = useState(true);
+  
+  // Redux storeから位置情報を取得
+  const { location, state: locationState } = useAppSelector(state => state.location);
+  const { items: posts } = useAppSelector(state => state.posts);
+
+  // 投稿マーカーの参照を保持
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const currentLocationMarkerRef = useRef<mapboxgl.Marker | null>(null);
+
+  // 現在地マーカーを追加する関数
+  const addCurrentLocationMarker = () => {
+    if (!mapRef.current || locationState !== Status.LOADED) return;
+
+    // 既存の現在地マーカーを削除
+    if (currentLocationMarkerRef.current) {
+      currentLocationMarkerRef.current.remove();
+    }
+
+    // 現在地マーカーを作成
+    currentLocationMarkerRef.current = new mapboxgl.Marker({ 
+      color: '#ff0000',
+      scale: 1.2
+    })
+      .setLngLat([location.lng, location.lat])
+      .setPopup(
+        new mapboxgl.Popup({ offset: 25 })
+          .setHTML('<div class="p-2 text-sm font-semibold">📍 現在地</div>')
+      )
+      .addTo(mapRef.current!);
+
+    console.log('現在地マーカーを追加:', [location.lng, location.lat]);
+  };
+
+  // 投稿マーカーを地図に追加する関数
+  const addPostMarkers = () => {
+    if (!mapRef.current || !posts.length) return;
+
+    // 既存のマーカーを削除
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    console.log('投稿マーカーを追加中:', posts.length, '件');
+
+    posts.forEach((post) => {
+      if (!post.coordinate || !post.coordinate.lat || !post.coordinate.lng) {
+        console.warn('座標が無効な投稿をスキップ:', post.id);
+        return;
+      }
+
+      // カテゴリに基づいて色を決定
+      const getMarkerColor = (category: string) => {
+        switch (category) {
+          case 'food': return '#ff6b6b';
+          case 'event': return '#4ecdc4';
+          case 'question': return '#45b7d1';
+          case 'announcement': return '#96ceb4';
+          case 'other': 
+          default: return '#feca57';
+        }
+      };
+
+      // マーカーを作成
+      const marker = new mapboxgl.Marker({ 
+        color: getMarkerColor(post.category || 'other'),
+        scale: 0.8
+      })
+        .setLngLat([post.coordinate.lng, post.coordinate.lat])
+        .setPopup(
+          new mapboxgl.Popup({ 
+            offset: 25,
+            closeButton: true,
+            closeOnClick: false 
+          })
+          .setHTML(`
+            <div class="p-3 max-w-sm bg-white rounded-lg">
+              <div class="font-semibold text-sm mb-2 text-blue-600">${post.category || 'その他'}</div>
+              <div class="text-sm text-gray-700 mb-2 line-clamp-3">${post.content}</div>
+              <div class="text-xs text-gray-500 flex items-center justify-between">
+                <span>👍 ${post.like || 0}</span>
+                <span>${new Date(post.created_time || '').toLocaleDateString()}</span>
+              </div>
+            </div>
+          `)
+        )
+        .addTo(mapRef.current!);
+
+      markersRef.current.push(marker);
+    });
+
+    console.log('投稿マーカー追加完了:', markersRef.current.length, '個');
+  };
+
+  // 投稿データをGeoJSONに変換
+  const createGeoJSONFromPosts = (posts: Post[]): GeoJSON.FeatureCollection => {
+    console.log('GeoJSONに変換する投稿データ:', posts.length, '件');
+    
+    const validFeatures = posts
+      .filter((post) => {
+        const isValid = !!(post.coordinate && post.coordinate.lat && post.coordinate.lng);
+        if (!isValid) {
+          console.warn('座標データが不正な投稿をスキップ:', {
+            id: post.id,
+            content: post.content?.substring(0, 20),
+            coordinate: post.coordinate
+          });
+        }
+        return isValid;
+      })
+      .map((post) => ({
+        type: 'Feature' as const,
+        properties: {
+          id: post.id,
+          content: post.content,
+          category: post.category || 'other',
+          likes: post.like,
+          created_time: post.created_time,
+          user_id: post.user_id,
+          tags: post.tags || []
+        },
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [post.coordinate.lng, post.coordinate.lat]
+        }
+      }));
+    
+    console.log(`有効な投稿: ${validFeatures.length}/${posts.length}`);
+    return {
+      type: 'FeatureCollection',
+      features: validFeatures
+    };
+  };
 
   // Mapboxトークンを初期化する関数
   const initializeMapboxToken = () => {
@@ -21,9 +154,16 @@ export const useMapbox = () => {
 
   // マップインスタンスを作成する関数
   const createMapInstance = (container: HTMLDivElement) => {
+    // 位置情報が取得済みの場合は現在地を、そうでなければデフォルト位置を使用
+    const center: [number, number] = locationState === Status.LOADED 
+      ? [location.lng, location.lat] 
+      : MAPBOX_CONFIG.CENTER;
+    
+    console.log('地図作成時の中心座標:', center);
+    
     return new mapboxgl.Map({
       container,
-      center: MAPBOX_CONFIG.CENTER,
+      center,
       zoom: MAPBOX_CONFIG.ZOOM,
       pitch: MAPBOX_CONFIG.PITCH,
       bearing: MAPBOX_CONFIG.BEARING,
@@ -114,19 +254,16 @@ export const useMapbox = () => {
     const style = document.createElement('style');
     style.textContent = `
       .mapboxgl-popup-content {
-        background: transparent !important;
-        border: none !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
+        background: white !important;
+        border: 1px solid #ccc !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
         padding: 0 !important;
-        max-width: none !important;
+        max-width: 300px !important;
       }
       .mapboxgl-popup-tip {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        width: 0 !important;
-        height: 0 !important;
+        border-top-color: white !important;
+        border-bottom-color: white !important;
       }
       .custom-marker {
         cursor: pointer;
@@ -134,17 +271,6 @@ export const useMapbox = () => {
       }
       .custom-marker:hover {
         transform: scale(1.1);
-      }
-      /* すべてのMapboxポップアップの吹き出しを非表示 */
-      .mapboxgl-popup-tip-top,
-      .mapboxgl-popup-tip-bottom,
-      .mapboxgl-popup-tip-left,
-      .mapboxgl-popup-tip-right {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        width: 0 !important;
-        height: 0 !important;
       }
     `;
     document.head.appendChild(style);
@@ -182,12 +308,44 @@ export const useMapbox = () => {
 
     // クリーンアップ関数
     return () => {
+      // 投稿マーカーを削除
+      markersRef.current.forEach(marker => marker.remove());
+      markersRef.current = [];
+      
+      // 現在地マーカーを削除
+      if (currentLocationMarkerRef.current) {
+        currentLocationMarkerRef.current.remove();
+        currentLocationMarkerRef.current = null;
+      }
+      
       if (mapRef.current) {
         mapRef.current.remove();
       }
       removeStyles();
     };
   }, []);
+
+  // 位置情報が更新された時に地図の中心を移動
+  useEffect(() => {
+    if (mapRef.current && locationState === Status.LOADED) {
+      console.log('位置情報更新により地図中心を移動:', [location.lng, location.lat]);
+      mapRef.current.easeTo({
+        center: [location.lng, location.lat],
+        duration: 1000
+      });
+      
+      // 現在地マーカーも更新
+      addCurrentLocationMarker();
+    }
+  }, [location, locationState]);
+
+  // 投稿データが更新された時にマーカーを更新
+  useEffect(() => {
+    if (mapRef.current && posts.length > 0) {
+      console.log('投稿データが更新されました。マーカーを更新中...');
+      addPostMarkers();
+    }
+  }, [posts]);
 
   const toggle3D = () => {
     if (!mapRef.current) return;
@@ -269,6 +427,9 @@ export const useMapbox = () => {
     mapRef,
     is3D,
     toggle3D,
-    changeMapView
+    changeMapView,
+    addPostMarkers,
+    addCurrentLocationMarker,
+    createGeoJSONFromPosts
   };
 };
