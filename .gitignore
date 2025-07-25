@@ -6,7 +6,8 @@ nginx/ssl
 
 /frontend/dist
 /keys
-/my-terraform
+/myterraform
 /supabase
 /CHAP.pem
 frontend/.env.local
+/files

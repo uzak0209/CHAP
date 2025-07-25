@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -22,7 +24,18 @@ func main() {
 	// Ginエンジンの作成
 	r := gin.Default()
 
+	// CORS設定（厳格に制限）
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000", "https://chap-app.jp"}, // Next.jsの開発サーバーのみ許可
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true, // cookieを使用する場合
+		MaxAge:           12 * time.Hour,
+	}))
+
 	routes.SetupRoutes(r)
+
 	// サーバー起動
 	log.Println("Starting server on :8080...")
 	if err := r.Run(":8080"); err != nil {
