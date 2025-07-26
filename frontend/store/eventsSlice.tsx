@@ -3,6 +3,7 @@ import { Event } from '../types/types'
 import { getAuthToken } from './authSlice';
 import { Lateef } from 'next/font/google';
 import { Status,LocationState } from '../types/types';
+import { apiClient, API_ENDPOINTS } from '../lib/api';
 export interface EventsState {
   items: Event[];
   loading: {
@@ -35,24 +36,16 @@ const initialState: EventsState = {
   },
 }
 
-export const fetchAroundEvents = createAsyncThunk(
+export const fetchAroundEvents = createAsyncThunk<Event[], { lat: number; lng: number }>(
   'events/fetchAround',
-  async (params: { lat: number; lng: number }) => {
-    const response = await fetch('http://localhost:8080/api/v1/around/event', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params),
-    })
-    if (!response.ok) throw new Error('Failed to fetch events')
-    return response.json()
+  async (params) => {
+    return await apiClient.post<Event[]>(`${API_ENDPOINTS.events.list}/around`, params);
   }
 )
-export const fetchEvent = createAsyncThunk(
+export const fetchEvent = createAsyncThunk<Event, string>(
   'events/fetch',
-  async (id: string) => {
-    const response = await fetch(`http://localhost:8080/api/v1/event/${id}`)
-    if (!response.ok) throw new Error('Failed to fetch event')
-    return response.json()
+  async (id) => {
+    return await apiClient.get<Event>(API_ENDPOINTS.events.get(id));
   }
 )
 export const createEvent = createAsyncThunk(

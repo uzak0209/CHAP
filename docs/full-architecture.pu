@@ -1,0 +1,189 @@
+@startuml Application Architecture
+
+title CHAP Application - Full Stack Architecture
+
+' Define colors
+skinparam rectangle {
+    BackgroundColor<<frontend>> LightBlue
+    BackgroundColor<<backend>> LightGreen
+    BackgroundColor<<database>> LightCoral
+    BackgroundColor<<auth>> LightYellow
+    BackgroundColor<<aws>> Orange
+}
+
+' Client Layer
+package "Client Layer" {
+    rectangle "Web Browser" as browser
+    rectangle "Mobile App" as mobile
+}
+
+' CDN/Proxy Layer
+rectangle "Cloudflare" as cloudflare <<aws>> {
+    - DNS Management
+    - SSL/TLS Termination
+    - DDoS Protection
+    - Caching
+}
+
+' Frontend Layer
+package "Frontend (Next.js)" as frontend_layer <<frontend>> {
+    rectangle "Next.js Application" as nextjs {
+        **Features:**
+        - App Router
+        - TypeScript
+        - Tailwind CSS
+        - shadcn/ui Components
+        
+        **Pages:**
+        - Login/Auth
+        - Events (CRUD)
+        - Threads (CRUD)
+        - Posts
+        - Profile
+        - Map Integration
+    }
+    
+    rectangle "State Management" as redux {
+        **Redux Toolkit:**
+        - authSlice
+        - eventsSlice
+        - threadsSlice
+        - postsSlice
+        - locationSlice
+        - filtersSlice
+    }
+}
+
+' AWS Infrastructure
+package "AWS Infrastructure" as aws_infra <<aws>> {
+    
+    ' Load Balancer (Future)
+    rectangle "Load Balancer\n(Future)" as alb
+    
+    ' EC2 Instance
+    rectangle "EC2 Instance" as ec2_detailed {
+        **Instance:** t2.micro
+        **OS:** Amazon Linux 2
+        **Public IP:** 56.155.98.63
+        **Port:** 8080
+        
+        **Applications:**
+        - Go Gin API Server
+        - JWT Authentication
+        - File Upload Handler
+        - Database Migrations
+    }
+    
+    ' RDS Database
+    rectangle "RDS PostgreSQL" as rds_detailed <<database>> {
+        **Engine:** PostgreSQL 17.2
+        **Instance:** db.t3.micro
+        **Features:**
+        - GORM Integration
+        - UUID Primary Keys
+        - Prepared Statements Disabled
+        - Multi-AZ Deployment
+        
+        **Tables:**
+        - users
+        - posts
+        - events
+        - threads
+        - comments (future)
+    }
+}
+
+' External Services
+package "External Services" as external {
+    rectangle "Google OAuth" as google_auth <<auth>> {
+        - OAuth 2.0
+        - User Profile
+        - Email Verification
+    }
+    
+    rectangle "Supabase\n(Development)" as supabase <<database>> {
+        - PostgreSQL Database
+        - Authentication
+        - Storage (S3-compatible)
+        - Real-time subscriptions
+    }
+}
+
+' API Layer Details
+package "API Endpoints" as api_layer <<backend>> {
+    rectangle "Authentication" as auth_endpoints {
+        **Routes:**
+        - POST /auth/register
+        - POST /auth/login
+        - POST /auth/google
+        - GET /auth/verify
+        - POST /auth/logout
+    }
+    
+    rectangle "Events API" as events_endpoints {
+        **Routes:**
+        - GET /events
+        - POST /events
+        - GET /events/:id
+        - PUT /events/:id
+        - DELETE /events/:id
+    }
+    
+    rectangle "Threads API" as threads_endpoints {
+        **Routes:**
+        - GET /threads
+        - POST /threads
+        - GET /threads/:id
+        - PUT /threads/:id
+        - DELETE /threads/:id
+    }
+    
+    rectangle "Posts API" as posts_endpoints {
+        **Routes:**
+        - GET /posts
+        - POST /posts
+        - GET /posts/:id
+        - PUT /posts/:id
+        - DELETE /posts/:id
+    }
+}
+
+' Connections
+browser --> cloudflare : "HTTPS Requests"
+mobile --> cloudflare : "API Calls"
+cloudflare --> nextjs : "Frontend\nStatic Files"
+cloudflare --> ec2_detailed : "API Requests\n(Port 8080)"
+
+nextjs --> redux : "State Management"
+nextjs --> ec2_detailed : "API Calls\n(REST)"
+
+ec2_detailed --> auth_endpoints : "Authentication"
+ec2_detailed --> events_endpoints : "Events CRUD"
+ec2_detailed --> threads_endpoints : "Threads CRUD"
+ec2_detailed --> posts_endpoints : "Posts CRUD"
+
+ec2_detailed --> rds_detailed : "Database\nQueries\n(5432)"
+ec2_detailed --> google_auth : "OAuth Flow"
+
+' Development vs Production
+nextjs -.-> supabase : "Development\nDatabase"
+note bottom of supabase : "Used during development\nwith local frontend"
+
+' Notes
+note right of ec2_detailed
+**Security:**
+- JWT Token Authentication
+- CORS Configuration
+- Security Groups
+- Private Database
+end note
+
+note bottom of rds_detailed
+**Configuration:**
+- Private Subnets Only
+- Security Group Restricted
+- Automated Backups
+- SSL Connections
+end note
+
+@enduml
