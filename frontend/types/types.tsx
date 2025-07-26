@@ -12,11 +12,11 @@ export interface Post {
   deleted_time?: string;
   updated_time: string;
   content: string;
+  category: string;     // カテゴリフィールド（必須）
   valid: boolean;
   parent?: number;      // int
   like: number;         // int
   tags: string[];
-  category?: string;    // カテゴリフィールドを追加（オプショナル）
 }
 
 export interface Thread {

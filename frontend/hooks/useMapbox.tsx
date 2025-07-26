@@ -9,9 +9,10 @@ export const useMapbox = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const [is3D, setIs3D] = useState(true);
   
-  // Redux storeから位置情報を取得
+  // Redux storeから位置情報とフィルタ状態を取得
   const { location, state: locationState } = useAppSelector(state => state.location);
   const { items: posts } = useAppSelector(state => state.posts);
+  const { selectedCategory } = useAppSelector(state => state.filters);
 
   // 投稿マーカーの参照を保持
   const markersRef = useRef<mapboxgl.Marker[]>([]);
@@ -47,8 +48,29 @@ export const useMapbox = () => {
     markersRef.current = [];
 
     console.log('投稿マーカーを追加中:', posts.length, '件');
+    console.log('選択されたカテゴリ:', selectedCategory);
 
-    posts.forEach((post) => {
+    // 有効なカテゴリのポストのみをフィルタリング
+    const validCategoryPosts = posts.filter((post) => {
+      const category = post.category || 'other';
+      // 'other'カテゴリは除外（フィルタに対応するカテゴリがないため）
+      const isValidCategory = category !== 'other' && category !== 'その他';
+      
+      // 選択されたカテゴリでフィルタリング
+      const matchesSelectedCategory = category === selectedCategory;
+      
+      const shouldShow = isValidCategory && matchesSelectedCategory;
+      
+      if (isValidCategory) {
+        console.log(`投稿ID:${post.id}, カテゴリ:${category}, 選択:${selectedCategory}, 表示:${shouldShow}`);
+      }
+      
+      return shouldShow;
+    });
+
+    console.log('有効なカテゴリの投稿:', validCategoryPosts.length, '件');
+
+    validCategoryPosts.forEach((post) => {
       if (!post.coordinate || !post.coordinate.lat || !post.coordinate.lng) {
         console.warn('座標が無効な投稿をスキップ:', post.id);
         return;
@@ -57,21 +79,35 @@ export const useMapbox = () => {
       // カテゴリに基づいて色を決定
       const getMarkerColor = (category: string) => {
         switch (category) {
-          case 'food': return '#ff6b6b';
-          case 'event': return '#4ecdc4';
-          case 'question': return '#45b7d1';
-          case 'announcement': return '#96ceb4';
-          case 'other': 
-          default: return '#feca57';
+          case 'entertainment': return '#ff6b6b';  // エンターテイメント（赤）
+          case 'community': return '#4ecdc4';      // コミュニティ（青緑）
+          case 'information': return '#45b7d1';    // 情報（青）
+          case 'disaster': return '#ff4757';       // 災害（赤）
+          case 'food': return '#feca57';           // 食事（黄）
+          case 'event': return '#96ceb4';          // イベント（緑）
+          default: return '#95a5a6';               // デフォルト（グレー）
         }
       };
 
       // マーカーを作成
       const marker = new mapboxgl.Marker({ 
-        color: getMarkerColor(post.category || 'other'),
+        color: getMarkerColor(post.category),
         scale: 0.8
       })
         .setLngLat([post.coordinate.lng, post.coordinate.lat]);
+
+      // カテゴリを日本語に変換
+      const getCategoryName = (category: string) => {
+        switch (category) {
+          case 'entertainment': return 'エンターテイメント';
+          case 'community': return 'コミュニティ';
+          case 'information': return '情報';
+          case 'disaster': return '災害';
+          case 'food': return '食事';
+          case 'event': return 'イベント';
+          default: return category;
+        }
+      };
 
       // ポップアップを個別に作成
       const popup = new mapboxgl.Popup({ 
@@ -108,7 +144,7 @@ export const useMapbox = () => {
                  style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
               <span class="text-red-500 font-medium" style="color: #ef4444; font-weight: 500;">❤️ ${post.like || 0} いいね</span>
               <div class="text-blue-600" style="color: #2563eb;">
-                <span class="font-medium" style="font-weight: 500;">${post.category || 'その他'}</span>
+                <span class="font-medium" style="font-weight: 500;">${getCategoryName(post.category)}</span>
                 <span class="ml-2" style="margin-left: 0.5rem;">${new Date(post.created_time || '').toLocaleDateString()}</span>
               </div>
             </div>
@@ -155,15 +191,29 @@ export const useMapbox = () => {
     
     const validFeatures = posts
       .filter((post) => {
-        const isValid = !!(post.coordinate && post.coordinate.lat && post.coordinate.lng);
-        if (!isValid) {
+        // 座標の有効性チェック
+        const isValidCoordinate = !!(post.coordinate && post.coordinate.lat && post.coordinate.lng);
+        if (!isValidCoordinate) {
           console.warn('座標データが不正な投稿をスキップ:', {
             id: post.id,
             content: post.content?.substring(0, 20),
             coordinate: post.coordinate
           });
+          return false;
         }
-        return isValid;
+        
+        // カテゴリのチェック（otherカテゴリは除外）
+        const category = post.category || 'other';
+        const isValidCategory = category !== 'other' && category !== 'その他';
+        if (!isValidCategory) {
+          console.warn('otherカテゴリの投稿をスキップ:', {
+            id: post.id,
+            category: category
+          });
+          return false;
+        }
+        
+        return true;
       })
       .map((post) => ({
         type: 'Feature' as const,
@@ -477,7 +527,7 @@ export const useMapbox = () => {
         restorePopupsRef.current?.({ type: 'data-update' });
       }, 800);
     }
-  }, [posts]);
+  }, [posts, selectedCategory]); // selectedCategoryも依存関係に追加
 
   // ポップアップを定期的にチェックして常時表示を維持
   useEffect(() => {
