@@ -303,16 +303,17 @@ export const useMapbox = () => {
     const style = document.createElement('style');
     style.textContent = `
       .mapboxgl-popup-content {
-        background: white !important;
-        border: 1px solid #ccc !important;
+        background: transparent !important;
+        border: none !important;
         border-radius: 8px !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+        box-shadow: none !important;
         padding: 0 !important;
         max-width: 300px !important;
       }
       .mapboxgl-popup-tip {
-        border-top-color: white !important;
-        border-bottom-color: white !important;
+        border-top-color: transparent !important;
+        border-bottom-color: transparent !important;
+        display: none !important;
       }
       .custom-marker {
         cursor: pointer;

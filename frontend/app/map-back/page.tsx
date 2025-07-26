@@ -107,7 +107,7 @@ export default function MapBackPage() {
                     })
                     .setLngLat([post.coordinate.lng, post.coordinate.lat])
                     .setHTML(`
-                      <div class="p-2 bg-white rounded shadow">
+                      <div class="p-2 transparent rounded shadow">
                         <div class="text-xs font-bold">${post.category || 'その他'}</div>
                         <div class="text-xs">${post.content.substring(0, 30)}...</div>
                       </div>
