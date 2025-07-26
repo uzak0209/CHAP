@@ -5,6 +5,7 @@ import maplibregl from 'maplibre-gl';
 import { MultiModalFAB } from '@/components/ui/multi-modal-fab';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchAroundPosts } from '@/store/postsSlice';
+import { fetchAroundThreads } from '@/store/threadsSlice';
 import { getCurrentLocation, refreshLocation } from '@/store/locationSlice';
 import { Status, Post } from '@/types/types';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -16,6 +17,7 @@ export default function MapPage() {
 
   const dispatch = useAppDispatch();
   const { items: posts, loading } = useAppSelector(state => state.posts);
+  const { items: threads } = useAppSelector(state => state.threads);
   const { state: locationState, location } = useAppSelector(state => state.location);
 
   // デバッグ用: postsの変更を監視
@@ -26,6 +28,18 @@ export default function MapPage() {
     }
   }, [posts]);
 
+  // デバッグ用: threadsの変更を監視
+  useEffect(() => {
+    console.log('地図ページ: スレッドデータが更新されました:', threads.length, '件');
+    if (threads.length > 0) {
+      console.log('地図ページ: 最新のスレッド:', threads[0]);
+      console.log('地図ページ: 全スレッドの座標:', threads.map(t => ({
+        id: t.id,
+        coordinate: t.coordinate
+      })));
+    }
+  }, [threads]);
+
   // 投稿作成を検知して地図データを更新
   useEffect(() => {
     if (locationState === Status.LOADED && posts.length > 0) {
@@ -34,10 +48,14 @@ export default function MapPage() {
       const postTime = new Date(latestPost.created_time || latestPost.updated_time);
       const timeDiff = now.getTime() - postTime.getTime();
       
-      // 5秒以内に作成された投稿があれば周辺投稿を再取得
+      // 5秒以内に作成された投稿があれば周辺投稿とスレッドを再取得
       if (timeDiff < 5000) {
-        console.log('新しい投稿を検知、周辺投稿を再取得します');
+        console.log('新しい投稿を検知、周辺投稿とスレッドを再取得します');
         dispatch(fetchAroundPosts({
+          lat: location.lat,
+          lng: location.lng
+        }));
+        dispatch(fetchAroundThreads({
           lat: location.lat,
           lng: location.lng
         }));
@@ -52,10 +70,12 @@ export default function MapPage() {
     }
   }, [dispatch, locationState]);
 
-  // 位置情報が取得できたら周辺の投稿を取得
+  // 位置情報が取得できたら周辺の投稿とスレッドを取得
   useEffect(() => {
     if (locationState === Status.LOADED) {
-      console.log('位置情報取得完了、周辺投稿を取得中:', location);
+      console.log('位置情報取得完了、周辺投稿とスレッドを取得中:', location);
+      
+      // 投稿を取得
       dispatch(fetchAroundPosts({
         lat: location.lat,
         lng: location.lng
@@ -74,6 +94,20 @@ export default function MapPage() {
       })
       .catch((error) => {
         console.error('周辺投稿取得エラー:', error);
+      });
+
+      // スレッドを取得
+      dispatch(fetchAroundThreads({
+        lat: location.lat,
+        lng: location.lng
+      }))
+      .unwrap()
+      .then((threads) => {
+        console.log('周辺スレッド取得成功:', threads);
+        console.log('取得したスレッド数:', threads.length);
+      })
+      .catch((error) => {
+        console.error('周辺スレッド取得エラー:', error);
       });
     }
   }, [dispatch, locationState, location]);

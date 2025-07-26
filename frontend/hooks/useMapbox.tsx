@@ -12,10 +12,12 @@ export const useMapbox = () => {
   // Redux storeから位置情報とフィルタ状態を取得
   const { location, state: locationState } = useAppSelector(state => state.location);
   const { items: posts } = useAppSelector(state => state.posts);
+  const { items: threads } = useAppSelector(state => state.threads);
   const { selectedCategory } = useAppSelector(state => state.filters);
 
-  // 投稿マーカーの参照を保持
+  // 投稿とスレッドマーカーの参照を保持
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const threadMarkersRef = useRef<mapboxgl.Marker[]>([]);
   const currentLocationMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const restorePopupsRef = useRef<((event?: any) => void) | null>(null);
 
@@ -183,6 +185,126 @@ export const useMapbox = () => {
     });
 
     console.log('投稿マーカー追加完了:', markersRef.current.length, '個');
+  };
+
+  // スレッドマーカーを地図に追加する関数
+  const addThreadMarkers = () => {
+    if (!mapRef.current) {
+      console.log('地図が初期化されていません（スレッド）');
+      return;
+    }
+    
+    if (!threads || threads.length === 0) {
+      console.log('スレッドデータがありません:', threads);
+      return;
+    }
+
+    // 既存のスレッドマーカーを削除
+    threadMarkersRef.current.forEach(marker => marker.remove());
+    threadMarkersRef.current = [];
+
+    console.log('スレッドマーカーを追加中:', threads.length, '件');
+    console.log('スレッドデータの詳細:', threads.map(t => ({
+      id: t.id,
+      content: t.content?.substring(0, 20),
+      coordinate: t.coordinate,
+      category: t.category
+    })));
+
+    threads.forEach((thread) => {
+      if (!thread.coordinate || !thread.coordinate.lat || !thread.coordinate.lng) {
+        console.warn('座標が無効なスレッドをスキップ:', thread.id);
+        return;
+      }
+
+      // スレッドマーカーを作成（黄色）
+      const marker = new mapboxgl.Marker({ 
+        color: '#ffd700', // 黄色
+        scale: 0.8 
+      })
+      .setLngLat([thread.coordinate.lng, thread.coordinate.lat]);
+
+      // カテゴリ名を日本語に変換する関数
+      const getCategoryName = (category: string) => {
+        switch (category) {
+          case 'entertainment': return 'エンターテイメント';
+          case 'community': return 'コミュニティ';
+          case 'information': return '情報';
+          case 'disaster': return '災害情報';
+          default: return category;
+        }
+      };
+
+      // タグからカテゴリを取得（最初のタグをカテゴリとして扱う）
+      const category = thread.tags && thread.tags.length > 0 ? thread.tags[0] : '';
+
+      // スレッド用のポップアップを作成
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        closeOnMove: false,
+        offset: 25,
+        className: 'thread-popup thread-popup-yellow'
+      })
+      .setHTML(`
+        <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg shadow-lg max-w-xs">
+          <div class="p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                スレッド
+              </div>
+              ${category ? `<div class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">${getCategoryName(category)}</div>` : ''}
+            </div>
+            <div class="mb-3">
+              <h3 class="font-semibold text-gray-900 text-sm mb-1">スレッド</h3>
+              <p class="text-gray-700 text-xs leading-relaxed">${thread.content ? thread.content.substring(0, 50) + (thread.content.length > 50 ? '...' : '') : ''}</p>
+            </div>
+            <div class="text-xs text-gray-500 border-t border-yellow-200 pt-2">
+              <div class="flex items-center justify-between">
+                <span>💬 クリックで詳細表示</span>
+                <span class="ml-2">${new Date(thread.created_time || '').toLocaleDateString()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+
+      // マーカーにクリックイベントを追加（スレッドページに遷移）
+      marker.getElement().addEventListener('click', () => {
+        window.location.href = `/threads/${thread.id}`;
+      });
+
+      // マーカーにポップアップを設定してから地図に追加
+      marker.setPopup(popup).addTo(mapRef.current!);
+
+      // スレッドマーカーをリストに追加
+      threadMarkersRef.current.push(marker);
+
+      console.log(`📌 スレッドマーカー${threadMarkersRef.current.length}を作成: スレッドID=${thread.id}`);
+
+      // ポップアップを即座に表示
+      setTimeout(() => {
+        try {
+          // ポップアップを地図に直接追加して表示
+          popup.addTo(mapRef.current!);
+          console.log(`✅ スレッド${thread.id}のポップアップを直接表示`);
+          
+          // さらにマーカーのポップアップも確認
+          setTimeout(() => {
+            const markerPopup = marker.getPopup();
+            if (markerPopup && !markerPopup.isOpen()) {
+              marker.togglePopup();
+              console.log(`🟡 スレッド${thread.id}のマーカーポップアップも表示`);
+            }
+          }, 100);
+          
+        } catch (error) {
+          console.error(`❌ スレッド${thread.id}のポップアップ表示エラー:`, error);
+        }
+      }, 250 + threadMarkersRef.current.length * 50); // スレッドマーカーごとに少しずつ遅延
+    });
+
+    console.log('スレッドマーカー追加完了:', threadMarkersRef.current.length, '個');
   };
 
   // 投稿データをGeoJSONに変換
@@ -432,6 +554,24 @@ export const useMapbox = () => {
             console.error(`📌 投稿マーカー${index}のポップアップ復元エラー:`, error);
           }
         });
+
+        // スレッドマーカーのポップアップを強制復元
+        threadMarkersRef.current.forEach((marker, index) => {
+          try {
+            const popup = marker.getPopup();
+            if (popup) {
+              // 強制的に閉じてから開く
+              if (popup.isOpen()) {
+                popup.remove();
+              }
+              marker.togglePopup();
+              restoredCount++;
+              console.log(`🟡 スレッドマーカー${index}のポップアップを強制復元`);
+            }
+          } catch (error) {
+            console.error(`🟡 スレッドマーカー${index}のポップアップ復元エラー:`, error);
+          }
+        });
         
         console.log(`✅ ポップアップ復元完了: ${restoredCount}個 (${eventType})`);
       }, 100);
@@ -450,6 +590,19 @@ export const useMapbox = () => {
             }
           } catch (error) {
             console.error(`🔁 投稿マーカー${index}の追加復元エラー:`, error);
+          }
+        });
+
+        threadMarkersRef.current.forEach((marker, index) => {
+          try {
+            const popup = marker.getPopup();
+            if (popup && !popup.isOpen()) {
+              marker.togglePopup();
+              doubleCheckCount++;
+              console.log(`🔁 スレッドマーカー${index}のポップアップを追加復元`);
+            }
+          } catch (error) {
+            console.error(`🔁 スレッドマーカー${index}の追加復元エラー:`, error);
           }
         });
         
@@ -512,6 +665,11 @@ export const useMapbox = () => {
       
       // 現在地マーカーも更新
       addCurrentLocationMarker();
+      
+      // スレッドマーカーも更新
+      if (threads.length > 0) {
+        addThreadMarkers();
+      }
     }
   }, [location, locationState]);
 
@@ -527,12 +685,18 @@ export const useMapbox = () => {
         restorePopupsRef.current?.({ type: 'data-update' });
       }, 800);
     }
-  }, [posts, selectedCategory]); // selectedCategoryも依存関係に追加
+    
+    // スレッドマーカーも追加
+    if (mapRef.current && threads.length > 0) {
+      console.log('スレッドデータが更新されました。スレッドマーカーを更新中...');
+      addThreadMarkers();
+    }
+  }, [posts, threads, selectedCategory]); // threadsも依存関係に追加
 
   // ポップアップを定期的にチェックして常時表示を維持
   useEffect(() => {
     const popupInterval = setInterval(() => {
-      if (!mapRef.current || markersRef.current.length === 0) return;
+      if (!mapRef.current || (markersRef.current.length === 0 && threadMarkersRef.current.length === 0)) return;
 
       console.log('🔄 ポップアップ状態を定期チェック中...');
       
@@ -546,6 +710,19 @@ export const useMapbox = () => {
           }
         } catch (error) {
           console.error(`📌 投稿マーカー${index}のポップアップチェックエラー:`, error);
+        }
+      });
+
+      // スレッドマーカーのポップアップをチェック
+      threadMarkersRef.current.forEach((marker, index) => {
+        try {
+          const popup = marker.getPopup();
+          if (popup && !popup.isOpen()) {
+            console.log(`🟡 スレッドマーカー${index}のポップアップが閉じています - 再表示`);
+            marker.togglePopup();
+          }
+        } catch (error) {
+          console.error(`🟡 スレッドマーカー${index}のポップアップチェックエラー:`, error);
         }
       });
     }, 3000); // 3秒ごとにチェック

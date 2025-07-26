@@ -33,7 +33,6 @@ export interface Thread {
   valid: boolean;
   like: number;         // int
   tags: string[];
-  category?: string;    // カテゴリフィールドを追加（オプショナル）
 }
 
 export interface Event {
