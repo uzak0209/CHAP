@@ -27,84 +27,15 @@ export const useMapbox = () => {
       currentLocationMarkerRef.current.remove();
     }
 
-    // 現在地マーカーを作成
+    // 現在地マーカーを作成（ポップアップなし）
     currentLocationMarkerRef.current = new mapboxgl.Marker({ 
       color: '#ff0000',
       scale: 1.2
     })
       .setLngLat([location.lng, location.lat])
-      .setPopup(
-        new mapboxgl.Popup({ 
-          offset: 25,
-          closeButton: false,   // 閉じるボタンを非表示
-          closeOnClick: false,  // クリックで閉じることを無効
-          closeOnMove: false    // 地図移動で閉じることを無効
-        })
-          .setHTML(`
-            <div class="relative max-w-xs bg-gradient-to-br from-red-50 to-pink-50 border border-red-200 shadow-lg rounded-2xl overflow-hidden" 
-                 style="max-width: 18rem; background: linear-gradient(to bottom right, #fef2f2, #fdf2f8); border: 1px solid #fecaca; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-radius: 1rem; overflow: hidden; position: relative;">
-              <!-- 吹き出しの矢印 -->
-              <div class="absolute -bottom-2 left-5 w-0 h-0" 
-                   style="position: absolute; bottom: -8px; left: 20px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #fef2f2;"></div>
-              
-              <!-- 現在地アイコン -->
-              <div class="absolute top-2 left-2 h-6 w-6 rounded-full bg-red-500 flex items-center justify-center"
-                   style="position: absolute; top: 8px; left: 8px; height: 24px; width: 24px; border-radius: 50%; background-color: #ef4444; display: flex; align-items: center; justify-content: center;">
-                <svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 24 24" style="height: 12px; width: 12px; color: white;">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                </svg>
-              </div>
-              
-              <!-- コンテンツ -->
-              <div class="p-4 pt-8" style="padding: 1rem; padding-top: 2rem;">
-                <p class="text-sm text-red-900 leading-relaxed mb-2 font-semibold" 
-                   style="font-size: 0.875rem; color: #7f1d1d; line-height: 1.6; margin-bottom: 0.5rem; font-weight: 600;">
-                  📍 現在地
-                </p>
-                <div class="text-xs text-red-600" style="font-size: 0.75rem; color: #dc2626;">
-                  <div style="margin-bottom: 0.25rem;">緯度: ${location.lat.toFixed(6)}</div>
-                  <div>経度: ${location.lng.toFixed(6)}</div>
-                </div>
-              </div>
-            </div>
-          `)
-      )
       .addTo(mapRef.current!);
 
-    // 現在地ポップアップも常時表示
-    setTimeout(() => {
-      try {
-        const popup = currentLocationMarkerRef.current?.getPopup();
-        if (popup) {
-          if (!popup.isOpen()) {
-            currentLocationMarkerRef.current?.togglePopup();
-            console.log('📍 現在地ポップアップを表示');
-          } else {
-            console.log('📍 現在地ポップアップは既に表示済み');
-          }
-          
-          // 状態確認
-          setTimeout(() => {
-            const isStillOpen = popup.isOpen();
-            console.log(`📍 現在地ポップアップ状態確認: ${isStillOpen ? '表示中' : '非表示'}`);
-            if (!isStillOpen) {
-              console.warn('📍 現在地ポップアップが閉じられました - 再表示を試行');
-              try {
-                currentLocationMarkerRef.current?.togglePopup();
-              } catch (retryError) {
-                console.error('📍 現在地ポップアップ再表示エラー:', retryError);
-              }
-            }
-          }, 200);
-        } else {
-          console.error('📍 現在地ポップアップオブジェクトが見つかりません');
-        }
-      } catch (error) {
-        console.error('📍 現在地ポップアップ表示エラー:', error);
-      }
-    }, 600); // 投稿ポップアップより遅く表示
-
-    console.log('現在地マーカーを追加:', [location.lng, location.lat]);
+    console.log('現在地マーカーを追加（ポップアップなし）:', [location.lng, location.lat]);
   };
 
   // 投稿マーカーを地図に追加する関数
@@ -450,24 +381,6 @@ export const useMapbox = () => {
             console.error(`📌 投稿マーカー${index}のポップアップ復元エラー:`, error);
           }
         });
-
-        // 現在地マーカーのポップアップを強制復元
-        if (currentLocationMarkerRef.current) {
-          try {
-            const popup = currentLocationMarkerRef.current.getPopup();
-            if (popup) {
-              // 強制的に閉じてから開く
-              if (popup.isOpen()) {
-                popup.remove();
-              }
-              currentLocationMarkerRef.current.togglePopup();
-              restoredCount++;
-              console.log('📍 現在地マーカーのポップアップを強制復元');
-            }
-          } catch (error) {
-            console.error('📍 現在地マーカーのポップアップ復元エラー:', error);
-          }
-        }
         
         console.log(`✅ ポップアップ復元完了: ${restoredCount}個 (${eventType})`);
       }, 100);
@@ -488,19 +401,6 @@ export const useMapbox = () => {
             console.error(`🔁 投稿マーカー${index}の追加復元エラー:`, error);
           }
         });
-
-        if (currentLocationMarkerRef.current) {
-          try {
-            const popup = currentLocationMarkerRef.current.getPopup();
-            if (popup && !popup.isOpen()) {
-              currentLocationMarkerRef.current.togglePopup();
-              doubleCheckCount++;
-              console.log('🔁 現在地マーカーのポップアップを追加復元');
-            }
-          } catch (error) {
-            console.error('🔁 現在地マーカーの追加復元エラー:', error);
-          }
-        }
         
         if (doubleCheckCount > 0) {
           console.log(`🔁 追加復元完了: ${doubleCheckCount}個`);
@@ -597,19 +497,6 @@ export const useMapbox = () => {
           console.error(`📌 投稿マーカー${index}のポップアップチェックエラー:`, error);
         }
       });
-
-      // 現在地マーカーのポップアップをチェック
-      if (currentLocationMarkerRef.current) {
-        try {
-          const popup = currentLocationMarkerRef.current.getPopup();
-          if (popup && !popup.isOpen()) {
-            console.log('📍 現在地マーカーのポップアップが閉じています - 再表示');
-            currentLocationMarkerRef.current.togglePopup();
-          }
-        } catch (error) {
-          console.error('📍 現在地マーカーのポップアップチェックエラー:', error);
-        }
-      }
     }, 3000); // 3秒ごとにチェック
 
     return () => {
