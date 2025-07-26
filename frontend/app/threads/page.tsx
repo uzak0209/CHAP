@@ -7,7 +7,6 @@ import { LoadingSpinner } from '@/components/ui/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { MessageCircle, MapPin, Users, Tag } from 'lucide-react';
 
 import { fetchAroundThreads, threadsActions } from '@/store/threadsSlice';
@@ -183,9 +182,6 @@ export default function ThreadsPage() {
           {renderContent()}
         </main>
       </div>
-      
-      {/* フローティングスレッド作成ボタン */}
-      <FloatingActionButton href="/threads/create" />
     </AppLayout>
   );
 }

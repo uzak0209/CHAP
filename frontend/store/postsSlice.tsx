@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Post } from '../types/types'
-import { get } from 'http';
-import { getAuthToken } from './authSlice';
+import { apiClient, API_ENDPOINTS } from '../lib/api'
 
 export interface PostsState {
   items: Post[];
@@ -36,77 +35,47 @@ const initialState: PostsState = {
 }
 
 // Async Thunks
-export const fetchAroundPosts = createAsyncThunk(
+export const fetchPosts = createAsyncThunk<Post[], void>(
+  'posts/fetchPosts',
+  async () => {
+    return await apiClient.get<Post[]>(API_ENDPOINTS.posts.list);
+  }
+)
+
+export const fetchAroundPosts = createAsyncThunk<Post[], { lat: number; lng: number }>(
   'posts/fetchAround',
   async (params: { lat: number; lng: number }) => {
-    const response = await fetch('http://localhost:8080/api/v1/around/post', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params),
-    })
-    if (!response.ok) throw new Error('Failed to fetch posts')
-    return response.json()
+    // 位置情報検索用の既存エンドポイント
+    return await apiClient.post<Post[]>(API_ENDPOINTS.around.posts, params);
   }
 )
 
-export const createPost = createAsyncThunk(
+export const createPost = createAsyncThunk<Post, Omit<Post, 'id' | 'user_id' | 'created_time' | 'updated_at'>>(
   'posts/create',
-  async (postData: Omit<Post, 'id' | 'user_id' | 'created_time' | 'updated_at'>) => {
-    const token=getAuthToken();
-    const headers={
-      'Content-Type':'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` } )
-    }
-    const response = await fetch('http://localhost:8080/api/v1/create/post', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(postData),
-    })
-    if (!response.ok) throw new Error('Failed to create post')
-    const result = await response.json()
-    return result.post || result
+  async (postData) => {
+    return await apiClient.post<Post>(API_ENDPOINTS.posts.create, postData);
   }
 )
 
-export const fetchPost= createAsyncThunk(
+export const fetchPost = createAsyncThunk<Post, number>(
   'posts/fetch',
-  async (id: number) => { // string に変更
-    const response = await fetch(`http://localhost:8080/api/v1/post/${id}`)
-    if (!response.ok) throw new Error('Failed to fetch post')
-    return response.json()
+  async (id: number) => {
+    return await apiClient.get<Post>(API_ENDPOINTS.posts.get(id.toString()));
   }
 )
 
-export const updatePost = createAsyncThunk(
+export const updatePost = createAsyncThunk<Post, { id: number; data: Partial<Post> }>(
   'posts/update',
-  async (id: number) => { // string に変更
-    const response = await fetch(`http://localhost:8080/api/v1/update/post/${id}`)
-    if (!response.ok) throw new Error('Failed to get post update data')
-    return response.json()
+  async ({ id, data }) => {
+    return await apiClient.put<Post>(API_ENDPOINTS.posts.update(id.toString()), data);
   }
 )
 
-export const editPost = createAsyncThunk(
-  'posts/edit',
-  async ({ id, data }: { id: number; data: Partial<Post> }) => { // string に変更
-    const response = await fetch(`http://localhost:8080/api/v1/edit/post/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) throw new Error('Failed to edit post')
-    return response.json()
-  }
-)
-
-export const deletePost = createAsyncThunk(
+export const deletePost = createAsyncThunk<number, number>(
   'posts/delete',
-  async (id: number): Promise<number> => { // string に変更
-    const response = await fetch(`http://localhost:8080/api/v1/delete/post/${id}`, {
-      method: 'DELETE',
-    })
-    if (!response.ok) throw new Error('Failed to delete post')
-    return id
+  async (id: number) => {
+    await apiClient.delete(API_ENDPOINTS.posts.delete(id.toString()));
+    return id;
   }
 )
 
@@ -125,6 +94,7 @@ const postsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+
       // fetchAroundPosts
       .addCase(fetchAroundPosts.pending, (state) => {
         state.loading.fetch = true
@@ -176,33 +146,19 @@ const postsSlice = createSlice({
 
       // updatePost
       .addCase(updatePost.pending, (state) => {
-        state.loading.fetch = true
-        state.error.fetch = null
-      })
-      .addCase(updatePost.fulfilled, (state, action) => {
-        state.loading.fetch = false
-        // 更新用データは既存アイテムには反映しない
-      })
-      .addCase(updatePost.rejected, (state, action) => {
-        state.loading.fetch = false
-        state.error.fetch = action.error.message || '更新データの取得に失敗しました'
-      })
-
-      // editPost
-      .addCase(editPost.pending, (state) => {
         state.loading.update = true
         state.error.update = null
       })
-      .addCase(editPost.fulfilled, (state, action) => {
+      .addCase(updatePost.fulfilled, (state, action) => {
         state.loading.update = false
         const index = state.items.findIndex(p => p.id === action.meta.arg.id)
         if (index !== -1) {
           state.items[index] = action.payload
         }
       })
-      .addCase(editPost.rejected, (state, action) => {
+      .addCase(updatePost.rejected, (state, action) => {
         state.loading.update = false
-        state.error.update = action.error.message || '投稿の編集に失敗しました'
+        state.error.update = action.error.message || '投稿の更新に失敗しました'
       })
 
       // deletePost

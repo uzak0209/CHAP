@@ -5,7 +5,6 @@ import { AppLayout } from '@/components/Layout/AppLayout';
 import { PostCard } from '@/components/Post/PostCard';
 import { PostFilters } from '@/components/Post/PostFilters';
 import { LoadingSpinner } from '@/components/ui/loading';
-import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { Post, Status } from '@/types/types';
 
 import { fetchAroundPosts, postsActions } from '@/store/postsSlice';
@@ -134,9 +133,6 @@ export default function PostPage() {
           </button>
         </div>
       </div>
-      
-      {/* フローティング投稿ボタン */}
-      <FloatingActionButton href="/post" />
     </AppLayout>
   );
 }

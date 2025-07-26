@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button"
 const items = [
   {
     title: "ホーム",
-    url: "/",
+    url: "/posts",
     icon: Home,
   },
   {
@@ -32,7 +32,7 @@ const items = [
   },
   {
     title: "投稿",
-    url: "/posts",
+    url: "/post",
     icon: Inbox,
   },
   {

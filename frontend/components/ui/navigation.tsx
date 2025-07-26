@@ -6,12 +6,9 @@ import { Home, Plus, MessageCircle, Bell, User, Map, Settings, Flag, MessageSqua
 import { cn } from '@/lib/utils';
 
 const navigation = [
-  { name: 'ホーム', href: '/', icon: Home },
+  { name: 'ホーム', href: '/posts', icon: Home },
   { name: 'マップ', href: '/map-back', icon: Map },
   { name: '投稿', href: '/post', icon: Plus },
-  { name: 'チャット', href: '/chat', icon: MessageCircle },
-  { name: '通知', href: '/notifications', icon: Bell },
-  { name: 'プロフィール', href: '/profile', icon: User },
   { name: 'イベント', href: '/events', icon: Flag },
   { name: 'スレッド', href: '/threads', icon: MessageSquare }
 ];
@@ -21,7 +18,7 @@ export function BottomNavigation() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-pb z-50">
-      <div className="grid grid-cols-8 w-full justify-between ">
+      <div className="flex w-full justify-around items-center px-2">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -31,17 +28,17 @@ export function BottomNavigation() {
               key={item.name}
               href={item.href}
               className={cn(
-                'flex flex-col items-center py-2 px-1 text-xs',
+                'flex flex-col items-center py-3 px-3 text-xs transition-colors duration-200',
                 isActive
                   ? 'text-primary font-medium'
                   : 'text-gray-500 hover:text-gray-700'
               )}
             >
               <Icon className={cn(
-                'w-5 h-5 mb-1',
-                item.name === '投稿' && 'w-6 h-6' // 投稿ボタンは少し大きく
+                'w-6 h-6 mb-1',
+                item.name === '投稿' && 'w-7 h-7' // 投稿ボタンは少し大きく
               )} />
-              <span className="text-[10px]">{item.name}</span>
+              <span className="text-[11px] font-medium">{item.name}</span>
             </Link>
           );
         })}

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Thread } from '../types/types'
-import { getAuthToken } from './authSlice';
+import { apiClient, API_ENDPOINTS } from '../lib/api'
 
 export interface ThreadsState {
   items: Thread[];
@@ -35,88 +35,47 @@ const initialState: ThreadsState = {
 }
 
 // Async Thunks
-export const fetchAroundThreads = createAsyncThunk(
+export const fetchThreads = createAsyncThunk<Thread[], void>(
+  'threads/fetchThreads',
+  async () => {
+    return await apiClient.get<Thread[]>(API_ENDPOINTS.threads.list);
+  }
+)
+
+export const fetchAroundThreads = createAsyncThunk<Thread[], { lat: number; lng: number }>(
   'threads/fetchAround',
   async (params: { lat: number; lng: number }) => {
-    const response = await fetch('http://localhost:8080/api/v1/around/thread', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params),
-    })
-    if (!response.ok) throw new Error('Failed to fetch threads')
-    return response.json()
+    // 位置情報検索用の既存エンドポイント
+    return await apiClient.post<Thread[]>(API_ENDPOINTS.around.threads, params);
   }
 )
 
-export const createThread = createAsyncThunk(
+export const createThread = createAsyncThunk<Thread, Omit<Thread, 'id' | 'created_time' | 'updated_at'>>(
   'threads/create',
-  async (threadData: Omit<Thread, 'id' | 'created_time' | 'updated_at'>) => {
-    const token=getAuthToken();
-          
-      const headers={
-        'Content-Type':'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` } )
-      }
-    const response = await fetch('http://localhost:8080/api/v1/create/thread', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(threadData),
-    })
-    if (!response.ok) throw new Error('Failed to create thread')
-    const result = await response.json()
-    return result.thread || result
+  async (threadData) => {
+    return await apiClient.post<Thread>(API_ENDPOINTS.threads.create, threadData);
   }
 )
-export const fetchThread = createAsyncThunk(
+
+export const fetchThread = createAsyncThunk<Thread, string>(
   'threads/fetch',
-  async (id: string) => { // string に変更
-    const response = await fetch(`http://localhost:8080/api/v1/thread/${id}`)
-    if (!response.ok) throw new Error('Failed to fetch thread')
-    return response.json()
+  async (id: string) => {
+    return await apiClient.get<Thread>(API_ENDPOINTS.threads.get(id));
   }
 )
 
-export const updateThread = createAsyncThunk(
+export const updateThread = createAsyncThunk<Thread, { id: string; data: Partial<Thread> }>(
   'threads/update',
-  async (id: string) => { // string に変更
-    const response = await fetch(`http://localhost:8080/api/v1/update/thread/${id}`)
-    if (!response.ok) throw new Error('Failed to get thread update data')
-    return response.json()
+  async ({ id, data }) => {
+    return await apiClient.put<Thread>(API_ENDPOINTS.threads.update(id), data);
   }
 )
 
-export const editThread = createAsyncThunk(
-  'threads/edit',
-  async ({ id, data }: { id: string; data: Partial<Thread> }) => { // string に変更
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    const response = await fetch(`http://localhost:8080/api/v1/edit/thread/${id}`, {
-      method: 'PUT',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) throw new Error('Failed to edit thread')
-    return response.json()
-  }
-)
-
-export const deleteThread = createAsyncThunk(
+export const deleteThread = createAsyncThunk<string, string>(
   'threads/delete',
-  async (id: string): Promise<string> => { // string に変更
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    const response = await fetch(`http://localhost:8080/api/v1/delete/thread/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    if (!response.ok) throw new Error('Failed to delete thread')
-    return id
+  async (id: string) => {
+    await apiClient.delete(API_ENDPOINTS.threads.delete(id));
+    return id;
   }
 )
 
@@ -192,27 +151,6 @@ const threadsSlice = createSlice({
       .addCase(updateThread.fulfilled, (state, action) => {
         state.loading.fetch = false
         // 更新用データは既存アイテムには反映しない
-      })
-      .addCase(updateThread.rejected, (state, action) => {
-        state.loading.fetch = false
-        state.error.fetch = action.error.message || '更新データの取得に失敗しました'
-      })
-
-      // editThread
-      .addCase(editThread.pending, (state) => {
-        state.loading.update = true
-        state.error.update = null
-      })
-      .addCase(editThread.fulfilled, (state, action) => {
-        state.loading.update = false
-        const index = state.items.findIndex(t => t.id === action.meta.arg.id)
-        if (index !== -1) {
-          state.items[index] = action.payload
-        }
-      })
-      .addCase(editThread.rejected, (state, action) => {
-        state.loading.update = false
-        state.error.update = action.error.message || 'スレッドの編集に失敗しました'
       })
 
       // deleteThread

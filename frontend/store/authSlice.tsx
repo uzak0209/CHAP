@@ -32,8 +32,8 @@ export interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  isAuthenticated: typeof window !== 'undefined' ? !!localStorage.getItem('token') : false,
-  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
+  isAuthenticated: typeof window !== 'undefined' ? !!localStorage.getItem('authtoken') : false,
+  token: typeof window !== 'undefined' ? localStorage.getItem('authtoken') : null,
   loading: {
     login: false,
     logout: false,
@@ -88,7 +88,7 @@ export const verifyToken = createAsyncThunk<VerifyResponse, void>(
       throw new Error('No token found');
     }
 
-    return await apiClient.get<VerifyResponse>(API_ENDPOINTS.auth.verify);
+    return await apiClient.get<VerifyResponse>(API_ENDPOINTS.auth.login);
   }
 )
 
@@ -113,7 +113,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       state.token = null
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('authToken')
+        localStorage.removeItem('authtoken')
       }
     }
   },

@@ -1,6 +1,12 @@
 // API Base URL Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://56.155.98.63:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.chap-app.jp';
 const USE_HTTPS = process.env.NEXT_PUBLIC_USE_HTTPS === 'true';
+
+console.log('🌟 API Configuration:', { 
+  API_BASE_URL, 
+  USE_HTTPS,
+  env: process.env.NEXT_PUBLIC_API_BASE_URL 
+});
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -9,30 +15,36 @@ export const API_ENDPOINTS = {
     register: `${API_BASE_URL}/api/v1/auth/register`,
     googleLogin: `${API_BASE_URL}/api/v1/auth/google`,
     logout: `${API_BASE_URL}/api/v1/auth/logout`,
-    verify: `${API_BASE_URL}/api/v1/auth/verify`,
+    verify: `${API_BASE_URL}/api/v1/auth/me`, // バックエンドの /auth/me を使用
   },
   events: {
-    list: `${API_BASE_URL}/api/v1/events`,
-    create: `${API_BASE_URL}/api/v1/events`,
-    get: (id: string) => `${API_BASE_URL}/api/v1/events/${id}`,
-    update: (id: string) => `${API_BASE_URL}/api/v1/events/${id}`,
-    delete: (id: string) => `${API_BASE_URL}/api/v1/events/${id}`,
+    list: `${API_BASE_URL}/api/v1/debug/events`, // 実際には存在しないかも
+    create: `${API_BASE_URL}/api/v1/create/event`,
+    get: (id: string) => `${API_BASE_URL}/api/v1/event/${id}`,
+    update: (id: string) => `${API_BASE_URL}/api/v1/edit/event/${id}`,
+    delete: (id: string) => `${API_BASE_URL}/api/v1/delete/event/${id}`,
   },
   threads: {
-    list: `${API_BASE_URL}/api/v1/threads`,
-    create: `${API_BASE_URL}/api/v1/threads`,
-    get: (id: string) => `${API_BASE_URL}/api/v1/threads/${id}`,
-    update: (id: string) => `${API_BASE_URL}/api/v1/threads/${id}`,
-    delete: (id: string) => `${API_BASE_URL}/api/v1/threads/${id}`,
+    list: `${API_BASE_URL}/api/v1/debug/threads`, // 実際には存在しないかも
+    create: `${API_BASE_URL}/api/v1/create/thread`,
+    get: (id: string) => `${API_BASE_URL}/api/v1/thread/${id}`,
+    update: (id: string) => `${API_BASE_URL}/api/v1/edit/thread/${id}`,
+    delete: (id: string) => `${API_BASE_URL}/api/v1/delete/thread/${id}`,
   },
   posts: {
-    list: `${API_BASE_URL}/api/v1/posts`,
-    create: `${API_BASE_URL}/api/v1/posts`,
-    get: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
-    update: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
-    delete: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
+    list: `${API_BASE_URL}/api/v1/debug/posts`,
+    create: `${API_BASE_URL}/api/v1/create/post`,
+    get: (id: string) => `${API_BASE_URL}/api/v1/post/${id}`,
+    update: (id: string) => `${API_BASE_URL}/api/v1/edit/post/${id}`,
+    delete: (id: string) => `${API_BASE_URL}/api/v1/delete/post/${id}`,
   },
   health: `${API_BASE_URL}/health`,
+  // 位置情報検索エンドポイント
+  around: {
+    posts: `${API_BASE_URL}/api/v1/around/post`,
+    threads: `${API_BASE_URL}/api/v1/around/thread`,
+    events: `${API_BASE_URL}/api/v1/around/event`,
+  },
 };
 
 // Default fetch options for HTTPS
@@ -47,7 +59,8 @@ export const defaultFetchOptions: RequestInit = {
 // API Client with token support
 export class ApiClient {
   private getAuthHeaders(): HeadersInit {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authtoken') : null;
+    console.log('🔑 Getting auth headers, token:', token ? `${token.substring(0, 10)}...` : 'null');
     return {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -64,17 +77,32 @@ export class ApiClient {
       },
     };
 
+    console.log('🌐 API Request:', {
+      url,
+      method: config.method || 'GET',
+      headers: config.headers,
+      body: config.body ? JSON.parse(config.body as string) : null,
+    });
+
     try {
       const response = await fetch(url, config);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+        console.error('❌ API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+          url,
+        });
         throw new Error(errorData.message || `HTTP ${response.status}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('✅ API Success:', { url, status: response.status });
+      return data;
     } catch (error) {
-      console.error('API Request failed:', error);
+      console.error('💥 API Request failed:', error);
       throw error;
     }
   }
