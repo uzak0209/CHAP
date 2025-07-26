@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import mapboxgl from 'mapbox-gl';
 import { MAPBOX_CONFIG } from '@/constants/map';
 import { useAppSelector } from '@/store';
 import { Status, Post } from '@/types/types';
 
 export const useMapbox = () => {
+  const router = useRouter();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const [is3D, setIs3D] = useState(true);
@@ -204,14 +206,30 @@ export const useMapbox = () => {
     threadMarkersRef.current = [];
 
     console.log('スレッドマーカーを追加中:', threads.length, '件');
-    console.log('スレッドデータの詳細:', threads.map(t => ({
-      id: t.id,
-      content: t.content?.substring(0, 20),
-      coordinate: t.coordinate,
-      category: t.category
-    })));
+    console.log('選択されたカテゴリ（スレッド）:', selectedCategory);
 
-    threads.forEach((thread) => {
+    // 有効なカテゴリのスレッドのみをフィルタリング
+    const validCategoryThreads = threads.filter((thread) => {
+      // タグからカテゴリを取得（最初のタグをカテゴリとして扱う）
+      const category = thread.tags && thread.tags.length > 0 ? thread.tags[0] : '';
+      // 'other'カテゴリは除外（フィルタに対応するカテゴリがないため）
+      const isValidCategory = category !== 'other' && category !== 'その他' && category !== '';
+      
+      // 選択されたカテゴリでフィルタリング
+      const matchesSelectedCategory = category === selectedCategory;
+      
+      const shouldShow = isValidCategory && matchesSelectedCategory;
+      
+      if (isValidCategory) {
+        console.log(`スレッドID:${thread.id}, カテゴリ:${category}, 選択:${selectedCategory}, 表示:${shouldShow}`);
+      }
+      
+      return shouldShow;
+    });
+
+    console.log('有効なカテゴリのスレッド:', validCategoryThreads.length, '件');
+
+    validCategoryThreads.forEach((thread) => {
       if (!thread.coordinate || !thread.coordinate.lat || !thread.coordinate.lng) {
         console.warn('座標が無効なスレッドをスキップ:', thread.id);
         return;
@@ -247,7 +265,7 @@ export const useMapbox = () => {
         className: 'thread-popup thread-popup-yellow'
       })
       .setHTML(`
-        <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg shadow-lg max-w-xs">
+        <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg shadow-lg max-w-xs cursor-pointer hover:shadow-xl transition-shadow" data-thread-id="${thread.id}">
           <div class="p-4">
             <div class="flex items-center gap-2 mb-3">
               <div class="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium">
@@ -271,7 +289,7 @@ export const useMapbox = () => {
 
       // マーカーにクリックイベントを追加（スレッドページに遷移）
       marker.getElement().addEventListener('click', () => {
-        window.location.href = `/threads/${thread.id}`;
+        router.push(`/threads/${thread.id}`);
       });
 
       // マーカーにポップアップを設定してから地図に追加
@@ -288,6 +306,17 @@ export const useMapbox = () => {
           // ポップアップを地図に直接追加して表示
           popup.addTo(mapRef.current!);
           console.log(`✅ スレッド${thread.id}のポップアップを直接表示`);
+          
+          // ポップアップのクリックイベントリスナーを追加
+          const popupElement = document.querySelector(`[data-thread-id="${thread.id}"]`);
+          if (popupElement) {
+            popupElement.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/threads/${thread.id}`);
+            });
+            console.log(`🔗 スレッド${thread.id}のポップアップにクリックイベント追加`);
+          }
           
           // さらにマーカーのポップアップも確認
           setTimeout(() => {
