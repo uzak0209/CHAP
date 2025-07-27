@@ -1,9 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useMapbox } from '@/hooks/useMapbox';
 import { useThreads } from '@/hooks/useThreads';
-import { useAppSelector } from '@/store';
+import { useAppSelector, useAppDispatch } from '@/store';
+import { fetchAroundPosts } from '@/store/postsSlice';
+import { fetchAroundThreads } from '@/store/threadsSlice';
+import { getCurrentLocation } from '@/store/locationSlice';
+import { Status } from '@/types/types';
 import MapControls from '@/components/Map/MapControls';
 import { MultiModalFAB } from '@/components/ui/multi-modal-fab';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -11,7 +15,30 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 export default function MapBackPage() {
   const { mapContainerRef, mapRef, is3D, toggle3D, changeMapView } = useMapbox();
   const { displayThreads } = useThreads(mapRef);
-  const { items: posts } = useAppSelector(state => state.posts);
+  const dispatch = useAppDispatch();
+  const { items: posts, loading: postsLoading, error: postsError } = useAppSelector(state => state.posts);
+  const { items: threads, loading: threadsLoading, error: threadsError } = useAppSelector(state => state.threads);
+  const { location, state: locationState } = useAppSelector(state => state.location);
+
+  // ページ読み込み時に位置情報を取得
+  useEffect(() => {
+    console.log('🌍 map-backページ初期化');
+    console.log('📍 現在の位置情報状態:', locationState);
+    
+    if (locationState === Status.IDLE || locationState === Status.ERROR) {
+      console.log('📡 位置情報を取得中...');
+      dispatch(getCurrentLocation());
+    }
+  }, [dispatch, locationState]);
+
+  // 位置情報が取得できたらデータを取得
+  useEffect(() => {
+    if (locationState === Status.LOADED) {
+      console.log('📍 位置情報取得完了、データ取得開始:', location);
+      dispatch(fetchAroundPosts({ lat: location.lat, lng: location.lng }));
+      dispatch(fetchAroundThreads({ lat: location.lat, lng: location.lng }));
+    }
+  }, [dispatch, locationState, location]);
 
   return (
     <div className="h-full w-full relative">
@@ -32,6 +59,32 @@ export default function MapBackPage() {
       {/* ポップアップ診断パネル */}
       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg z-10">
         <div className="text-xs text-gray-600 mb-2">ポップアップ診断</div>
+        
+        <div className="text-xs text-gray-500 mb-2">
+          <div>投稿: {posts.length}件 {postsLoading.fetch && '(読込中)'}</div>
+          <div>スレッド: {threads.length}件 {threadsLoading.fetch && '(読込中)'}</div>
+          <div>位置情報: {locationState === Status.LOADED ? '取得済み' : locationState}</div>
+          {locationState === Status.LOADED && (
+            <div className="text-xs">
+              📍 {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+            </div>
+          )}
+          <div className="text-xs text-gray-400 mt-1">
+            {locationState === Status.LOADING && '📡 位置取得中...'}
+            {locationState === Status.ERROR && '❌ 位置取得失敗'}
+            {locationState === Status.IDLE && '⏸️ 位置取得待機'}
+          </div>
+          {postsError.fetch && (
+            <div className="text-xs text-red-500 mt-1">
+              投稿エラー: {postsError.fetch}
+            </div>
+          )}
+          {threadsError.fetch && (
+            <div className="text-xs text-red-500 mt-1">
+              スレッドエラー: {threadsError.fetch}
+            </div>
+          )}
+        </div>
         
         <button 
           onClick={() => {
@@ -54,11 +107,32 @@ export default function MapBackPage() {
               console.log(`📌 ポップアップ${index}: ${isVisible ? '表示中' : '非表示'}`);
             });
             
-            alert(`ポップアップ診断結果:\n・マーカー数: ${markerElements.length}\n・ポップアップ数: ${popupElements.length}\n・表示中: ${visibleCount}`);
+            alert(`ポップアップ診断結果:\n・マーカー数: ${markerElements.length}\n・ポップアップ数: ${popupElements.length}\n・表示中: ${visibleCount}\n・投稿: ${posts.length}件\n・スレッド: ${threads.length}件\n・位置情報: ${locationState}`);
           }}
           className="mb-2 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors w-full"
         >
           状態確認
+        </button>
+        
+        <button 
+          onClick={() => {
+            console.log('📡 位置情報とデータを再取得');
+            dispatch(getCurrentLocation())
+              .unwrap()
+              .then((location) => {
+                console.log('✅ 位置情報取得成功:', location);
+                dispatch(fetchAroundPosts({ lat: location.lat, lng: location.lng }));
+                dispatch(fetchAroundThreads({ lat: location.lat, lng: location.lng }));
+                alert(`データを再取得しました\n緯度: ${location.lat.toFixed(4)}\n経度: ${location.lng.toFixed(4)}`);
+              })
+              .catch((error) => {
+                console.error('❌ 位置情報取得失敗:', error);
+                alert('位置情報の取得に失敗しました: ' + error);
+              });
+          }}
+          className="mb-2 px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors w-full"
+        >
+          データ再取得
         </button>
         
         <button 
