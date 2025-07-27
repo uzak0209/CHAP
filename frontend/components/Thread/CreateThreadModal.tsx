@@ -40,13 +40,15 @@ export function CreateThreadModal({ isOpen, onClose }: CreateThreadModalProps) {
     
     setLoading(true);
     try {
+      // カテゴリをタグに追加
+      const allTags = category ? [category, ...tags] : tags;
+      
       await dispatch(createThread({
         content,
-        category: category as PostCategory,
-        tags,
+        tags: allTags,
         coordinate: state === Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
         like: 0,
-        user_id: 'current-user', // 実際のユーザーIDに置き換え
+        user_id: '123e4567-e89b-12d3-a456-426614174000', // 有効なUUID形式に変更
         valid: true,
       }));
       

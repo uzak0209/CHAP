@@ -115,3 +115,17 @@
   background-size: 400% 400%;
   animation: gradient-shift 15s ease infinite;
 }
+
+/* スレッド用黄色吹き出しのスタイル */
+.thread-popup-yellow .mapboxgl-popup-content {
+  background-color: #fef3c7 !important; /* yellow-100 */
+  border: 2px solid #f59e0b !important; /* yellow-500 */
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -3px rgba(245, 158, 11, 0.3), 0 4px 6px -2px rgba(245, 158, 11, 0.05) !important;
+  padding: 0 !important;
+  max-width: none !important;
+}
+
+.thread-popup-yellow .mapboxgl-popup-tip {
+  border-top-color: #f59e0b !important; /* yellow-500 */
+}

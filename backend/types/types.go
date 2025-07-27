@@ -18,6 +18,7 @@ type Post struct {
 	UpdatedTime time.Time      `json:"updated_time" gorm:"autoUpdateTime"`
 	DeletedTime *time.Time     `json:"deleted_time,omitempty"`
 	Content     string         `json:"content"`
+	Category    string         `json:"category" gorm:"default:'other'"`
 	Valid       bool           `json:"valid"`
 	Parent      int            `json:"parent"`
 	Like        int            `json:"like"`
