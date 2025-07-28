@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import mapboxgl from 'mapbox-gl';
 import { MAPBOX_CONFIG } from '@/constants/map';
 import { useAppSelector } from '@/store';
-import { Status, Post } from '@/types/types';
+import { Status, Post, Thread } from '@/types/types';
 
 export const useMapbox = () => {
   const router = useRouter();
@@ -130,7 +130,7 @@ export const useMapbox = () => {
           <div class="absolute -bottom-2 left-5 w-0 h-0" 
                style="position: absolute; bottom: -8px; left: 20px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #eff6ff;"></div>
           
-          <!-- スレッドアイコン -->
+          <!-- 投稿アイコン -->
           <div class="absolute top-2 left-2 h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center"
                style="position: absolute; top: 8px; left: 8px; height: 24px; width: 24px; border-radius: 50%; background-color: #3b82f6; display: flex; align-items: center; justify-content: center;">
             <svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 24 24" style="height: 12px; width: 12px; color: white;">
@@ -146,9 +146,8 @@ export const useMapbox = () => {
             </p>
             <div class="flex justify-between items-center text-xs" 
                  style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
-              <span class="text-red-500 font-medium" style="color: #ef4444; font-weight: 500;">❤️ ${post.like || 0} いいね</span>
+              <span class="text-red-500 font-medium" style="color: #ef4444; font-weight: 500;">❤️ ${post.like || 0}</span>
               <div class="text-blue-600" style="color: #2563eb;">
-                <span class="font-medium" style="font-weight: 500;">${getCategoryName(post.category)}</span>
                 <span class="ml-2" style="margin-left: 0.5rem;">${new Date(post.created_time || '').toLocaleDateString()}</span>
               </div>
             </div>
@@ -169,19 +168,19 @@ export const useMapbox = () => {
         try {
           // ポップアップを地図に直接追加して表示
           popup.addTo(mapRef.current!);
-          console.log(`✅ 投稿${post.id}のポップアップを直接表示`);
+          console.log(` 投稿${post.id}のポップアップを直接表示`);
           
           // さらにマーカーのポップアップも確認
           setTimeout(() => {
             const markerPopup = marker.getPopup();
             if (markerPopup && !markerPopup.isOpen()) {
               marker.togglePopup();
-              console.log(`� 投稿${post.id}のマーカーポップアップも表示`);
+              console.log(`投稿${post.id}のマーカーポップアップも表示`);
             }
           }, 100);
           
         } catch (error) {
-          console.error(`❌ 投稿${post.id}のポップアップ表示エラー:`, error);
+          console.error(`投稿${post.id}のポップアップ表示エラー:`, error);
         }
       }, post === posts[0] ? 200 : 200 + markersRef.current.length * 50); // マーカーごとに少しずつ遅延
     });
@@ -205,8 +204,6 @@ export const useMapbox = () => {
     threadMarkersRef.current.forEach(marker => marker.remove());
     threadMarkersRef.current = [];
 
-    console.log('スレッドマーカーを追加中:', threads.length, '件');
-    console.log('選択されたカテゴリ（スレッド）:', selectedCategory);
 
     // 有効なカテゴリのスレッドのみをフィルタリング
     const validCategoryThreads = threads.filter((thread) => {
@@ -234,6 +231,15 @@ export const useMapbox = () => {
         console.warn('座標が無効なスレッドをスキップ:', thread.id);
         return;
       }
+
+      // スレッドデータの日付情報をデバッグ
+      console.log('🔍 スレッドデータの詳細:', {
+        id: thread.id,
+        created_time: thread.created_time,
+        created_time_type: typeof thread.created_time,
+        updated_at: thread.updated_at,
+        all_props: Object.keys(thread)
+      });
 
       // スレッドマーカーを作成（黄色）
       const marker = new mapboxgl.Marker({ 
@@ -267,20 +273,29 @@ export const useMapbox = () => {
       .setHTML(`
         <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg shadow-lg max-w-xs cursor-pointer hover:shadow-xl transition-shadow" data-thread-id="${thread.id}">
           <div class="p-4">
-            <div class="flex items-center gap-2 mb-3">
-              <div class="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                スレッド
-              </div>
-              ${category ? `<div class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">${getCategoryName(category)}</div>` : ''}
-            </div>
             <div class="mb-3">
-              <h3 class="font-semibold text-gray-900 text-sm mb-1">スレッド</h3>
               <p class="text-gray-700 text-xs leading-relaxed">${thread.content ? thread.content.substring(0, 50) + (thread.content.length > 50 ? '...' : '') : ''}</p>
             </div>
             <div class="text-xs text-gray-500 border-t border-yellow-200 pt-2">
               <div class="flex items-center justify-between">
-                <span>💬 クリックで詳細表示</span>
-                <span class="ml-2">${new Date(thread.created_time || '').toLocaleDateString()}</span>
+                <span class="text-red-500 font-medium" style="color: #ef4444; font-weight: 500;">❤️ ${thread.like || 0}</span>
+                <span class="ml-2">${(() => {
+                  // 安全な日付処理
+                  let dateStr = thread.created_time || thread.updated_at || (thread as any).timestamp;
+                  console.log('📅 日付処理:', { dateStr, id: thread.id });
+                  
+                  // Goのzero value日付をチェック
+                  if (!dateStr || dateStr === '' || dateStr === '0001-01-01T00:00:00Z') {
+                    return '日付不明';
+                  }
+                  
+                  const date = new Date(dateStr);
+                  if (isNaN(date.getTime()) || date.getFullYear() <= 1) {
+                    return '日付不明';
+                  }
+                  
+                  return date.toLocaleDateString('ja-JP');
+                })()}</span>
               </div>
             </div>
           </div>
@@ -298,14 +313,12 @@ export const useMapbox = () => {
       // スレッドマーカーをリストに追加
       threadMarkersRef.current.push(marker);
 
-      console.log(`📌 スレッドマーカー${threadMarkersRef.current.length}を作成: スレッドID=${thread.id}`);
-
       // ポップアップを即座に表示
       setTimeout(() => {
         try {
           // ポップアップを地図に直接追加して表示
           popup.addTo(mapRef.current!);
-          console.log(`✅ スレッド${thread.id}のポップアップを直接表示`);
+          console.log(`スレッド${thread.id}のポップアップを直接表示`);
           
           // ポップアップのクリックイベントリスナーを追加
           const popupElement = document.querySelector(`[data-thread-id="${thread.id}"]`);
@@ -315,7 +328,7 @@ export const useMapbox = () => {
               e.stopPropagation();
               router.push(`/threads/${thread.id}`);
             });
-            console.log(`🔗 スレッド${thread.id}のポップアップにクリックイベント追加`);
+            console.log(`スレッド${thread.id}のポップアップにクリックイベント追加`);
           }
           
           // さらにマーカーのポップアップも確認
@@ -323,12 +336,12 @@ export const useMapbox = () => {
             const markerPopup = marker.getPopup();
             if (markerPopup && !markerPopup.isOpen()) {
               marker.togglePopup();
-              console.log(`🟡 スレッド${thread.id}のマーカーポップアップも表示`);
+              console.log(`スレッド${thread.id}のマーカーポップアップも表示`);
             }
           }, 100);
           
         } catch (error) {
-          console.error(`❌ スレッド${thread.id}のポップアップ表示エラー:`, error);
+          console.error(`スレッド${thread.id}のポップアップ表示エラー:`, error);
         }
       }, 250 + threadMarkersRef.current.length * 50); // スレッドマーカーごとに少しずつ遅延
     });
@@ -560,7 +573,7 @@ export const useMapbox = () => {
     // ズーム・移動・スタイル変更時にポップアップを再表示
     const restorePopups = (event?: any) => {
       const eventType = event?.type || 'unknown';
-      console.log(`🔄 地図変更検出 (${eventType}) - ポップアップを強制復元中...`);
+    
       
       // 短い遅延でまず試行
       setTimeout(() => {
@@ -577,7 +590,7 @@ export const useMapbox = () => {
               }
               marker.togglePopup();
               restoredCount++;
-              console.log(`📌 投稿マーカー${index}のポップアップを強制復元`);
+            
             }
           } catch (error) {
             console.error(`📌 投稿マーカー${index}のポップアップ復元エラー:`, error);
@@ -595,14 +608,14 @@ export const useMapbox = () => {
               }
               marker.togglePopup();
               restoredCount++;
-              console.log(`🟡 スレッドマーカー${index}のポップアップを強制復元`);
+            
             }
           } catch (error) {
-            console.error(`🟡 スレッドマーカー${index}のポップアップ復元エラー:`, error);
+            console.error(`スレッドマーカー${index}のポップアップ復元エラー:`, error);
           }
         });
         
-        console.log(`✅ ポップアップ復元完了: ${restoredCount}個 (${eventType})`);
+        console.log(`ポップアップ復元完了: ${restoredCount}個 (${eventType})`);
       }, 100);
       
       // 追加の確認とダブル復元（確実性を高める）
@@ -615,10 +628,10 @@ export const useMapbox = () => {
             if (popup && !popup.isOpen()) {
               marker.togglePopup();
               doubleCheckCount++;
-              console.log(`🔁 投稿マーカー${index}のポップアップを追加復元`);
+              console.log(`投稿マーカー${index}のポップアップを追加復元`);
             }
           } catch (error) {
-            console.error(`🔁 投稿マーカー${index}の追加復元エラー:`, error);
+            console.error(`投稿マーカー${index}の追加復元エラー:`, error);
           }
         });
 
@@ -628,15 +641,15 @@ export const useMapbox = () => {
             if (popup && !popup.isOpen()) {
               marker.togglePopup();
               doubleCheckCount++;
-              console.log(`🔁 スレッドマーカー${index}のポップアップを追加復元`);
+              console.log(`スレッドマーカー${index}のポップアップを追加復元`);
             }
           } catch (error) {
-            console.error(`🔁 スレッドマーカー${index}の追加復元エラー:`, error);
+            console.error(`スレッドマーカー${index}の追加復元エラー:`, error);
           }
         });
         
         if (doubleCheckCount > 0) {
-          console.log(`🔁 追加復元完了: ${doubleCheckCount}個`);
+          console.log(`追加復元完了: ${doubleCheckCount}個`);
         }
       }, 500);
     };
@@ -653,7 +666,6 @@ export const useMapbox = () => {
     mapRef.current.on('idle', restorePopups);    // 地図がアイドル状態になった時
     mapRef.current.on('load', restorePopups);    // 地図の読み込み完了時
     
-    console.log('🎯 地図イベントリスナーを設定完了（強化版）');
 
     // クリーンアップ関数
     return () => {
@@ -747,11 +759,11 @@ export const useMapbox = () => {
         try {
           const popup = marker.getPopup();
           if (popup && !popup.isOpen()) {
-            console.log(`🟡 スレッドマーカー${index}のポップアップが閉じています - 再表示`);
+            console.log(`スレッドマーカー${index}のポップアップが閉じています - 再表示`);
             marker.togglePopup();
           }
         } catch (error) {
-          console.error(`🟡 スレッドマーカー${index}のポップアップチェックエラー:`, error);
+          console.error(`スレッドマーカー${index}のポップアップチェックエラー:`, error);
         }
       });
     }, 3000); // 3秒ごとにチェック

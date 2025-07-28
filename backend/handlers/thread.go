@@ -111,7 +111,15 @@ func CreateThread(c *gin.Context) {
 
 	// ThreadのUserIDを設定（他のフィールドはリクエストから取得）
 	thread.UserID = uid
-	thread.ID = 0 // 自動インクリメント用に0に設定
+	thread.ID = 0       // 自動インクリメント用に0に設定
+	thread.Valid = true // デフォルトで有効に設定
+	// 明示的に現在時刻を設定（gormタグと併用で確実に）
+	if thread.CreatedTime.IsZero() {
+		thread.CreatedTime = time.Now()
+	}
+	if thread.UpdatedTime.IsZero() {
+		thread.UpdatedTime = time.Now()
+	}
 	// GORMでSupabaseのPostgreSQLに保存
 	result := db.SafeDB().Create(&thread)
 	if result.Error != nil {

@@ -28,9 +28,9 @@ type Thread struct {
 	Coordinate  Coordinate     `json:"coordinate" gorm:"embedded"`
 	ID          uint           `json:"id" gorm:"primaryKey;autoIncrement"`
 	UserID      uuid.UUID      `json:"user_id" gorm:"type:uuid;not null"`
-	CreatedTime time.Time      `json:"created_time"`
-	DeletedTime time.Time      `json:"deleted_time"`
-	UpdatedTime time.Time      `json:"updated_time"`
+	CreatedTime time.Time      `json:"created_time" gorm:"autoCreateTime"`
+	DeletedTime *time.Time     `json:"deleted_time,omitempty"`
+	UpdatedTime time.Time      `json:"updated_time" gorm:"autoUpdateTime"`
 	Content     string         `json:"content"`
 	Valid       bool           `json:"valid"`
 	Like        int            `json:"like"`
@@ -40,9 +40,9 @@ type Event struct {
 	Coordinate  Coordinate     `json:"coordinate" gorm:"embedded"`
 	ID          string         `json:"id" gorm:"primaryKey;autoIncrement"`
 	UserID      uuid.UUID      `json:"user_id" gorm:"type:uuid;not null"`
-	CreatedTime time.Time      `json:"created_time"`
-	DeletedTime time.Time      `json:"deleted_time"`
-	UpdatedTime time.Time      `json:"updated_time"`
+	CreatedTime time.Time      `json:"created_time" gorm:"autoCreateTime"`
+	DeletedTime *time.Time     `json:"deleted_time,omitempty"`
+	UpdatedTime time.Time      `json:"updated_time" gorm:"autoUpdateTime"`
 	Content     string         `json:"content"`
 	Valid       bool           `json:"valid"`
 	Like        int            `json:"like"`

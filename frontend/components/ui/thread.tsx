@@ -62,7 +62,7 @@ const Thread: React.FC<ThreadProps> = ({ message, author, timestamp, className, 
           {message}
         </p>
         <div className="flex justify-between items-center text-xs">
-          <span className="text-red-500 font-medium">❤️ {like} いいね</span>
+          <span className="text-red-500 font-medium">❤️ {like} </span>
           {author && timestamp && (
             <div className="text-blue-600">
               <span className="font-medium">{author}</span>

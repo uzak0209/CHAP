@@ -66,11 +66,7 @@ const ThreadHeader = ({ thread, replyCount }: { thread: Thread; replyCount: numb
       </div>
       <div className="flex items-center gap-1">
         <Heart className="w-3 h-3" />
-        <span>いいね: {thread.like}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <MapPin className="w-3 h-3" />
-        <span>場所: {thread.coordinate.lat.toFixed(4)}, {thread.coordinate.lng.toFixed(4)}</span>
+        <span>{thread.like}</span>
       </div>
     </div>
   </div>

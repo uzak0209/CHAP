@@ -46,7 +46,7 @@ const EventCard = ({ event }: { event: Event }) => (
           <p>{new Date(event.created_time).toLocaleString()}</p>
         </div>
       </div>
-      <div className="flex items-center">
+      {/* <div className="flex items-center">
         <MapPin className="w-5 h-5 mr-3 text-gray-600" />
         <div>
           <p className="font-semibold">場所</p>
@@ -55,7 +55,7 @@ const EventCard = ({ event }: { event: Event }) => (
             {event.coordinate.lng.toFixed(4)}
           </p>
         </div>
-      </div>
+      </div> */}
       {event.tags && event.tags.length > 0 && (
         <div className="flex items-center">
           <Tag className="w-5 h-5 mr-3 text-gray-600" />

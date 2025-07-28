@@ -36,13 +36,13 @@ const ThreadCard = ({ thread }: { thread: Thread }) => {
             <p>{new Date(thread.created_time).toLocaleString()}</p>
           </div>
         </div>
-        <div className="flex items-center">
+        {/* <div className="flex items-center">
           <MapPin className="w-5 h-5 mr-3 text-gray-600" />
           <div>
             <p className="font-semibold">場所</p>
             <p>緯度: {thread.coordinate.lat.toFixed(4)}, 経度: {thread.coordinate.lng.toFixed(4)}</p>
           </div>
-        </div>
+        </div> */}
         {thread.tags && thread.tags.length > 0 && (
           <div className="flex items-center">
             <Tag className="w-5 h-5 mr-3 text-gray-600" />
@@ -56,7 +56,7 @@ const ThreadCard = ({ thread }: { thread: Thread }) => {
           </div>
         )}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">❤️ {thread.like} いいね</span>
+          <span className="text-sm text-gray-500">❤️ {thread.like} </span>
           <Button 
             variant="outline" 
             size="sm"
