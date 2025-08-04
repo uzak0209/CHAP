@@ -31,11 +31,6 @@ const items = [
     icon: Search,
   },
   {
-    title: "投稿",
-    url: "/posts",
-    icon: Inbox,
-  },
-  {
     title: "イベント",
     url: "/events",
     icon: Calendar,

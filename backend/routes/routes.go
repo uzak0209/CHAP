@@ -42,6 +42,7 @@ func SetupRoutes(r *gin.Engine) {
 
 		// デバッグ用（認証不要）- 開発時のみ使用
 		v1.GET("/debug/posts", handlers.GetAllPosts)
+		v1.GET("/debug/events", handlers.GetAllEvents)
 
 		// 認証が必要なエンドポイント
 		auth := v1.Group("")
@@ -57,6 +58,8 @@ func SetupRoutes(r *gin.Engine) {
 			auth.GET("/update/post/:id", handlers.GetUpdatePost)
 			auth.PUT("/edit/post/:id", handlers.EditPost)
 			auth.DELETE("/delete/post/:id", handlers.DeletePost)
+			auth.POST("/post/:id/like", handlers.LikePost)
+			auth.GET("/post/:id/like/status", handlers.GetPostLikeStatus)
 
 			// スレッド関連
 			auth.POST("/create/thread", handlers.CreateThread)
@@ -64,6 +67,8 @@ func SetupRoutes(r *gin.Engine) {
 			auth.GET("/update/thread/:id", handlers.GetUpdateThread)
 			auth.PUT("/edit/thread/:id", handlers.EditThread)
 			auth.DELETE("/delete/thread/:id", handlers.DeleteThread)
+			auth.POST("/thread/:id/like", handlers.LikeThread)
+			auth.GET("/thread/:id/like/status", handlers.GetThreadLikeStatus)
 
 			// イベント関連
 			auth.POST("/create/event", handlers.CreateEvent)

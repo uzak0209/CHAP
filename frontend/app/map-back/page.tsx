@@ -6,6 +6,7 @@ import { useThreads } from '@/hooks/useThreads';
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchAroundPosts } from '@/store/postsSlice';
 import { fetchAroundThreads } from '@/store/threadsSlice';
+import { fetchAroundEvents } from '@/store/eventsSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
 import { Status } from '@/types/types';
 import MapControls from '@/components/Map/MapControls';
@@ -38,6 +39,9 @@ export default function MapBackPage() {
   // スレッドデータの状態
   const { items: threads, loading: threadsLoading, error: threadsError } = useAppSelector(state => state.threads);
   
+  // イベントデータの状態
+  const { items: events, loading: eventsLoading, error: eventsError } = useAppSelector(state => state.events);
+  
   // 位置情報の状態
   const { location, state: locationState } = useAppSelector(state => state.location);
 
@@ -57,6 +61,8 @@ export default function MapBackPage() {
       dispatch(fetchAroundPosts({ lat: location.lat, lng: location.lng }));
       // 現在位置を中心とした周辺のスレッドを取得
       dispatch(fetchAroundThreads({ lat: location.lat, lng: location.lng }));
+      // 現在位置を中心とした周辺のイベントを取得
+      dispatch(fetchAroundEvents({ lat: location.lat, lng: location.lng }));
     }
   }, [dispatch, locationState, location]);
 

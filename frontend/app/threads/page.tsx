@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
-import { MessageCircle, MapPin, Users, Tag } from 'lucide-react';
+import { MessageCircle, MapPin, Users, Tag, Heart } from 'lucide-react';
 
 import { fetchAroundThreads, threadsActions } from '@/store/threadsSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
@@ -56,7 +56,10 @@ const ThreadCard = ({ thread }: { thread: Thread }) => {
           </div>
         )}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">❤️ {thread.like} </span>
+          <div className="flex items-center gap-1">
+            <Heart className="w-3 h-3" />
+            <span className="text-sm text-gray-500">{thread.like} </span>
+          </div>
           <Button 
             variant="outline" 
             size="sm"

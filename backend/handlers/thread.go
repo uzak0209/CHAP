@@ -240,3 +240,145 @@ func DeleteThread(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "thread deleted"})
 }
+
+// LikeThread - スレッドのいいね/いいね解除機能
+func LikeThread(c *gin.Context) {
+	threadID := c.Param("id")
+	userID := c.GetString("user_id")
+
+	log.Printf("[LikeThread] 開始 - ThreadID: %s, UserID: %s", threadID, userID)
+
+	// UUIDをパース
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		log.Printf("[LikeThread] UUIDパースエラー: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
+		return
+	}
+
+	// Thread IDを数値に変換
+	tid, err := strconv.ParseUint(threadID, 10, 32)
+	if err != nil {
+		log.Printf("[LikeThread] ThreadIDパースエラー: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid thread_id format"})
+		return
+	}
+
+	// スレッドが存在するかチェック
+	var thread types.Thread
+	if err := db.SafeDB().Where("id = ?", tid).First(&thread).Error; err != nil {
+		log.Printf("[LikeThread] スレッドが見つかりません: %v", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
+		return
+	}
+
+	log.Printf("[LikeThread] スレッド発見 - 現在のいいね数: %d", thread.Like)
+
+	// 既にいいねしているかチェック
+	var existingLike types.ThreadLikes
+	err = db.SafeDB().Where("user_id = ? AND thread_id = ?", uid, tid).First(&existingLike).Error
+	
+	dbConn := db.SafeDB()
+	if err == gorm.ErrRecordNotFound {
+		// いいねが存在しない場合は新規作成
+		log.Printf("[LikeThread] いいね追加処理開始")
+		newLike := types.ThreadLikes{
+			UserID:   uid,
+			ThreadID: uint(tid),
+		}
+		
+		// トランザクション開始
+		tx := dbConn.Begin()
+		
+		// いいね作成
+		if err := tx.Create(&newLike).Error; err != nil {
+			log.Printf("[LikeThread] いいね作成エラー: %v", err)
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create like"})
+			return
+		}
+		
+		// スレッドのいいね数を+1
+		newLikeCount := thread.Like + 1
+		if err := tx.Model(&thread).Update("like", newLikeCount).Error; err != nil {
+			log.Printf("[LikeThread] いいね数更新エラー: %v", err)
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update like count"})
+			return
+		}
+		
+		tx.Commit()
+		log.Printf("[LikeThread] いいね追加完了 - 新しいいいね数: %d", newLikeCount)
+		c.JSON(http.StatusOK, gin.H{"liked": true, "like_count": newLikeCount})
+
+	} else if err == nil {
+		// 既にいいねしている場合は削除（いいね取り消し）
+		log.Printf("[LikeThread] いいね削除処理開始")
+		tx := dbConn.Begin()
+		
+		// いいね削除
+		if err := tx.Delete(&existingLike).Error; err != nil {
+			log.Printf("[LikeThread] いいね削除エラー: %v", err)
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to remove like"})
+			return
+		}
+		
+		// スレッドのいいね数を-1（0以下にはならないように）
+		newLikeCount := thread.Like - 1
+		if newLikeCount < 0 {
+			newLikeCount = 0
+		}
+		if err := tx.Model(&thread).Update("like", newLikeCount).Error; err != nil {
+			log.Printf("[LikeThread] いいね数更新エラー: %v", err)
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update like count"})
+			return
+		}
+		
+		tx.Commit()
+		log.Printf("[LikeThread] いいね削除完了 - 新しいいいね数: %d", newLikeCount)
+		c.JSON(http.StatusOK, gin.H{"liked": false, "like_count": newLikeCount})
+
+	} else {
+		// その他のエラー
+		log.Printf("[LikeThread] データベースエラー: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error"})
+	}
+}
+
+// GetThreadLikeStatus - スレッドのいいね状態を取得
+func GetThreadLikeStatus(c *gin.Context) {
+	threadID := c.Param("id")
+	userID := c.GetString("user_id")
+
+	// UUIDをパース
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
+		return
+	}
+
+	// Thread IDを数値に変換
+	tid, err := strconv.ParseUint(threadID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid thread_id format"})
+		return
+	}
+
+	// スレッドが存在するかチェック
+	var thread types.Thread
+	if err := db.SafeDB().Where("id = ?", tid).First(&thread).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
+		return
+	}
+
+	// いいね状態をチェック
+	var existingLike types.ThreadLikes
+	liked := db.SafeDB().Where("user_id = ? AND thread_id = ?", uid, tid).First(&existingLike).Error == nil
+
+	c.JSON(http.StatusOK, gin.H{
+		"liked":      liked,
+		"like_count": thread.Like,
+	})
+}

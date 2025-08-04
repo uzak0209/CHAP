@@ -1,5 +1,5 @@
 // API Base URL Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://56.155.98.63:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
 const USE_HTTPS = process.env.NEXT_PUBLIC_USE_HTTPS === 'true';
 
 // API Endpoints
@@ -110,3 +110,133 @@ export class ApiClient {
 export const apiClient = new ApiClient();
 
 export default API_BASE_URL;
+
+// いいね機能
+export const likePost = async (postId: number): Promise<{ liked: boolean; like_count: number }> => {
+  const token = localStorage.getItem('authtoken'); // authSliceと一致するキー名に修正
+  
+  console.log('🔍 いいねAPI呼び出し詳細:', {
+    postId,
+    hasToken: !!token,
+    apiUrl: `${API_BASE_URL}/post/${postId}/like`
+  });
+
+  const response = await fetch(`${API_BASE_URL}/api/v1/post/${postId}/like`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+    },
+  });
+
+  console.log('🔍 いいねAPIレスポンス詳細:', {
+    status: response.status,
+    statusText: response.statusText,
+    ok: response.ok,
+    headers: Object.fromEntries(response.headers.entries())
+  });
+
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    try {
+      // レスポンスのクローンを作成して、複数回読み込みを回避
+      const responseClone = response.clone();
+      const errorData = await responseClone.json();
+      console.error('❌ いいねAPIエラーレスポンス:', errorData);
+      errorMessage = errorData.error || errorMessage;
+    } catch (parseError) {
+      console.error('❌ エラーレスポンスのJSON解析に失敗:', parseError);
+      try {
+        const responseText = await response.text();
+        console.error('❌ レスポンステキスト:', responseText);
+        errorMessage = responseText || errorMessage;
+      } catch (textError) {
+        console.error('❌ レスポンステキストの取得にも失敗:', textError);
+      }
+    }
+    throw new Error(`Failed to toggle like: ${errorMessage}`);
+  }
+
+  return response.json();
+};
+
+export const getPostLikeStatus = async (postId: number): Promise<{ liked: boolean; like_count: number }> => {
+  const token = localStorage.getItem('authtoken'); // authSliceと一致するキー名に修正
+  const response = await fetch(`${API_BASE_URL}/api/v1/post/${postId}/like/status`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to get like status');
+  }
+
+  return response.json();
+};
+
+// スレッドのいいね機能API
+export const likeThread = async (threadId: number): Promise<{ liked: boolean; like_count: number }> => {
+  const token = localStorage.getItem('authtoken');
+  
+  console.log('🔍 スレッドいいねAPI呼び出し詳細:', {
+    threadId,
+    hasToken: !!token,
+    apiUrl: `${API_BASE_URL}/api/v1/thread/${threadId}/like`
+  });
+
+  const response = await fetch(`${API_BASE_URL}/api/v1/thread/${threadId}/like`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+    },
+  });
+
+  console.log('🔍 スレッドいいねAPIレスポンス詳細:', {
+    status: response.status,
+    statusText: response.statusText,
+    ok: response.ok
+  });
+
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    try {
+      const responseClone = response.clone();
+      const errorData = await responseClone.json();
+      console.error('❌ スレッドいいねAPIエラーレスポンス:', errorData);
+      errorMessage = errorData.error || errorMessage;
+    } catch (parseError) {
+      console.error('❌ エラーレスポンスのJSON解析に失敗:', parseError);
+      try {
+        const responseText = await response.text();
+        console.error('❌ レスポンステキスト:', responseText);
+        errorMessage = responseText || errorMessage;
+      } catch (textError) {
+        console.error('❌ レスポンステキストの取得にも失敗:', textError);
+      }
+    }
+    throw new Error(`Failed to toggle thread like: ${errorMessage}`);
+  }
+
+  return response.json();
+};
+
+export const getThreadLikeStatus = async (threadId: number): Promise<{ liked: boolean; like_count: number }> => {
+  const token = localStorage.getItem('authtoken');
+  const response = await fetch(`${API_BASE_URL}/api/v1/thread/${threadId}/like/status`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to get thread like status');
+  }
+
+  return response.json();
+};

@@ -61,15 +61,15 @@ type User struct {
 }
 type PostLikes struct {
 	UserID uuid.UUID `json:"user_id" gorm:"type:uuid;not null;primaryKey"`
-	PostID uuid.UUID `json:"post_id" gorm:"type:uuid;not null;primaryKey"`
+	PostID uint      `json:"post_id" gorm:"not null;primaryKey"`
 }
 type ThreadLikes struct {
 	UserID   uuid.UUID `json:"user_id" gorm:"type:uuid;not null;primaryKey"`
-	ThreadID uuid.UUID `json:"thread_id" gorm:"type:uuid;not null;primaryKey"`
+	ThreadID uint      `json:"thread_id" gorm:"not null;primaryKey"`
 }
 type EventLikes struct {
 	UserID  uuid.UUID `json:"user_id" gorm:"type:uuid;not null;primaryKey"`
-	EventID uuid.UUID `json:"event_id" gorm:"type:uuid;not null;primaryKey"`
+	EventID string    `json:"event_id" gorm:"not null;primaryKey"`
 }
 
 type Coordinate struct {

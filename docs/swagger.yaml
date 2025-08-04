@@ -456,9 +456,6 @@ components:
         password:
           type: string
           description: パスワード
-        image:
-          type: string
-          description: プロフィール画像URL
         likes:
           type: integer
           description: いいね数

@@ -2,18 +2,37 @@
 
 import React, { useState } from 'react';
 import { Button } from './button';
-import { Plus, MessageSquareText, Image, X } from 'lucide-react';
+import { Plus, MessageSquareText, Image, X, Calendar } from 'lucide-react';
 import { CreatePostModal } from '@/components/Post/CreatePostModal';
 import { CreateThreadModal } from '@/components/Thread/CreateThreadModal';
+import { CreateEventModal } from '@/components/Event/CreateEventModal';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { fetchAroundEvents } from '@/store/eventsSlice';
+import { Status } from '@/types/types';
 
 interface MultiModalFABProps {
   className?: string;
 }
 
 export function MultiModalFAB({ className = '' }: MultiModalFABProps) {
+  const dispatch = useAppDispatch();
+  const { location, state: locationState } = useAppSelector(state => state.location);
+  
   const [isOpen, setIsOpen] = useState(false);
   const [showPostModal, setShowPostModal] = useState(false);
   const [showThreadModal, setShowThreadModal] = useState(false);
+  const [showEventModal, setShowEventModal] = useState(false);
+
+  // イベント作成後の処理
+  const handleEventModalClose = () => {
+    setShowEventModal(false);
+    
+    // イベント作成が成功した場合、イベントデータを再取得
+    if (locationState === Status.LOADED) {
+      console.log('🔄 イベント作成後、周辺イベントを再取得します');
+      dispatch(fetchAroundEvents({ lat: location.lat, lng: location.lng }));
+    }
+  };
 
   const actions = [
     {
@@ -33,6 +52,15 @@ export function MultiModalFAB({ className = '' }: MultiModalFABProps) {
         setShowThreadModal(true);
       },
       bgColor: 'bg-purple-600 hover:bg-purple-700'
+    },
+    {
+      icon: <Calendar className="h-5 w-5" />,
+      label: 'イベント作成',
+      onClick: () => {
+        setIsOpen(false);
+        setShowEventModal(true);
+      },
+      bgColor: 'bg-orange-600 hover:bg-orange-700'
     }
   ];
 
@@ -95,6 +123,10 @@ export function MultiModalFAB({ className = '' }: MultiModalFABProps) {
       <CreateThreadModal 
         isOpen={showThreadModal} 
         onClose={() => setShowThreadModal(false)} 
+      />
+      <CreateEventModal 
+        isOpen={showEventModal} 
+        onClose={handleEventModalClose} 
       />
     </>
   );

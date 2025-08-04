@@ -23,6 +23,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [like, setLike] = useState(0);
   
   const dispatch = useAppDispatch();
   const { state, location } = useAppSelector((state) => state.location);

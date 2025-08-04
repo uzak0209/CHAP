@@ -17,7 +17,7 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const storedToken = localStorage.getItem('authToken');
+      const storedToken = localStorage.getItem('authtoken');
       
       if (storedToken && !isAuthenticated) {
         try {
@@ -32,11 +32,11 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
             const userData = await response.json();
             dispatch(setUser(userData.user));
           } else {
-            localStorage.removeItem('authToken');
+            localStorage.removeItem('authtoken');
           }
         } catch (error) {
           console.error('Auth initialization failed:', error);
-          localStorage.removeItem('authToken');
+          localStorage.removeItem('authtoken');
         }
       }
     };

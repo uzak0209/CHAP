@@ -12,6 +12,21 @@ import (
 	"gorm.io/gorm"
 )
 
+// GetAllEvents デバッグ用：全イベント取得
+func GetAllEvents(c *gin.Context) {
+	var events []types.Event
+	result := db.SafeDB().Find(&events)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch events"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"count":  len(events),
+		"events": events,
+	})
+}
+
 func EditEvent(c *gin.Context) {
 	id := c.Param("id")
 	var event types.Event
