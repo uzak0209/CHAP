@@ -49,7 +49,7 @@ export const createPostPopupHTML = (post: Post) => {
 export const createThreadPopupHTML = (thread: Thread) => {
   // 安全な日付処理
   const formatDate = () => {
-    let dateStr = thread.created_time || thread.updated_at || (thread as any).timestamp;
+    let dateStr = thread.updated_at || (thread as any).timestamp;
     
     // Goのzero value日付をチェック
     if (!dateStr || dateStr === '' || dateStr === '0001-01-01T00:00:00Z') {
