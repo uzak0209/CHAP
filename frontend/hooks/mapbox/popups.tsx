@@ -132,55 +132,55 @@ export const createEventPopupHTML = (event: Event) => {
   };
 
   return `
-    <div class="relative max-w-sm shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
-         data-event-id="${event.id}"
-         data-category="${validCategory}"
-         style="max-width: 20rem; background: ${colors.background}; border: 1px solid ${colors.border}; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-radius: 1rem; overflow: hidden; position: relative;">
-      
-      <!-- 吹き出しの矢印 -->
-      <div class="absolute -bottom-2 left-5 w-0 h-0" 
-           style="position: absolute; bottom: -8px; left: 20px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid ${colors.arrow};"></div>
-      
-      <!-- イベントアイコン -->
-      <div class="absolute top-2 left-2 h-6 w-6 rounded-full flex items-center justify-center"
-           style="position: absolute; top: 8px; left: 8px; height: 24px; width: 24px; border-radius: 50%; background-color: ${colors.iconBg}; display: flex; align-items: center; justify-content: center;">
-        <svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 24 24" style="height: 12px; width: 12px; color: white;">
-          <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-        </svg>
-      </div>
-      
-      ${isNewEvent ? `
-      <!-- 新規イベント表示 -->
-      <div class="absolute top-2 right-2 text-white text-xs px-2 py-1 rounded-full"
-           style="position: absolute; top: 8px; right: 8px; background-color: ${colors.iconBg}; color: white; font-size: 0.75rem; padding: 4px 8px; border-radius: 9999px;">
-        NEW!
-      </div>
-      ` : ''}
-      
-      <!-- メッセージコンテンツ -->
-      <div class="p-4 pt-8" style="padding: 1rem; padding-top: 2rem;">
-        <h3 class="font-bold mb-2 text-lg" style="color: ${colors.textColor}; font-size: 1.125rem; margin-bottom: 0.5rem; font-weight: bold;">
-          ${event.content ? event.content.substring(0, 30) + (event.content.length > 30 ? '...' : '') : 'イベント'}
-        </h3>
-        <p class="text-sm mb-3" style="color: ${colors.textColor}; font-size: 0.875rem; margin-bottom: 0.75rem; opacity: 0.8;">
-          📅 ${getCategoryLabel(eventCategory)}
-        </p>
-        <div class="flex justify-between items-center text-xs" 
-             style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
-          <div class="flex items-center gap-1">
-            <svg id="heart-event-${event.id}" class="w-3 h-3 cursor-pointer hover:scale-110 transition-transform" fill="white" viewBox="0 0 24 24" style="width: 12px; height: 12px;">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
-            <span id="like-count-event-${event.id}" class="text-white font-medium" style="color: #efffff; font-weight: 500;">${event.like || 0}</span>
-          </div>
-          <div style="color: ${colors.textColor}; opacity: 0.7;">
-            <span class="font-medium" style="font-weight: 500;">📍 ${!event.coordinate ? '現在地' : 'イベント'}</span>
-            <span class="ml-2" style="margin-left: 0.5rem;">${formatDate()}</span>
-          </div>
+  <div class="relative max-w-sm shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
+       data-event-id="${event.id}"
+       data-category="${validCategory}"
+       style="max-width: 20rem; background: ${colors.background}; border: 1px solid ${colors.border}; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-radius: 1rem; overflow: hidden; position: relative;">
+    
+    <!-- 吹き出しの矢印 -->
+    <div class="absolute -bottom-2 left-5 w-0 h-0" 
+         style="position: absolute; bottom: -8px; left: 20px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid ${colors.arrow};"></div>
+    
+    <!-- イベントアイコン -->
+    <div class="absolute top-2 left-2 h-6 w-6 rounded-full flex items-center justify-center"
+         style="position: absolute; top: 8px; left: 8px; height: 24px; width: 24px; border-radius: 50%; background-color: ${colors.iconBg}; display: flex; align-items: center; justify-content: center;">
+      <svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 24 24" style="height: 12px; width: 12px; color: white;">
+        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+      </svg>
+    </div>
+    
+    ${isNewEvent ? `
+    <!-- 新規イベント表示 -->
+    <div class="absolute top-2 right-2 text-white text-xs px-2 py-1 rounded-full"
+         style="position: absolute; top: 8px; right: 8px; background-color: ${colors.iconBg}; color: white; font-size: 0.625rem; padding: 2px 6px; border-radius: 9999px;">
+      NEW!
+    </div>
+    ` : ''}
+    
+    <!-- メッセージコンテンツ -->
+    <div class="p-3 pt-7" style="padding: 0.75rem; padding-top: 1.75rem;">
+      <h3 class="font-bold mb-1 text-sm" style="color: ${colors.textColor}; font-size: 0.875rem; margin-bottom: 0.25rem; font-weight: bold;">
+        ${event.content ? event.content.substring(0, 30) + (event.content.length > 30 ? '...' : '') : 'イベント'}
+      </h3>
+      <p class="text-xs mb-2" style="color: ${colors.textColor}; font-size: 0.75rem; margin-bottom: 0.5rem; opacity: 0.8;">
+        📅 ${getCategoryLabel(eventCategory)}
+      </p>
+      <div class="flex justify-between items-center text-xs" 
+           style="display: flex; justify-content: space-between; align-items: center; font-size: 0.65rem;">
+        <div class="flex items-center gap-1">
+          <svg id="heart-event-${event.id}" class="w-3 h-3 cursor-pointer hover:scale-110 transition-transform" fill="white" viewBox="0 0 24 24" style="width: 10px; height: 10px;">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span id="like-count-event-${event.id}" class="text-white font-medium" style="color: #efffff; font-weight: 500; font-size: 0.65rem;">${event.like || 0}</span>
+        </div>
+        <div style="color: ${colors.textColor}; opacity: 0.7;">
+          <span class="font-medium" style="font-weight: 500;">📍 ${!event.coordinate ? '現在地' : 'イベント'}</span>
+          <span class="ml-2" style="margin-left: 0.5rem;">${formatDate()}</span>
         </div>
       </div>
     </div>
-  `;
+  </div>
+`;
 };
 
 // 初期いいね状態の確認と色設定関数（投稿用）

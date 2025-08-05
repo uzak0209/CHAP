@@ -96,8 +96,6 @@ export const createMarkerFunctions = (
     })
       .setLngLat([location.lng, location.lat])
       .addTo(mapRef.current!);
-
-    console.log('現在地マーカーを追加:', [location.lng, location.lat]);
   };
 
   // 投稿マーカーを地図に追加する関数
@@ -107,8 +105,6 @@ export const createMarkerFunctions = (
     // 既存のマーカーを削除
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
-
-    console.log('投稿マーカーを追加中:', posts.length, '件');
 
     // 有効なカテゴリのポストのみをフィルタリング
     const validCategoryPosts = posts.filter((post) => {
@@ -129,7 +125,7 @@ export const createMarkerFunctions = (
       // マーカーを作成
       const marker = new mapboxgl.Marker({ 
         color: getMarkerColor(post.category),
-        scale: 0.8
+        scale: 0.5
       }).setLngLat(coordinates);
 
       // ポップアップを作成・設定
@@ -157,8 +153,6 @@ export const createMarkerFunctions = (
         }
       }, post === posts[0] ? 200 : 200 + markersRef.current.length * 50);
     });
-
-    console.log('投稿マーカー追加完了:', markersRef.current.length, '個');
   };
 
   // スレッドマーカーを地図に追加する関数
@@ -179,7 +173,6 @@ export const createMarkerFunctions = (
       return isValidCategory && matchesSelectedCategory;
     });
 
-    console.log('有効なカテゴリのスレッド:', validCategoryThreads.length, '件');
 
     validCategoryThreads.forEach((thread) => {
       if (!thread.coordinate || !thread.coordinate.lat || !thread.coordinate.lng) {
@@ -192,7 +185,7 @@ export const createMarkerFunctions = (
       // スレッドマーカーを作成（黄色）
       const marker = new mapboxgl.Marker({ 
         color: '#ffd700',
-        scale: 0.8 
+        scale: 0.6 
       }).setLngLat(coordinates);
 
       // ポップアップを作成・設定
@@ -234,6 +227,7 @@ export const createMarkerFunctions = (
 
   // イベントマーカーを地図に追加する関数
   const addEventMarkers = () => {
+
     if (!mapRef.current || !events || events.length === 0) {
       console.log('🔄 イベントマーカー追加をスキップ: マップまたはイベントデータなし');
       return;
@@ -268,8 +262,8 @@ export const createMarkerFunctions = (
 
     // 有効なカテゴリのイベントのみをフィルタリング
     const validCategoryEvents = events.filter((event) => {
-      const category = event.category || (event.tags && event.tags.length > 0 ? event.tags[0] : '');
-      const isValidCategory = category !== 'other' && category !== 'その他' && category !== '';
+      const category = event.category; 
+      const isValidCategory = category !== 'other' && category !== 'その他';
       const matchesSelectedCategory = category === selectedCategory;
       
       console.log(`🔍 イベント${event.id}フィルタ詳細:`, {
