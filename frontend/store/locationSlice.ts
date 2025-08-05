@@ -4,7 +4,7 @@ import { LatLng ,Status,LocationState} from "@/types/types";
 
 const initialState: LocationState = {
   state: Status.IDLE,
-  location: { Lat: 0, Lng: 0 }, // デフォルト値として0,0を設定
+  location: { lat: 0, lng: 0 }, // デフォルト値として0,0を設定
   error: undefined,
 };
 
@@ -24,8 +24,8 @@ export const getCurrentLocation = createAsyncThunk<
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const coords = {
-          Lat: position.coords.latitude,
-          Lng: position.coords.longitude,
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
         };
         resolve(coords);
       },

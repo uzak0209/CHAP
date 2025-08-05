@@ -13,9 +13,7 @@ import { useRouter } from 'next/navigation';
 import { createPost, useAppDispatch,useAppSelector } from '@/store';
 import { LatLng ,Status,LocationState, PostCategory} from '@/types/types';
 import { POST_CATEGORY_OPTIONS } from '@/constants/categories';
-import { POST_CATEGORY_OPTIONS } from '@/constants/categories';
 
-const categoryOptions = POST_CATEGORY_OPTIONS;
 const categoryOptions = POST_CATEGORY_OPTIONS;
 
 export default function PostPage() {
