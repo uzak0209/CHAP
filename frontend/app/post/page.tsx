@@ -12,12 +12,9 @@ import { Camera, MapPin, Hash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createPost, useAppDispatch,useAppSelector } from '@/store';
 import { LatLng ,Status,LocationState, PostCategory} from '@/types/types';
+import { POST_CATEGORY_OPTIONS } from '@/constants/categories';
 
-const categoryOptions = [
-  { value: 'entertainment', label: 'エンターテイメント' },
-  { value: 'community', label: '地域住民コミュニケーション' },
-  { value: 'disaster', label: '災害情報' }
-];
+const categoryOptions = POST_CATEGORY_OPTIONS;
 
 export default function PostPage() {
   const [content, setContent] = useState('');

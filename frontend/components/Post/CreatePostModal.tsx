@@ -11,6 +11,7 @@ import { X, Camera, MapPin, Hash } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { createPost } from '@/store/postsSlice';
 import { Status, PostCategory } from '@/types/types';
+import { POST_CATEGORY_OPTIONS } from '@/constants/categories';
 
 interface CreatePostModalProps {
   isOpen: boolean;
@@ -28,11 +29,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
   const dispatch = useAppDispatch();
   const { state, location } = useAppSelector((state) => state.location);
 
-  const categoryOptions = [
-    { value: 'entertainment', label: 'エンターテイメント' },
-    { value: 'community', label: '地域住民コミュニケーション' },
-    { value: 'disaster', label: '災害情報' }
-  ];
+  const categoryOptions = POST_CATEGORY_OPTIONS;
 
   const handleSubmit = async () => {
     if (!content.trim() || !category) return;

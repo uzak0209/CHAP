@@ -14,6 +14,7 @@ import { createEvent, eventsActions } from '@/store/eventsSlice';
 import { filtersActions } from '@/store/filtersSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
 import { Event, EventCategory, Status } from '@/types/types';
+import { EVENT_CATEGORY_OPTIONS } from '@/constants/categories';
 
 
 export default function CreateEventPage() {
@@ -161,12 +162,7 @@ function EventCategorySection({
   category: EventCategory | ''; 
   onCategoryChange: (value: EventCategory | '') => void;
 }) {
-  const categoryOptions = [
-    { value: '', label: 'カテゴリを選択してください' },
-    { value: 'entertainment', label: 'エンターテイメント' },
-    { value: 'community', label: '地域住民コミュニケーション' },
-    { value: 'disaster', label: '災害情報' },
-  ];
+  const categoryOptions = EVENT_CATEGORY_OPTIONS;
 
   return (
     <div className="space-y-2">

@@ -12,6 +12,7 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import { createThread } from '@/store/threadsSlice';
 import { Status } from '@/types/types';
 import { PostCategory } from '@/types/thread';
+import { THREAD_CATEGORY_OPTIONS } from '@/constants/categories';
 
 interface CreateThreadModalProps {
   isOpen: boolean;
@@ -28,11 +29,7 @@ export function CreateThreadModal({ isOpen, onClose }: CreateThreadModalProps) {
   const dispatch = useAppDispatch();
   const { state, location } = useAppSelector((state) => state.location);
 
-  const categoryOptions = [
-    { value: 'entertainment', label: 'エンターテイメント' },
-    { value: 'community', label: '地域住民コミュニケーション' },
-    { value: 'disaster', label: '災害情報' }
-  ];
+  const categoryOptions = THREAD_CATEGORY_OPTIONS;
 
   const handleSubmit = async () => {
     if (!content.trim() || !category) return;

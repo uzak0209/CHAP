@@ -18,13 +18,6 @@ export const createPostPopupHTML = (post: Post) => {
       <div class="absolute -bottom-2 left-5 w-0 h-0" 
            style="position: absolute; bottom: -8px; left: 20px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #eff6ff;"></div>
       
-      <!-- 投稿アイコン -->
-      <div class="absolute top-2 left-2 h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center"
-           style="position: absolute; top: 8px; left: 8px; height: 24px; width: 24px; border-radius: 50%; background-color: #3b82f6; display: flex; align-items: center; justify-content: center;">
-        <svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 24 24" style="height: 12px; width: 12px; color: white;">
-          <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-        </svg>
-      </div>
       
       <!-- メッセージコンテンツ -->
       <div class="p-4 pt-8" style="padding: 1rem; padding-top: 2rem;">
@@ -145,13 +138,13 @@ export const createEventPopupHTML = (event: Event) => {
     <div class="absolute -bottom-2 left-5 w-0 h-0" 
          style="position: absolute; bottom: -8px; left: 20px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid ${colors.arrow};"></div>
     
-    <!-- イベントアイコン -->
-    <div class="absolute top-2 left-2 h-6 w-6 rounded-full flex items-center justify-center"
-         style="position: absolute; top: 8px; left: 8px; height: 24px; width: 24px; border-radius: 50%; background-color: ${colors.iconBg}; display: flex; align-items: center; justify-content: center;">
-      <svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 24 24" style="height: 12px; width: 12px; color: white;">
-        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-      </svg>
-    </div>
+    // <!-- イベントアイコン -->
+    // <div class="absolute top-2 left-2 h-6 w-6 rounded-full flex items-center justify-center"
+    //      style="position: absolute; top: 8px; left: 8px; height: 24px; width: 24px; border-radius: 50%; background-color: ${colors.iconBg}; display: flex; align-items: center; justify-content: center;">
+    //   <svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 24 24" style="height: 12px; width: 12px; color: white;">
+    //     <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+    //   </svg>
+    // </div>
     
     ${isNewEvent ? `
     <!-- 新規イベント表示 -->
@@ -353,14 +346,6 @@ const getCategoryColors = (category: string) => {
         textColor: '#134e4a',
         arrow: '#f0fdfa'
       };
-    case 'information':
-      return {
-        background: 'linear-gradient(to bottom right, #eff6ff, #dbeafe)', 
-        border: '#93c5fd',
-        iconBg: '#3b82f6',
-        textColor: '#1e3a8a',
-        arrow: '#eff6ff'
-      };
     case 'disaster':
       return {
         background: 'linear-gradient(to bottom right, #fef2f2, #fee2e2)',
@@ -368,23 +353,6 @@ const getCategoryColors = (category: string) => {
         iconBg: '#dc2626',
         textColor: '#991b1b',
         arrow: '#fef2f2'
-      };
-    case 'food':
-      return {
-        background: 'linear-gradient(to bottom right, #fffbeb, #fef3c7)',
-        border: '#fcd34d',
-        iconBg: '#f59e0b',
-        textColor: '#92400e',
-        arrow: '#fffbeb'
-      };
-    case 'event':
-    default:
-      return {
-        background: 'linear-gradient(to bottom right, #ecfdf5, #d1fae5)',
-        border: '#86efac',
-        iconBg: '#10b981',
-        textColor: '#064e3b',
-        arrow: '#ecfdf5'
       };
   }
 };
