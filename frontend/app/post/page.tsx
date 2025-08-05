@@ -42,7 +42,7 @@ export default function PostPage() {
         coordinate: state===Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
         valid: true,
         like: 0,
-        updated_time: new Date().toISOString(),
+        created_at: new Date().toISOString(),
       }));
       router.push('/timeline');
     } catch (error) {
@@ -193,6 +193,7 @@ function TagsSection({
   onAddTag: () => void;
   onRemoveTag: (tag: string) => void;
 }) {
+  
   const dispatch = useAppDispatch();
   return (
     <div>
