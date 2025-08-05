@@ -6,7 +6,7 @@ import { useAppSelector } from '@/store';
 import { Status } from '@/types/types';
 import { createMarkerFunctions } from '@/hooks/mapbox/markers';
 import { initializeMapboxToken, createMapInstance, setupMapLabels, setupMapStyle, hideRoadLayers, createMapStyles, createRestorePopupsFunction } from '@/hooks/mapbox/setup';
-import { checkInitialLikeStatus, checkInitialThreadLikeStatus, checkInitialEventLikeStatus } from '@/hooks/mapbox/popups';
+// import { checkInitialLikeStatus, checkInitialThreadLikeStatus, checkInitialEventLikeStatus } from '@/hooks/mapbox/popups';
 
 export const useMapbox = () => {
   const router = useRouter();
@@ -219,7 +219,7 @@ export const useMapbox = () => {
   }, [location, locationState, addCurrentLocationMarker, addThreadMarkers, addEventMarkers, threads.length, events.length]);
 
   // 前回のイベントIDリストを保持するref
-  const prevEventIdsRef = useRef<string[]>([]);
+  const prevEventIdsRef = useRef<number[]>([]);
 
   // 投稿データが更新された時にマーカーを更新
   useEffect(() => {
@@ -265,7 +265,7 @@ export const useMapbox = () => {
         if (events.length > 0) {
           console.log('✨ イベントデータが実際に変更されました。マーカーを更新中...', events);
           addEventMarkers();
-          prevEventIdsRef.current = currentEventIds;
+          // prevEventIdsRef.current = currentEventIds;
         } else {
           console.log('⚠️ イベントデータが空になりました。マーカーをクリア...');
           // 既存のマーカーをクリア
@@ -290,7 +290,7 @@ export const useMapbox = () => {
           if (post.coordinate && post.coordinate.lat && post.coordinate.lng) {
             setTimeout(() => {
               console.log(`🔐 認証後: 投稿${post.id}のいいね状態を確認中 (${index + 1}/${posts.length})`);
-              checkInitialLikeStatus(post);
+              // checkInitialLikeStatus(post);
             }, index * 100); // 100msずつ遅延（200msから短縮）
           }
         });
@@ -299,7 +299,7 @@ export const useMapbox = () => {
           if (thread.coordinate && thread.coordinate.lat && thread.coordinate.lng) {
             setTimeout(() => {
               console.log(`🔐 認証後: スレッド${thread.id}のいいね状態を確認中 (${index + 1}/${threads.length})`);
-              checkInitialThreadLikeStatus(thread);
+              // checkInitialThreadLikeStatus(thread);
             }, index * 100); // 100msずつ遅延（200msから短縮）
           }
         });
@@ -308,7 +308,7 @@ export const useMapbox = () => {
           if (event.coordinate && event.coordinate.lat && event.coordinate.lng) {
             setTimeout(() => {
               console.log(`🔐 認証後: イベント${event.id}のいいね状態を確認中 (${index + 1}/${events.length})`);
-              checkInitialEventLikeStatus(event);
+              // checkInitialEventLikeStatus(event);
             }, index * 100); // 100msずつ遅延
           }
         });
