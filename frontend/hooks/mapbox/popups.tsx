@@ -6,7 +6,7 @@ import { Post, Thread, Event } from '@/types/types';
 // 投稿ポップアップのHTML生成関数
 export const createPostPopupHTML = (post: Post) => {
   // バックエンドから返される大文字フィールドに対応
-  const postId = (post as any).ID || post.id;
+  const postId = (post as any).ID || post.ID;
   const updatedAt = (post as any).UpdatedAt || post.updated_at;
   
   return `
@@ -159,7 +159,7 @@ export const createEventPopupHTML = (event: Event) => {
       <h3 class="font-bold mb-1 text-sm" style="color: ${colors.textColor}; font-size: 0.875rem; margin-bottom: 0.25rem; font-weight: bold;">
         ${event.content ? event.content.substring(0, 30) + (event.content.length > 30 ? '...' : '') : 'イベント'}
       </h3>
-      <p class="text-xs mb-2" style="color: ${colors.textColor}; font-size: 0.75rem; margin-bottom: 0.5rem; opacity: 0.8;">
+      <p class="text-xs mb-2" style="color: ${olors.textColor}; font-size: 0.75rem; margin-bottom: 0.5rem; opacity: 0.8;">
         📅 ${getCategoryLabel(eventCategory)}
       </p>
       <div class="flex justify-between items-center text-xs" 
@@ -183,7 +183,7 @@ export const createEventPopupHTML = (event: Event) => {
 // 初期いいね状態の確認と色設定関数（投稿用）
 export const checkInitialLikeStatus = async (post: Post) => {
   try {
-    console.log(`🔍 投稿${post.id}の初期いいね状態を確認中...`);
+    console.log(`🔍 投稿${post.ID}の初期いいね状態を確認中...`);
     
     // 認証状態をチェック
     const token = localStorage.getItem('authtoken');
@@ -194,30 +194,30 @@ export const checkInitialLikeStatus = async (post: Post) => {
     
     // 投稿データに含まれているいいね数を使用（個別取得は不要）
     const likeCount = post.like || 0;
-    console.log(`📊 投稿${post.id}のいいね数: ${likeCount}`);
+    console.log(`📊 投稿${post.ID}のいいね数: ${likeCount}`);
     
-    const heartIcon = document.getElementById(`heart-post-${post.id}`);
-    const likeCountElement = document.getElementById(`like-count-post-${post.id}`);
+    const heartIcon = document.getElementById(`heart-post-${post.ID}`);
+    const likeCountElement = document.getElementById(`like-count-post-${post.ID}`);
     
     if (heartIcon && likeCountElement) {
       // デフォルトは未いいね状態に設定（個別のいいね状態はユーザーがいいねボタンを押した時に更新）
       heartIcon.style.fill = 'white';
       likeCountElement.style.color = '#ffffff';
       likeCountElement.style.fontWeight = '500';
-      console.log(`🤍 投稿${post.id}の初期状態を未いいねに設定 (${likeCount})`);
+      console.log(`🤍 投稿${post.ID}の初期状態を未いいねに設定 (${likeCount})`);
       
       // いいね数を更新（投稿データから取得した値を使用）
       likeCountElement.textContent = likeCount.toString();
-      console.log(`📊 投稿${post.id}のいいね数を更新: ${likeCount}`);
+      console.log(`📊 投稿${post.ID}のいいね数を更新: ${likeCount}`);
     } else {
-      console.warn(`⚠️ 投稿${post.id}のDOM要素が見つかりません`);
-      console.log(`🔍 検索した要素ID: heart-post-${post.id}, like-count-post-${post.id}`);
+      console.warn(`⚠️ 投稿${post.ID}のDOM要素が見つかりません`);
+      console.log(`🔍 検索した要素ID: heart-post-${post.ID}, like-count-post-${post.ID}`);
     }
   } catch (error) {
-    console.warn(`⚠️ 投稿${post.id}の初期いいね状態確認に失敗:`, error);
+    console.warn(`⚠️ 投稿${post.ID}の初期いいね状態確認に失敗:`, error);
     // エラーの場合はデフォルト状態（未いいね）に設定
-    const heartIcon = document.getElementById(`heart-post-${post.id}`);
-    const likeCountElement = document.getElementById(`like-count-post-${post.id}`);
+    const heartIcon = document.getElementById(`heart-post-${post.ID}`);
+    const likeCountElement = document.getElementById(`like-count-post-${post.ID}`);
     
     if (heartIcon && likeCountElement) {
       heartIcon.style.fill = 'white';
