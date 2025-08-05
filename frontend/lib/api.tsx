@@ -1,5 +1,5 @@
 // API Base URL Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL =  'http://localhost:8080';
 const USE_HTTPS = process.env.NEXT_PUBLIC_USE_HTTPS === 'true';
 
 // API Endpoints

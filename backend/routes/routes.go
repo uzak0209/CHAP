@@ -37,7 +37,6 @@ func SetupRoutes(r *gin.Engine) {
 		// 個別取得（認証不要）
 		v1.GET("/post/:id", handlers.GetPost)
 		v1.GET("/thread/:id", handlers.GetThread)
-		v1.GET("/thread/:id/details", handlers.GetThreadWithReplies)
 		v1.GET("/event/:id", handlers.GetEvent)
 
 		// デバッグ用（認証不要）- 開発時のみ使用
@@ -58,23 +57,22 @@ func SetupRoutes(r *gin.Engine) {
 			auth.GET("/update/post/:id", handlers.GetUpdatePost)
 			auth.PUT("/edit/post/:id", handlers.EditPost)
 			auth.DELETE("/delete/post/:id", handlers.DeletePost)
-			auth.POST("/post/:id/like", handlers.LikePost)
-			auth.GET("/post/:id/like/status", handlers.GetPostLikeStatus)
 
 			// スレッド関連
 			auth.POST("/create/thread", handlers.CreateThread)
-			auth.POST("/thread/:id/reply", handlers.CreateThreadReply)
 			auth.GET("/update/thread/:id", handlers.GetUpdateThread)
 			auth.PUT("/edit/thread/:id", handlers.EditThread)
 			auth.DELETE("/delete/thread/:id", handlers.DeleteThread)
-			auth.POST("/thread/:id/like", handlers.LikeThread)
-			auth.GET("/thread/:id/like/status", handlers.GetThreadLikeStatus)
 
 			// イベント関連
 			auth.POST("/create/event", handlers.CreateEvent)
 			auth.GET("/update/event/:id", handlers.GetUpdateEvent)
 			auth.PUT("/edit/event/:id", handlers.EditEvent)
 			auth.DELETE("/delete/event/:id", handlers.DeleteEvent)
+
+			// コメント関連
+			auth.POST("/create/comment", handlers.CreateComment)
+			auth.DELETE("/delete/comment/:id", handlers.DeleteComment)
 		}
 	}
 

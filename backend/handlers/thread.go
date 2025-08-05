@@ -3,7 +3,6 @@ package handlers
 import (
 	"api/db"
 	"api/types"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -31,7 +30,7 @@ func EditThread(c *gin.Context) {
 	}
 
 	// 更新日時を現在の時刻に設定
-	thread.UpdatedTime = time.Now()
+	thread.UpdatedAt = time.Now()
 
 	// GORMで更新
 	if err := db.SafeDB().Save(&thread).Error; err != nil {
@@ -56,43 +55,6 @@ func GetThread(c *gin.Context) {
 	c.JSON(http.StatusOK, thread)
 }
 
-// GetThreadWithReplies - スレッドとそのレス一覧を取得
-func GetThreadWithReplies(c *gin.Context) {
-	id := c.Param("id")
-	threadID, err := strconv.Atoi(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid thread id"})
-		return
-	}
-
-	var thread types.Thread
-	// スレッド本体を取得
-	result := db.SafeDB().Where("id = ?", threadID).First(&thread)
-	if result.Error != nil {
-		log.Printf("[GetThreadWithReplies] Thread not found: %v", result.Error)
-		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
-		return
-	}
-
-	// レス（parent = thread.id のPost）を取得
-	var replies []types.Post
-	if err := db.SafeDB().Where("parent = ?", threadID).
-		Order("created_time ASC").
-		Find(&replies).Error; err != nil {
-		log.Printf("[GetThreadWithReplies] Failed to fetch replies: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch replies"})
-		return
-	}
-
-	log.Printf("[GetThreadWithReplies] Found thread %d with %d replies", threadID, len(replies))
-
-	c.JSON(http.StatusOK, gin.H{
-		"thread":      thread,
-		"replies":     replies,
-		"reply_count": len(replies),
-	})
-}
-
 // CreateThread handles POST /thread
 func CreateThread(c *gin.Context) {
 	var thread types.Thread
@@ -114,11 +76,11 @@ func CreateThread(c *gin.Context) {
 	thread.ID = 0       // 自動インクリメント用に0に設定
 	thread.Valid = true // デフォルトで有効に設定
 	// 明示的に現在時刻を設定（gormタグと併用で確実に）
-	if thread.CreatedTime.IsZero() {
-		thread.CreatedTime = time.Now()
+	if thread.CreatedAt.IsZero() {
+		thread.CreatedAt = time.Now()
 	}
-	if thread.UpdatedTime.IsZero() {
-		thread.UpdatedTime = time.Now()
+	if thread.UpdatedAt.IsZero() {
+		thread.UpdatedAt = time.Now()
 	}
 	// GORMでSupabaseのPostgreSQLに保存
 	result := db.SafeDB().Create(&thread)
@@ -151,57 +113,6 @@ func GetAroundAllThread(c *gin.Context) {
 	c.JSON(http.StatusOK, threads)
 }
 
-// CreateThreadReply - スレッドにレスを投稿
-func CreateThreadReply(c *gin.Context) {
-	threadID := c.Param("id")
-	tid, err := strconv.Atoi(threadID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid thread id"})
-		return
-	}
-
-	// スレッドが存在するか確認
-	var thread types.Thread
-	if err := db.SafeDB().Where("id = ?", tid).First(&thread).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
-		return
-	}
-
-	var reply types.Post
-	if err := c.ShouldBindJSON(&reply); err != nil {
-		log.Printf("[CreateThreadReply] JSON bind error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid json format"})
-		return
-	}
-
-	// JWT認証からuser_idを取得
-	userID := c.GetString("user_id")
-	uid, err := uuid.Parse(userID)
-	if err != nil {
-		log.Printf("[CreateThreadReply] UUID parse error: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
-		return
-	}
-
-	// レスの設定
-	reply.UserID = uid
-	reply.Parent = tid                   // スレッドIDを親として設定
-	reply.ID = 0                         // 自動インクリメント用
-	reply.Coordinate = thread.Coordinate // スレッドと同じ座標を使用
-	reply.Valid = true
-
-	log.Printf("[CreateThreadReply] Creating reply for thread %d: %+v", tid, reply)
-
-	// データベースに保存
-	if err := db.SafeDB().Create(&reply).Error; err != nil {
-		log.Printf("[CreateThreadReply] Database save error: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create reply"})
-		return
-	}
-
-	log.Printf("[CreateThreadReply] Reply created successfully with ID: %d", reply.ID)
-	c.JSON(http.StatusCreated, gin.H{"reply": reply})
-}
 func GetUpdateThread(c *gin.Context) {
 	from := c.Param("from")
 	var threads []types.Thread
@@ -239,146 +150,4 @@ func DeleteThread(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "thread deleted"})
-}
-
-// LikeThread - スレッドのいいね/いいね解除機能
-func LikeThread(c *gin.Context) {
-	threadID := c.Param("id")
-	userID := c.GetString("user_id")
-
-	log.Printf("[LikeThread] 開始 - ThreadID: %s, UserID: %s", threadID, userID)
-
-	// UUIDをパース
-	uid, err := uuid.Parse(userID)
-	if err != nil {
-		log.Printf("[LikeThread] UUIDパースエラー: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
-		return
-	}
-
-	// Thread IDを数値に変換
-	tid, err := strconv.ParseUint(threadID, 10, 32)
-	if err != nil {
-		log.Printf("[LikeThread] ThreadIDパースエラー: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid thread_id format"})
-		return
-	}
-
-	// スレッドが存在するかチェック
-	var thread types.Thread
-	if err := db.SafeDB().Where("id = ?", tid).First(&thread).Error; err != nil {
-		log.Printf("[LikeThread] スレッドが見つかりません: %v", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
-		return
-	}
-
-	log.Printf("[LikeThread] スレッド発見 - 現在のいいね数: %d", thread.Like)
-
-	// 既にいいねしているかチェック
-	var existingLike types.ThreadLikes
-	err = db.SafeDB().Where("user_id = ? AND thread_id = ?", uid, tid).First(&existingLike).Error
-	
-	dbConn := db.SafeDB()
-	if err == gorm.ErrRecordNotFound {
-		// いいねが存在しない場合は新規作成
-		log.Printf("[LikeThread] いいね追加処理開始")
-		newLike := types.ThreadLikes{
-			UserID:   uid,
-			ThreadID: uint(tid),
-		}
-		
-		// トランザクション開始
-		tx := dbConn.Begin()
-		
-		// いいね作成
-		if err := tx.Create(&newLike).Error; err != nil {
-			log.Printf("[LikeThread] いいね作成エラー: %v", err)
-			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create like"})
-			return
-		}
-		
-		// スレッドのいいね数を+1
-		newLikeCount := thread.Like + 1
-		if err := tx.Model(&thread).Update("like", newLikeCount).Error; err != nil {
-			log.Printf("[LikeThread] いいね数更新エラー: %v", err)
-			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update like count"})
-			return
-		}
-		
-		tx.Commit()
-		log.Printf("[LikeThread] いいね追加完了 - 新しいいいね数: %d", newLikeCount)
-		c.JSON(http.StatusOK, gin.H{"liked": true, "like_count": newLikeCount})
-
-	} else if err == nil {
-		// 既にいいねしている場合は削除（いいね取り消し）
-		log.Printf("[LikeThread] いいね削除処理開始")
-		tx := dbConn.Begin()
-		
-		// いいね削除
-		if err := tx.Delete(&existingLike).Error; err != nil {
-			log.Printf("[LikeThread] いいね削除エラー: %v", err)
-			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to remove like"})
-			return
-		}
-		
-		// スレッドのいいね数を-1（0以下にはならないように）
-		newLikeCount := thread.Like - 1
-		if newLikeCount < 0 {
-			newLikeCount = 0
-		}
-		if err := tx.Model(&thread).Update("like", newLikeCount).Error; err != nil {
-			log.Printf("[LikeThread] いいね数更新エラー: %v", err)
-			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update like count"})
-			return
-		}
-		
-		tx.Commit()
-		log.Printf("[LikeThread] いいね削除完了 - 新しいいいね数: %d", newLikeCount)
-		c.JSON(http.StatusOK, gin.H{"liked": false, "like_count": newLikeCount})
-
-	} else {
-		// その他のエラー
-		log.Printf("[LikeThread] データベースエラー: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "database error"})
-	}
-}
-
-// GetThreadLikeStatus - スレッドのいいね状態を取得
-func GetThreadLikeStatus(c *gin.Context) {
-	threadID := c.Param("id")
-	userID := c.GetString("user_id")
-
-	// UUIDをパース
-	uid, err := uuid.Parse(userID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
-		return
-	}
-
-	// Thread IDを数値に変換
-	tid, err := strconv.ParseUint(threadID, 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid thread_id format"})
-		return
-	}
-
-	// スレッドが存在するかチェック
-	var thread types.Thread
-	if err := db.SafeDB().Where("id = ?", tid).First(&thread).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
-		return
-	}
-
-	// いいね状態をチェック
-	var existingLike types.ThreadLikes
-	liked := db.SafeDB().Where("user_id = ? AND thread_id = ?", uid, tid).First(&existingLike).Error == nil
-
-	c.JSON(http.StatusOK, gin.H{
-		"liked":      liked,
-		"like_count": thread.Like,
-	})
 }
