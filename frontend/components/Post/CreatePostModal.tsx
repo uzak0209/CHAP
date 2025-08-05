@@ -31,7 +31,6 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
   const categoryOptions = [
     { value: 'entertainment', label: 'エンターテイメント' },
     { value: 'community', label: '地域住民コミュニケーション' },
-    { value: 'information', label: '情報共有' },
     { value: 'disaster', label: '災害情報' }
   ];
 
@@ -48,7 +47,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
         coordinate: state === Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
         valid: true,
         like: 0,
-        updated_time: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       }));
       
       // 成功したらモーダルを閉じてフォームをリセット

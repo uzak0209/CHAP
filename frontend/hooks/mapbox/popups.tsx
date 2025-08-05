@@ -37,7 +37,7 @@ export const createPostPopupHTML = (post: Post) => {
             <span id="like-count-post-${post.id}" class="text-white font-medium" style="color: #efffff; font-weight: 500;">${post.like || 0}</span>
           </div>
           <div class="text-blue-600" style="color: #2563eb;">
-            <span class="ml-2" style="margin-left: 0.5rem;">${new Date(post.created_time || '').toLocaleDateString()}</span>
+            <span class="ml-2" style="margin-left: 0.5rem;">${new Date(post.updated_time || '').toLocaleDateString()}</span>
           </div>
         </div>
       </div>
@@ -49,7 +49,7 @@ export const createPostPopupHTML = (post: Post) => {
 export const createThreadPopupHTML = (thread: Thread) => {
   // 安全な日付処理
   const formatDate = () => {
-    let dateStr = thread.updated_at || (thread as any).timestamp;
+    let dateStr = thread.updated_at; 
     
     // Goのzero value日付をチェック
     if (!dateStr || dateStr === '' || dateStr === '0001-01-01T00:00:00Z') {
@@ -116,7 +116,7 @@ export const createEventPopupHTML = (event: Event) => {
 
   // 安全な日付処理
   const formatDate = () => {
-    let dateStr = event.created_time || event.updated_at;
+    let dateStr =  event.updated_at;
     
     // Goのzero value日付をチェック
     if (!dateStr || dateStr === '' || dateStr === '0001-01-01T00:00:00Z') {
