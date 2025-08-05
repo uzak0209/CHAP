@@ -39,7 +39,7 @@ const initialState: EventsState = {
 export const fetchAroundEvents = createAsyncThunk<Event[], { lat: number; lng: number }>(
   'events/fetchAround',
   async (params) => {
-    return await apiClient.post<Event[]>(`${API_ENDPOINTS.events.list}/around`, params);
+    return await apiClient.post<Event[]>(`${API_ENDPOINTS.events.around}`, params);
   }
 )
 export const fetchEvent = createAsyncThunk<Event, string>(

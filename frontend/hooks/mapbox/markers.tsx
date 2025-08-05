@@ -9,10 +9,7 @@ export const getMarkerColor = (category: string) => {
   switch (category) {
     case 'entertainment': return '#ff6b6b';  // エンターテイメント（赤）
     case 'community': return '#4ecdc4';      // コミュニティ（青緑）
-    case 'information': return '#45b7d1';    // 情報（青）
     case 'disaster': return '#ff4757';       // 災害（赤）
-    case 'food': return '#feca57';           // 食事（黄）
-    case 'event': return '#96ceb4';          // イベント（緑）
     default: return '#95a5a6';               // デフォルト（グレー）
   }
 };
@@ -22,10 +19,7 @@ const getCategoryRGBA = (category: string) => {
   switch (category) {
     case 'entertainment': return 'rgba(255, 107, 107, ';  // エンターテイメント（赤）
     case 'community': return 'rgba(78, 205, 196, ';       // コミュニティ（青緑）
-    case 'information': return 'rgba(69, 183, 209, ';     // 情報（青）
     case 'disaster': return 'rgba(255, 71, 87, ';         // 災害（赤）
-    case 'food': return 'rgba(254, 202, 87, ';            // 食事（黄）
-    case 'event': return 'rgba(150, 206, 180, ';          // イベント（緑）
     default: return 'rgba(149, 165, 166, ';               // デフォルト（グレー）
   }
 };
@@ -35,10 +29,7 @@ const getCategoryLabel = (category: string) => {
   switch (category) {
     case 'entertainment': return 'エンターテイメント';
     case 'community': return '地域住民コミュニケーション';
-    case 'information': return '情報';
     case 'disaster': return '災害情報';
-    case 'food': return '食事';
-    case 'event': return 'イベント';
     default: return 'その他';
   }
 };
@@ -62,14 +53,6 @@ const getCategoryColors = (category: string) => {
         textColor: '#134e4a',
         arrow: '#f0fdfa'
       };
-    case 'information':
-      return {
-        background: 'linear-gradient(to bottom right, #eff6ff, #dbeafe)', 
-        border: '#93c5fd',
-        iconBg: '#3b82f6',
-        textColor: '#1e3a8a',
-        arrow: '#eff6ff'
-      };
     case 'disaster':
       return {
         background: 'linear-gradient(to bottom right, #fef2f2, #fee2e2)',
@@ -77,23 +60,6 @@ const getCategoryColors = (category: string) => {
         iconBg: '#dc2626',
         textColor: '#991b1b',
         arrow: '#fef2f2'
-      };
-    case 'food':
-      return {
-        background: 'linear-gradient(to bottom right, #fffbeb, #fef3c7)',
-        border: '#fcd34d',
-        iconBg: '#f59e0b',
-        textColor: '#92400e',
-        arrow: '#fffbeb'
-      };
-    case 'event':
-    default:
-      return {
-        background: 'linear-gradient(to bottom right, #ecfdf5, #d1fae5)',
-        border: '#86efac',
-        iconBg: '#10b981',
-        textColor: '#064e3b',
-        arrow: '#ecfdf5'
       };
   }
 };

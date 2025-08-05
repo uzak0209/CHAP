@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
     verify: `${API_BASE_URL}/api/v1/auth/verify`,
   },
   events: {
+    around: `${API_BASE_URL}/api/v1/around/event`,
     list: `${API_BASE_URL}/api/v1/events`,
     create: `${API_BASE_URL}/api/v1/events`,
     get: (id: string) => `${API_BASE_URL}/api/v1/events/${id}`,
@@ -26,11 +27,11 @@ export const API_ENDPOINTS = {
     delete: (id: string) => `${API_BASE_URL}/api/v1/threads/${id}`,
   },
   posts: {
-    list: `${API_BASE_URL}/api/v1/timeline`,
-    create: `${API_BASE_URL}/api/v1/timeline`,
-    get: (id: string) => `${API_BASE_URL}/api/v1/timeline/${id}`,
-    update: (id: string) => `${API_BASE_URL}/api/v1/timeline/${id}`,
-    delete: (id: string) => `${API_BASE_URL}/api/v1/timeline/${id}`,
+    list: `${API_BASE_URL}/api/v1/posts`,
+    create: `${API_BASE_URL}/api/v1/posts`,
+    get: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
+    update: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
+    delete: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
   },
   health: `${API_BASE_URL}/health`,
 };
@@ -111,196 +112,196 @@ export const apiClient = new ApiClient();
 
 export default API_BASE_URL;
 
-// いいね機能
-export const likePost = async (postId: number): Promise<{ liked: boolean; like_count: number }> => {
-  const token = localStorage.getItem('authtoken'); // authSliceと一致するキー名に修正
+// // いいね機能
+// export const likePost = async (postId: number): Promise<{ liked: boolean; like_count: number }> => {
+//   const token = localStorage.getItem('authtoken'); // authSliceと一致するキー名に修正
   
-  console.log('🔍 いいねAPI呼び出し詳細:', {
-    postId,
-    hasToken: !!token,
-    apiUrl: `${API_BASE_URL}/post/${postId}/like`
-  });
+//   console.log('🔍 いいねAPI呼び出し詳細:', {
+//     postId,
+//     hasToken: !!token,
+//     apiUrl: `${API_BASE_URL}/post/${postId}/like`
+//   });
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/post/${postId}/like`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-    },
-  });
+//   const response = await fetch(`${API_BASE_URL}/api/v1/post/${postId}/like`, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       ...(token && { 'Authorization': `Bearer ${token}` }),
+//     },
+//   });
 
-  console.log('🔍 いいねAPIレスポンス詳細:', {
-    status: response.status,
-    statusText: response.statusText,
-    ok: response.ok,
-    headers: Object.fromEntries(response.headers.entries())
-  });
+//   console.log('🔍 いいねAPIレスポンス詳細:', {
+//     status: response.status,
+//     statusText: response.statusText,
+//     ok: response.ok,
+//     headers: Object.fromEntries(response.headers.entries())
+//   });
 
-  if (!response.ok) {
-    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-    try {
-      // レスポンスのクローンを作成して、複数回読み込みを回避
-      const responseClone = response.clone();
-      const errorData = await responseClone.json();
-      console.error('❌ いいねAPIエラーレスポンス:', errorData);
-      errorMessage = errorData.error || errorMessage;
-    } catch (parseError) {
-      console.error('❌ エラーレスポンスのJSON解析に失敗:', parseError);
-      try {
-        const responseText = await response.text();
-        console.error('❌ レスポンステキスト:', responseText);
-        errorMessage = responseText || errorMessage;
-      } catch (textError) {
-        console.error('❌ レスポンステキストの取得にも失敗:', textError);
-      }
-    }
-    throw new Error(`Failed to toggle like: ${errorMessage}`);
-  }
+//   if (!response.ok) {
+//     let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+//     try {
+//       // レスポンスのクローンを作成して、複数回読み込みを回避
+//       const responseClone = response.clone();
+//       const errorData = await responseClone.json();
+//       console.error('❌ いいねAPIエラーレスポンス:', errorData);
+//       errorMessage = errorData.error || errorMessage;
+//     } catch (parseError) {
+//       console.error('❌ エラーレスポンスのJSON解析に失敗:', parseError);
+//       try {
+//         const responseText = await response.text();
+//         console.error('❌ レスポンステキスト:', responseText);
+//         errorMessage = responseText || errorMessage;
+//       } catch (textError) {
+//         console.error('❌ レスポンステキストの取得にも失敗:', textError);
+//       }
+//     }
+//     throw new Error(`Failed to toggle like: ${errorMessage}`);
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };
 
-export const getPostLikeStatus = async (postId: number): Promise<{ liked: boolean; like_count: number }> => {
-  const token = localStorage.getItem('authtoken'); // authSliceと一致するキー名に修正
-  const response = await fetch(`${API_BASE_URL}/api/v1/post/${postId}/like/status`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-    },
-  });
+// export const getPostLikeStatus = async (postId: number): Promise<{ liked: boolean; like_count: number }> => {
+//   const token = localStorage.getItem('authtoken'); // authSliceと一致するキー名に修正
+//   const response = await fetch(`${API_BASE_URL}/api/v1/post/${postId}/like/status`, {
+//     method: 'GET',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       ...(token && { 'Authorization': `Bearer ${token}` }),
+//     },
+//   });
 
-  if (!response.ok) {
-    throw new Error('Failed to get like status');
-  }
+//   if (!response.ok) {
+//     throw new Error('Failed to get like status');
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };
 
-// スレッドのいいね機能API
-export const likeThread = async (threadId: number): Promise<{ liked: boolean; like_count: number }> => {
-  const token = localStorage.getItem('authtoken');
+// // スレッドのいいね機能API
+// export const likeThread = async (threadId: number): Promise<{ liked: boolean; like_count: number }> => {
+//   const token = localStorage.getItem('authtoken');
   
-  console.log('🔍 スレッドいいねAPI呼び出し詳細:', {
-    threadId,
-    hasToken: !!token,
-    apiUrl: `${API_BASE_URL}/api/v1/thread/${threadId}/like`
-  });
+//   console.log('🔍 スレッドいいねAPI呼び出し詳細:', {
+//     threadId,
+//     hasToken: !!token,
+//     apiUrl: `${API_BASE_URL}/api/v1/thread/${threadId}/like`
+//   });
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/thread/${threadId}/like`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-    },
-  });
+//   const response = await fetch(`${API_BASE_URL}/api/v1/thread/${threadId}/like`, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       ...(token && { 'Authorization': `Bearer ${token}` }),
+//     },
+//   });
 
-  console.log('🔍 スレッドいいねAPIレスポンス詳細:', {
-    status: response.status,
-    statusText: response.statusText,
-    ok: response.ok
-  });
+//   console.log('🔍 スレッドいいねAPIレスポンス詳細:', {
+//     status: response.status,
+//     statusText: response.statusText,
+//     ok: response.ok
+//   });
 
-  if (!response.ok) {
-    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-    try {
-      const responseClone = response.clone();
-      const errorData = await responseClone.json();
-      console.error('❌ スレッドいいねAPIエラーレスポンス:', errorData);
-      errorMessage = errorData.error || errorMessage;
-    } catch (parseError) {
-      console.error('❌ エラーレスポンスのJSON解析に失敗:', parseError);
-      try {
-        const responseText = await response.text();
-        console.error('❌ レスポンステキスト:', responseText);
-        errorMessage = responseText || errorMessage;
-      } catch (textError) {
-        console.error('❌ レスポンステキストの取得にも失敗:', textError);
-      }
-    }
-    throw new Error(`Failed to toggle thread like: ${errorMessage}`);
-  }
+//   if (!response.ok) {
+//     let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+//     try {
+//       const responseClone = response.clone();
+//       const errorData = await responseClone.json();
+//       console.error('❌ スレッドいいねAPIエラーレスポンス:', errorData);
+//       errorMessage = errorData.error || errorMessage;
+//     } catch (parseError) {
+//       console.error('❌ エラーレスポンスのJSON解析に失敗:', parseError);
+//       try {
+//         const responseText = await response.text();
+//         console.error('❌ レスポンステキスト:', responseText);
+//         errorMessage = responseText || errorMessage;
+//       } catch (textError) {
+//         console.error('❌ レスポンステキストの取得にも失敗:', textError);
+//       }
+//     }
+//     throw new Error(`Failed to toggle thread like: ${errorMessage}`);
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };
 
-export const getThreadLikeStatus = async (threadId: number): Promise<{ liked: boolean; like_count: number }> => {
-  const token = localStorage.getItem('authtoken');
-  const response = await fetch(`${API_BASE_URL}/api/v1/thread/${threadId}/like/status`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-    },
-  });
+// export const getThreadLikeStatus = async (threadId: number): Promise<{ liked: boolean; like_count: number }> => {
+//   const token = localStorage.getItem('authtoken');
+//   const response = await fetch(`${API_BASE_URL}/api/v1/thread/${threadId}/like/status`, {
+//     method: 'GET',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       ...(token && { 'Authorization': `Bearer ${token}` }),
+//     },
+//   });
 
-  if (!response.ok) {
-    throw new Error('Failed to get thread like status');
-  }
+//   if (!response.ok) {
+//     throw new Error('Failed to get thread like status');
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };
 
-// イベントのいいね機能API
-export const likeEvent = async (eventId: string): Promise<{ liked: boolean; like_count: number }> => {
-  const token = localStorage.getItem('authtoken');
+// // イベントのいいね機能API
+// export const likeEvent = async (eventId: string): Promise<{ liked: boolean; like_count: number }> => {
+//   const token = localStorage.getItem('authtoken');
   
-  console.log('🔍 イベントいいねAPI呼び出し詳細:', {
-    eventId,
-    hasToken: !!token,
-    apiUrl: `${API_BASE_URL}/api/v1/event/${eventId}/like`
-  });
+//   console.log('🔍 イベントいいねAPI呼び出し詳細:', {
+//     eventId,
+//     hasToken: !!token,
+//     apiUrl: `${API_BASE_URL}/api/v1/event/${eventId}/like`
+//   });
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/event/${eventId}/like`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-    },
-  });
+//   const response = await fetch(`${API_BASE_URL}/api/v1/event/${eventId}/like`, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       ...(token && { 'Authorization': `Bearer ${token}` }),
+//     },
+//   });
 
-  console.log('🔍 イベントいいねAPIレスポンス詳細:', {
-    status: response.status,
-    statusText: response.statusText,
-    ok: response.ok
-  });
+//   console.log('🔍 イベントいいねAPIレスポンス詳細:', {
+//     status: response.status,
+//     statusText: response.statusText,
+//     ok: response.ok
+//   });
 
-  if (!response.ok) {
-    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-    try {
-      const responseClone = response.clone();
-      const errorData = await responseClone.json();
-      console.error('❌ イベントいいねAPIエラーレスポンス:', errorData);
-      errorMessage = errorData.error || errorMessage;
-    } catch (parseError) {
-      console.error('❌ エラーレスポンスのJSON解析に失敗:', parseError);
-      try {
-        const responseText = await response.text();
-        console.error('❌ レスポンステキスト:', responseText);
-        errorMessage = responseText || errorMessage;
-      } catch (textError) {
-        console.error('❌ レスポンステキストの取得にも失敗:', textError);
-      }
-    }
-    throw new Error(`Failed to toggle event like: ${errorMessage}`);
-  }
+//   if (!response.ok) {
+//     let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+//     try {
+//       const responseClone = response.clone();
+//       const errorData = await responseClone.json();
+//       console.error('❌ イベントいいねAPIエラーレスポンス:', errorData);
+//       errorMessage = errorData.error || errorMessage;
+//     } catch (parseError) {
+//       console.error('❌ エラーレスポンスのJSON解析に失敗:', parseError);
+//       try {
+//         const responseText = await response.text();
+//         console.error('❌ レスポンステキスト:', responseText);
+//         errorMessage = responseText || errorMessage;
+//       } catch (textError) {
+//         console.error('❌ レスポンステキストの取得にも失敗:', textError);
+//       }
+//     }
+//     throw new Error(`Failed to toggle event like: ${errorMessage}`);
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };
 
-export const getEventLikeStatus = async (eventId: string): Promise<{ liked: boolean; like_count: number }> => {
-  const token = localStorage.getItem('authtoken');
-  const response = await fetch(`${API_BASE_URL}/api/v1/event/${eventId}/like/status`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-    },
-  });
+// export const getEventLikeStatus = async (eventId: string): Promise<{ liked: boolean; like_count: number }> => {
+//   const token = localStorage.getItem('authtoken');
+//   const response = await fetch(`${API_BASE_URL}/api/v1/event/${eventId}/like/status`, {
+//     method: 'GET',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       ...(token && { 'Authorization': `Bearer ${token}` }),
+//     },
+//   });
 
-  if (!response.ok) {
-    throw new Error('Failed to get event like status');
-  }
+//   if (!response.ok) {
+//     throw new Error('Failed to get event like status');
+//   }
 
-  return response.json();
-};
+//   return response.json();
+// };

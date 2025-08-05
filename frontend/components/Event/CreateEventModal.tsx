@@ -31,7 +31,6 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log('イベントを作成します');
     e.preventDefault();
     if (!title || !description) return;
 

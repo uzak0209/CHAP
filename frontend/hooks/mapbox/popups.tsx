@@ -2,7 +2,6 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import mapboxgl from 'mapbox-gl';
 import { Post, Thread, Event } from '@/types/types';
-import { likePost, getPostLikeStatus, likeThread, getThreadLikeStatus, likeEvent, getEventLikeStatus } from '@/lib/api';
 
 // 投稿ポップアップのHTML生成関数
 export const createPostPopupHTML = (post: Post) => {
@@ -87,70 +86,12 @@ export const createThreadPopupHTML = (thread: Thread) => {
   `;
 };
 
-// カテゴリに基づく色設定を取得する関数
-const getCategoryColors = (category: string) => {
-  switch (category) {
-    case 'entertainment':
-      return {
-        background: 'linear-gradient(to bottom right, #fef2f2, #fecaca)',
-        border: '#fca5a5',
-        iconBg: '#ef4444',
-        textColor: '#991b1b',
-        arrow: '#fef2f2'
-      };
-    case 'community':
-      return {
-        background: 'linear-gradient(to bottom right, #f0fdfa, #ccfbf1)',
-        border: '#5eead4',
-        iconBg: '#14b8a6',
-        textColor: '#134e4a',
-        arrow: '#f0fdfa'
-      };
-    case 'information':
-      return {
-        background: 'linear-gradient(to bottom right, #eff6ff, #dbeafe)', 
-        border: '#93c5fd',
-        iconBg: '#3b82f6',
-        textColor: '#1e3a8a',
-        arrow: '#eff6ff'
-      };
-    case 'disaster':
-      return {
-        background: 'linear-gradient(to bottom right, #fef2f2, #fee2e2)',
-        border: '#fca5a5',
-        iconBg: '#dc2626',
-        textColor: '#991b1b',
-        arrow: '#fef2f2'
-      };
-    case 'food':
-      return {
-        background: 'linear-gradient(to bottom right, #fffbeb, #fef3c7)',
-        border: '#fcd34d',
-        iconBg: '#f59e0b',
-        textColor: '#92400e',
-        arrow: '#fffbeb'
-      };
-    case 'event':
-    default:
-      return {
-        background: 'linear-gradient(to bottom right, #ecfdf5, #d1fae5)',
-        border: '#86efac',
-        iconBg: '#10b981',
-        textColor: '#064e3b',
-        arrow: '#ecfdf5'
-      };
-  }
-};
-
 // カテゴリに基づくラベルを取得する関数
 const getCategoryLabel = (category: string) => {
   switch (category) {
     case 'entertainment': return 'エンターテイメント';
     case 'community': return '地域住民コミュニケーション';
-    case 'information': return '情報';
     case 'disaster': return '災害情報';
-    case 'food': return '食事';
-    case 'event': return 'イベント';
     default: return 'その他';
   }
 };
@@ -158,15 +99,16 @@ const getCategoryLabel = (category: string) => {
 // イベントポップアップのHTML生成関数
 export const createEventPopupHTML = (event: Event) => {
   // イベントのカテゴリを決定（category フィールドまたは tags から取得）
+  console.log('イベントを作成');
   const eventCategory = event.category || (event.tags && event.tags.length > 0 ? event.tags[0] : 'event');
   
-  // カテゴリが無効な場合はnullを返して表示しない
-  if (!eventCategory || eventCategory === 'other' || eventCategory === 'その他' || eventCategory === '') {
-    return null;
-  }
+  // カテゴリが無効な場合はデフォルトカテゴリを使用
+  const validCategory = (!eventCategory || eventCategory === 'other' || eventCategory === 'その他' || eventCategory === '') 
+    ? 'event' 
+    : eventCategory;
 
   // カテゴリに基づく色設定を取得
-  const colors = getCategoryColors(eventCategory);
+  const colors = getCategoryColors(validCategory);
 
   // 新しく作成されたイベントかどうかを判定（作成から5分以内）
   const isNewEvent = event.created_time && 
@@ -192,7 +134,7 @@ export const createEventPopupHTML = (event: Event) => {
   return `
     <div class="relative max-w-sm shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
          data-event-id="${event.id}"
-         data-category="${eventCategory}"
+         data-category="${validCategory}"
          style="max-width: 20rem; background: ${colors.background}; border: 1px solid ${colors.border}; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-radius: 1rem; overflow: hidden; position: relative;">
       
       <!-- 吹き出しの矢印 -->
@@ -253,30 +195,23 @@ export const checkInitialLikeStatus = async (post: Post) => {
       return;
     }
     
-    const status = await getPostLikeStatus(post.id);
-    console.log(`📊 投稿${post.id}のAPI取得いいね状態:`, status);
+    // 投稿データに含まれているいいね数を使用（個別取得は不要）
+    const likeCount = post.like || 0;
+    console.log(`📊 投稿${post.id}のいいね数: ${likeCount}`);
     
     const heartIcon = document.getElementById(`heart-post-${post.id}`);
     const likeCountElement = document.getElementById(`like-count-post-${post.id}`);
     
     if (heartIcon && likeCountElement) {
-      if (status.liked) {
-        // いいね済み：赤色に設定
-        heartIcon.style.fill = '#ef4444';
-        likeCountElement.style.color = '#ef4444';
-        likeCountElement.style.fontWeight = 'bold';
-        console.log(`💖 投稿${post.id}は既にいいね済み (${status.like_count})`);
-      } else {
-        // 未いいね：白色に設定
-        heartIcon.style.fill = 'white';
-        likeCountElement.style.color = '#ffffff';
-        likeCountElement.style.fontWeight = '500';
-        console.log(`🤍 投稿${post.id}は未いいね (${status.like_count})`);
-      }
+      // デフォルトは未いいね状態に設定（個別のいいね状態はユーザーがいいねボタンを押した時に更新）
+      heartIcon.style.fill = 'white';
+      likeCountElement.style.color = '#ffffff';
+      likeCountElement.style.fontWeight = '500';
+      console.log(`🤍 投稿${post.id}の初期状態を未いいねに設定 (${likeCount})`);
       
-      // いいね数を確実に更新（APIから取得した値を使用）
-      likeCountElement.textContent = status.like_count.toString();
-      console.log(`📊 投稿${post.id}のいいね数を更新: ${status.like_count}`);
+      // いいね数を更新（投稿データから取得した値を使用）
+      likeCountElement.textContent = likeCount.toString();
+      console.log(`📊 投稿${post.id}のいいね数を更新: ${likeCount}`);
     } else {
       console.warn(`⚠️ 投稿${post.id}のDOM要素が見つかりません`);
       console.log(`🔍 検索した要素ID: heart-post-${post.id}, like-count-post-${post.id}`);
@@ -309,31 +244,23 @@ export const checkInitialThreadLikeStatus = async (thread: Thread) => {
       return;
     }
     
-    const threadId = typeof thread.id === 'string' ? parseInt(thread.id) : thread.id;
-    const status = await getThreadLikeStatus(threadId);
-    console.log(`📊 スレッド${thread.id}のAPI取得いいね状態:`, status);
+    // スレッドデータに含まれているいいね数を使用（個別取得は不要）
+    const likeCount = thread.like || 0;
+    console.log(`📊 スレッド${thread.id}のいいね数: ${likeCount}`);
     
     const heartIcon = document.getElementById(`heart-thread-${thread.id}`);
     const likeCountElement = document.getElementById(`like-count-thread-${thread.id}`);
     
     if (heartIcon && likeCountElement) {
-      if (status.liked) {
-        // いいね済み：赤色に設定
-        heartIcon.style.fill = '#ef4444';
-        likeCountElement.style.color = '#ef4444';
-        likeCountElement.style.fontWeight = 'bold';
-        console.log(`💖 スレッド${thread.id}は既にいいね済み (${status.like_count})`);
-      } else {
-        // 未いいね：白色に設定
-        heartIcon.style.fill = 'white';
-        likeCountElement.style.color = '#ffffff';
-        likeCountElement.style.fontWeight = '500';
-        console.log(`🤍 スレッド${thread.id}は未いいね (${status.like_count})`);
-      }
+      // デフォルトは未いいね状態に設定（個別のいいね状態はユーザーがいいねボタンを押した時に更新）
+      heartIcon.style.fill = 'white';
+      likeCountElement.style.color = '#ffffff';
+      likeCountElement.style.fontWeight = '500';
+      console.log(`🤍 スレッド${thread.id}の初期状態を未いいねに設定 (${likeCount})`);
       
-      // いいね数を確実に更新（APIから取得した値を使用）
-      likeCountElement.textContent = status.like_count.toString();
-      console.log(`📊 スレッド${thread.id}のいいね数を更新: ${status.like_count}`);
+      // いいね数を更新（スレッドデータから取得した値を使用）
+      likeCountElement.textContent = likeCount.toString();
+      console.log(`📊 スレッド${thread.id}のいいね数を更新: ${likeCount}`);
     } else {
       console.warn(`⚠️ スレッド${thread.id}のDOM要素が見つかりません`);
       console.log(`🔍 検索した要素ID: heart-thread-${thread.id}, like-count-thread-${thread.id}`);
@@ -366,30 +293,23 @@ export const checkInitialEventLikeStatus = async (event: Event) => {
       return;
     }
     
-    const status = await getEventLikeStatus(event.id);
-    console.log(`📊 イベント${event.id}のAPI取得いいね状態:`, status);
+    // イベントデータに含まれているいいね数を使用（個別取得は不要）
+    const likeCount = event.like || 0;
+    console.log(`📊 イベント${event.id}のいいね数: ${likeCount}`);
     
     const heartIcon = document.getElementById(`heart-event-${event.id}`);
     const likeCountElement = document.getElementById(`like-count-event-${event.id}`);
     
     if (heartIcon && likeCountElement) {
-      if (status.liked) {
-        // いいね済み：赤色に設定
-        heartIcon.style.fill = '#ef4444';
-        likeCountElement.style.color = '#ef4444';
-        likeCountElement.style.fontWeight = 'bold';
-        console.log(`💖 イベント${event.id}は既にいいね済み (${status.like_count})`);
-      } else {
-        // 未いいね：白色に設定
-        heartIcon.style.fill = 'white';
-        likeCountElement.style.color = '#ffffff';
-        likeCountElement.style.fontWeight = '500';
-        console.log(`🤍 イベント${event.id}は未いいね (${status.like_count})`);
-      }
+      // デフォルトは未いいね状態に設定（個別のいいね状態はユーザーがいいねボタンを押した時に更新）
+      heartIcon.style.fill = 'white';
+      likeCountElement.style.color = '#ffffff';
+      likeCountElement.style.fontWeight = '500';
+      console.log(`🤍 イベント${event.id}の初期状態を未いいねに設定 (${likeCount})`);
       
-      // いいね数を確実に更新（APIから取得した値を使用）
-      likeCountElement.textContent = status.like_count.toString();
-      console.log(`📊 イベント${event.id}のいいね数を更新: ${status.like_count}`);
+      // いいね数を更新（イベントデータから取得した値を使用）
+      likeCountElement.textContent = likeCount.toString();
+      console.log(`📊 イベント${event.id}のいいね数を更新: ${likeCount}`);
     } else {
       console.warn(`⚠️ イベント${event.id}のDOM要素が見つかりません`);
       console.log(`🔍 検索した要素ID: heart-event-${event.id}, like-count-event-${event.id}`);
@@ -407,6 +327,61 @@ export const checkInitialEventLikeStatus = async (event: Event) => {
       // エラー時は初期値を使用
       likeCountElement.textContent = (event.like || 0).toString();
     }
+  }
+};
+
+// カテゴリに基づく色設定を取得する関数
+const getCategoryColors = (category: string) => {
+  switch (category) {
+    case 'entertainment':
+      return {
+        background: 'linear-gradient(to bottom right, #fef2f2, #fecaca)',
+        border: '#fca5a5',
+        iconBg: '#ef4444',
+        textColor: '#991b1b',
+        arrow: '#fef2f2'
+      };
+    case 'community':
+      return {
+        background: 'linear-gradient(to bottom right, #f0fdfa, #ccfbf1)',
+        border: '#5eead4',
+        iconBg: '#14b8a6',
+        textColor: '#134e4a',
+        arrow: '#f0fdfa'
+      };
+    case 'information':
+      return {
+        background: 'linear-gradient(to bottom right, #eff6ff, #dbeafe)', 
+        border: '#93c5fd',
+        iconBg: '#3b82f6',
+        textColor: '#1e3a8a',
+        arrow: '#eff6ff'
+      };
+    case 'disaster':
+      return {
+        background: 'linear-gradient(to bottom right, #fef2f2, #fee2e2)',
+        border: '#fca5a5',
+        iconBg: '#dc2626',
+        textColor: '#991b1b',
+        arrow: '#fef2f2'
+      };
+    case 'food':
+      return {
+        background: 'linear-gradient(to bottom right, #fffbeb, #fef3c7)',
+        border: '#fcd34d',
+        iconBg: '#f59e0b',
+        textColor: '#92400e',
+        arrow: '#fffbeb'
+      };
+    case 'event':
+    default:
+      return {
+        background: 'linear-gradient(to bottom right, #ecfdf5, #d1fae5)',
+        border: '#86efac',
+        iconBg: '#10b981',
+        textColor: '#064e3b',
+        arrow: '#ecfdf5'
+      };
   }
 };
 
