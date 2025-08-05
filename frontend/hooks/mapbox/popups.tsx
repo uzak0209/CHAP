@@ -6,8 +6,8 @@ import { Post, Thread, Event } from '@/types/types';
 // 投稿ポップアップのHTML生成関数
 export const createPostPopupHTML = (post: Post) => {
   // バックエンドから返される大文字フィールドに対応
-  const postId = (post as any).ID || post.ID;
-  const updatedAt = (post as any).UpdatedAt || post.updated_at;
+  const postId = (post as any).id || post.id;
+  const updatedAt = (post as any).updated_at || post.updated_at;
   
   return `
     <div class="relative max-w-sm bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 shadow-lg rounded-2xl overflow-hidden" 
@@ -132,15 +132,15 @@ export const createEventPopupHTML = (event: Event) => {
   <div class="relative max-w-sm shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
        data-event-id="${event.id}"
        data-category="${validCategory}"
-       style="max-width: 20rem; background: ${colors.background}; border: 1px solid ${colors.border}; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-radius: 1rem; overflow: hidden; position: relative;">
+       style="max-width: 20rem; background: ${colors?.background}; border: 1px solid ${colors?.border}; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-radius: 1rem; overflow: hidden; position: relative;">
     
     <!-- 吹き出しの矢印 -->
     <div class="absolute -bottom-2 left-5 w-0 h-0" 
-         style="position: absolute; bottom: -8px; left: 20px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid ${colors.arrow};"></div>
+         style="position: absolute; bottom: -8px; left: 20px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid ${colors?.arrow};"></div>
     
     // <!-- イベントアイコン -->
     // <div class="absolute top-2 left-2 h-6 w-6 rounded-full flex items-center justify-center"
-    //      style="position: absolute; top: 8px; left: 8px; height: 24px; width: 24px; border-radius: 50%; background-color: ${colors.iconBg}; display: flex; align-items: center; justify-content: center;">
+    //      style="position: absolute; top: 8px; left: 8px; height: 24px; width: 24px; border-radius: 50%; background-color: ${colors?.iconBg}; display: flex; align-items: center; justify-content: center;">
     //   <svg class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 24 24" style="height: 12px; width: 12px; color: white;">
     //     <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
     //   </svg>
@@ -149,17 +149,17 @@ export const createEventPopupHTML = (event: Event) => {
     ${isNewEvent ? `
     <!-- 新規イベント表示 -->
     <div class="absolute top-2 right-2 text-white text-xs px-2 py-1 rounded-full"
-         style="position: absolute; top: 8px; right: 8px; background-color: ${colors.iconBg}; color: white; font-size: 0.625rem; padding: 2px 6px; border-radius: 9999px;">
+         style="position: absolute; top: 8px; right: 8px; background-color: ${colors?.iconBg}; color: white; font-size: 0.625rem; padding: 2px 6px; border-radius: 9999px;">
       NEW!
     </div>
     ` : ''}
     
     <!-- メッセージコンテンツ -->
     <div class="p-3 pt-7" style="padding: 0.75rem; padding-top: 1.75rem;">
-      <h3 class="font-bold mb-1 text-sm" style="color: ${colors.textColor}; font-size: 0.875rem; margin-bottom: 0.25rem; font-weight: bold;">
+      <h3 class="font-bold mb-1 text-sm" style="color: ${colors?.textColor}; font-size: 0.875rem; margin-bottom: 0.25rem; font-weight: bold;">
         ${event.content ? event.content.substring(0, 30) + (event.content.length > 30 ? '...' : '') : 'イベント'}
       </h3>
-      <p class="text-xs mb-2" style="color: ${olors.textColor}; font-size: 0.75rem; margin-bottom: 0.5rem; opacity: 0.8;">
+      <p class="text-xs mb-2" style="color: ${colors?.textColor}; font-size: 0.75rem; margin-bottom: 0.5rem; opacity: 0.8;">
         📅 ${getCategoryLabel(eventCategory)}
       </p>
       <div class="flex justify-between items-center text-xs" 
@@ -170,7 +170,7 @@ export const createEventPopupHTML = (event: Event) => {
           </svg>
           <span id="like-count-event-${event.id}" class="text-white font-medium" style="color: #efffff; font-weight: 500; font-size: 0.65rem;">${event.like || 0}</span>
         </div>
-        <div style="color: ${colors.textColor}; opacity: 0.7;">
+        <div style="color: ${colors?.textColor}; opacity: 0.7;">
           <span class="font-medium" style="font-weight: 500;">📍 ${!event.coordinate ? '現在地' : 'イベント'}</span>
           <span class="ml-2" style="margin-left: 0.5rem;">${formatDate()}</span>
         </div>
@@ -183,7 +183,7 @@ export const createEventPopupHTML = (event: Event) => {
 // 初期いいね状態の確認と色設定関数（投稿用）
 export const checkInitialLikeStatus = async (post: Post) => {
   try {
-    console.log(`🔍 投稿${post.ID}の初期いいね状態を確認中...`);
+    console.log(`🔍 投稿${post.id}の初期いいね状態を確認中...`);
     
     // 認証状態をチェック
     const token = localStorage.getItem('authtoken');
@@ -194,30 +194,30 @@ export const checkInitialLikeStatus = async (post: Post) => {
     
     // 投稿データに含まれているいいね数を使用（個別取得は不要）
     const likeCount = post.like || 0;
-    console.log(`📊 投稿${post.ID}のいいね数: ${likeCount}`);
+    console.log(`📊 投稿${post.id}のいいね数: ${likeCount}`);
     
-    const heartIcon = document.getElementById(`heart-post-${post.ID}`);
-    const likeCountElement = document.getElementById(`like-count-post-${post.ID}`);
+    const heartIcon = document.getElementById(`heart-post-${post.id}`);
+    const likeCountElement = document.getElementById(`like-count-post-${post.id}`);
     
     if (heartIcon && likeCountElement) {
       // デフォルトは未いいね状態に設定（個別のいいね状態はユーザーがいいねボタンを押した時に更新）
       heartIcon.style.fill = 'white';
       likeCountElement.style.color = '#ffffff';
       likeCountElement.style.fontWeight = '500';
-      console.log(`🤍 投稿${post.ID}の初期状態を未いいねに設定 (${likeCount})`);
+      console.log(`🤍 投稿${post.id}の初期状態を未いいねに設定 (${likeCount})`);
       
       // いいね数を更新（投稿データから取得した値を使用）
       likeCountElement.textContent = likeCount.toString();
-      console.log(`📊 投稿${post.ID}のいいね数を更新: ${likeCount}`);
+      console.log(`📊 投稿${post.id}のいいね数を更新: ${likeCount}`);
     } else {
-      console.warn(`⚠️ 投稿${post.ID}のDOM要素が見つかりません`);
-      console.log(`🔍 検索した要素ID: heart-post-${post.ID}, like-count-post-${post.ID}`);
+      console.warn(`⚠️ 投稿${post.id}のDOM要素が見つかりません`);
+      console.log(`🔍 検索した要素ID: heart-post-${post.id}, like-count-post-${post.id}`);
     }
   } catch (error) {
-    console.warn(`⚠️ 投稿${post.ID}の初期いいね状態確認に失敗:`, error);
+    console.warn(`⚠️ 投稿${post.id}の初期いいね状態確認に失敗:`, error);
     // エラーの場合はデフォルト状態（未いいね）に設定
-    const heartIcon = document.getElementById(`heart-post-${post.ID}`);
-    const likeCountElement = document.getElementById(`like-count-post-${post.ID}`);
+    const heartIcon = document.getElementById(`heart-post-${post.id}`);
+    const likeCountElement = document.getElementById(`like-count-post-${post.id}`);
     
     if (heartIcon && likeCountElement) {
       heartIcon.style.fill = 'white';

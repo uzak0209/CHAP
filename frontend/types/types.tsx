@@ -3,20 +3,20 @@ export type PostCategory = 'entertainment' | 'community' | 'information' | 'disa
 export type EventCategory = 'entertainment' | 'community' | 'information' | 'disaster' | 'food' | 'event';
 
 export interface Post {
-  ID: number;           // 自動インクリメントのID
-  User_id: string;      // UUIDの文字列
-  Coordinate: {
-    Lat: number;
-    Lng: number;
+  id: number;           // 自動インクリメントのID
+  user_id: string;      // UUIDの文字列
+  coordinate: {
+    lat: number;
+    lng: number;
   };
-  Created_at: string;
-  Deleted_at?: string;
-  Updated_at?: string;
-  Content: string;
-  Category: string;     // カテゴリフィールド（必須）
-  Valid: boolean;
-  Like: number;         // int
-  Tags: string[];
+  created_at: string;
+  deleted_at?: string;
+  updated_at?: string;
+  content: string;
+  category: string;     // カテゴリフィールド（必須）
+  valid: boolean;
+  like: number;         // int
+  tags: string[];
 }
 
 export interface Thread {
@@ -43,14 +43,14 @@ export interface Event {
     lat: number;
     lng: number;
   };
-  Created_at: string;
-  Deleted_at?: string;
-  Updated_at?: string;
-  Content: string;
-  Category: string;    // カテゴリフィールド（必須）
-  Valid: boolean;
-  Like: number;         // int
-  Tags: string[];
+  created_at: string;
+  deleted_at?: string;
+  updated_at?: string;
+  content: string;
+  category: string;    // カテゴリフィールド（必須）
+  valid: boolean;
+  like: number;         // int
+  tags: string[];
 }
 export interface Comment{
   id: number;
@@ -63,32 +63,32 @@ export interface Comment{
 
 }
 export interface User {
-  ID: string;           // UUIDの文字列
-  Name: string;
+  id: string;           // UUIDの文字列
+  name: string;
 }
 
 // いいね関連
 export interface PostLikes {
-  User_id: string;      // UUIDの文字列
-  Post_id:  number;    
+  user_id: string;      // UUIDの文字列
+  post_id:  number;    
 }
 
 export interface ThreadLikes {
-  User_id: string;      // UUIDの文字列
-  Thread_id: number;  
+  user_id: string;      // UUIDの文字列
+  thread_id: number;  
 }
 
 export interface EventLikes {
-  User_id: string;      // UUIDの文字列
-  Event_id: number;     
+  user_id: string;      // UUIDの文字列
+  event_id: number;     
 }
 
 export interface Coordinate {
-  Lat: number;
-  Lng: number;
+  lat: number;
+  lng: number;
 }
 
-export type LatLng = { Lat: number; Lng: number };
+export type LatLng = { lat: number; lng: number };
 
 // Immerと互換性のある型定義に修正
 export type LocationState = {
