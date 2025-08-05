@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, Camera, MapPin, Hash } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { createPost } from '@/store/postsSlice';
+import { createPost, fetchAroundPosts } from '@/store/postsSlice';
 import { Status, PostCategory } from '@/types/types';
 import { POST_CATEGORY_OPTIONS } from '@/constants/categories';
 
@@ -28,6 +28,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
   
   const dispatch = useAppDispatch();
   const { state, location } = useAppSelector((state) => state.location);
+  const { selectedCategory } = useAppSelector((state) => state.filters);
 
   const categoryOptions = POST_CATEGORY_OPTIONS;
 
@@ -45,7 +46,14 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
         valid: true,
         like: 0,
         created_at: new Date().toISOString(),
-      }));
+        visible: selectedCategory === category
+      })).unwrap();
+      
+      // POST成功後に周辺の投稿を再取得（地図上に即座に反映）
+      if (state === Status.LOADED) {
+        console.log('📍 投稿作成成功 - 周辺データを再取得中...');
+        await dispatch(fetchAroundPosts({ lat: location.lat, lng: location.lng }));
+      }
       
       // 成功したらモーダルを閉じてフォームをリセット
       setContent('');

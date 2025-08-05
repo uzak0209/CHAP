@@ -43,7 +43,7 @@ const EventCard = ({ event }: { event: Event }) => (
         <Calendar className="w-5 h-5 mr-3 text-gray-600" />
         <div>
           <p className="font-semibold">開催日時</p>
-          <p>{new Date(event.created_time).toLocaleString()}</p>
+          <p>{new Date(event.created_at).toLocaleString()}</p>
         </div>
       </div>
       {/* <div className="flex items-center">
@@ -107,8 +107,8 @@ export default function EventsPage() {
     return [...events].sort((a, b) => {
       if (sortBy === "time") {
         return (
-          new Date(b.created_time).getTime() -
-          new Date(a.created_time).getTime()
+          new Date(b.created_at).getTime() -
+          new Date(a.created_at).getTime()
         );
       }
       // TODO: 距離でのソート

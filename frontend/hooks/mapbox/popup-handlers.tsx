@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import mapboxgl from 'mapbox-gl';
 import { Post, Thread, Event } from '@/types/types';
 // いいね機能のAPI関数は現在コメントアウトされているため、importを削除
-import { createPostPopupHTML, createThreadPopupHTML, createEventPopupHTML, checkInitialLikeStatus, checkInitialThreadLikeStatus, checkInitialEventLikeStatus } from './popups';
+import { PostPopup, ThreadPopup, EventPopup } from './popups';
 
 // 投稿のいいね機能イベントリスナー設定関数
 export const setupPostLikeHandler = (post: Post) => {
@@ -378,7 +378,6 @@ export const createAndSetupPostPopup = (post: Post, coordinates: [number, number
     anchor: 'bottom'
   })
   .setLngLat(coordinates)
-  .setHTML(createPostPopupHTML(post));
 
   // ポップアップ表示後にイベントリスナーを設定（既存のリスナーがある場合はスキップ）
   setTimeout(() => {
@@ -387,7 +386,7 @@ export const createAndSetupPostPopup = (post: Post, coordinates: [number, number
       setupPostLikeHandler(post);
     }
     // 初期いいね状態を確認して色を設定
-    checkInitialLikeStatus(post);
+    // checkInitialLikeStatus(post);
   }, 300);
 
   return popup;
@@ -401,7 +400,6 @@ export const createAndSetupThreadPopup = (thread: Thread, coordinates: [number, 
     offset: 25,
     className: 'thread-popup thread-popup-yellow'
   })
-  .setHTML(createThreadPopupHTML(thread));
 
   // ポップアップ表示後にイベントリスナーを設定（既存のリスナーがある場合はスキップ）
   setTimeout(() => {
@@ -412,7 +410,7 @@ export const createAndSetupThreadPopup = (thread: Thread, coordinates: [number, 
       setupThreadLikeHandler(thread);
     }
     // 初期いいね状態を確認して色を設定
-    checkInitialThreadLikeStatus(thread);
+    // checkInitialThreadLikeStatus(thread);
   }, 300);
 
   return popup;
@@ -620,21 +618,21 @@ export const createAndSetupEventPopup = (event: Event, coordinates: [number, num
     return null;
   }
 
-  const popupHTML = createEventPopupHTML(event);
-  if (!popupHTML) {
-    console.log(`イベント${event.id}のHTML生成に失敗（カテゴリなし）`);
-    return null;
-  }
+  // const popupHTML = createEventPopupHTML(event);
+  //   if (!popupHTML) {
+  //     console.log(`イベント${event.id}のHTML生成に失敗（カテゴリなし）`);
+  //     return null;
+  //   }
 
-  const popup = new mapboxgl.Popup({
-    closeButton: false,
-    closeOnClick: false,
-    closeOnMove: false,
-    offset: 25,
-    className: `event-popup event-${eventCategory}`
-  })
-  // .setLngLat(coordinates)
-  .setHTML(createEventPopupHTML(event));
+  // const popup = new mapboxgl.Popup({
+  //   closeButton: false,
+  //   closeOnClick: false,
+  //   closeOnMove: false,
+  //   offset: 25,
+  //   className: `event-popup event-${eventCategory}`
+  // })
+  // // .setLngLat(coordinates)
+  // .setHTML(createEventPopupHTML(event));
 
   // ポップアップ表示後にイベントリスナーを設定（既存のリスナーがある場合はスキップ）
   setTimeout(() => {
@@ -645,8 +643,8 @@ export const createAndSetupEventPopup = (event: Event, coordinates: [number, num
       setupEventLikeHandler(event);
     }
     // 初期いいね状態を確認して色を設定
-    checkInitialEventLikeStatus(event);
+    // checkInitialEventLikeStatus(event);
   }, 300);
 
-  return popup;
+  // return popup;
 };

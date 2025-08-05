@@ -279,6 +279,27 @@ export const useMapbox = () => {
     }
   }, [posts, threads, events, selectedCategory, addPostMarkers, addThreadMarkers, addEventMarkers]);
 
+  // フィルタが変更されたときの専用effect
+  useEffect(() => {
+    if (mapRef.current && (posts.length > 0 || threads.length > 0 || events.length > 0)) {
+      console.log('🔄 フィルタ変更を検知 - マーカーを強制再描画:', selectedCategory);
+      console.log('📊 現在のデータ状況:', {
+        posts: posts.length,
+        threads: threads.length,
+        events: events.length
+      });
+      
+      // 少し遅延を入れて確実にマーカーを再作成
+      setTimeout(() => {
+        console.log('⚡ フィルタ変更によるマーカー再作成開始');
+        addPostMarkers();
+        addThreadMarkers(); 
+        addEventMarkers();
+        console.log('✅ フィルタ変更によるマーカー再作成完了');
+      }, 100);
+    }
+  }, [selectedCategory, addPostMarkers, addThreadMarkers, addEventMarkers]); // 依存配列を拡張
+
   // 認証状態が変更された時にいいね状態を再確認
   useEffect(() => {
     if (isAuthenticated && mapRef.current) {

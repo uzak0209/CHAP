@@ -25,7 +25,8 @@ export default function PostPage() {
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
   const {state, location, error } = useAppSelector((state) => state.location);
-  const router = useRouter();
+  const router = useRouter();   
+  const { selectedCategory } = useAppSelector((state) => state.filters);
   
   const handleSubmit = async () => {
     if (!content.trim() || !category) return;
@@ -40,6 +41,7 @@ export default function PostPage() {
         like: 0,
         created_at: new Date().toISOString(),
         category: category as PostCategory,
+        visible: selectedCategory === category
       }));
       router.push('/timeline');
     } catch (error) {

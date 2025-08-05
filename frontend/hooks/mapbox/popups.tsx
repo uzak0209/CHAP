@@ -6,13 +6,28 @@ import { Heart, MessageCircle, Calendar, MapPin } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useAppSelector } from '@/store';
 
 // 投稿ポップアップコンポーネント
-export const PostPopup: React.FC<{ post: Post; onLike?: (postId: string) => void }> = ({ post, onLike }) => {
+export const PostPopup: React.FC<{ post: Post;  }> = ({ post}) => {
   const postId = post.id;
   const updatedAt = post.updated_at;
+  
+  // 現在選択されているカテゴリを取得
+  const selectedCategory = useAppSelector(state => state.filters.selectedCategory);
+  
+  // 投稿のカテゴリと選択されたカテゴリが一致するかチェック
+  const category = post.category || 'other';
+  const showPopup = selectedCategory === category;
+  
+  console.log(`🔍 投稿${postId}ポップアップ表示判定:`, {
+    投稿カテゴリ: category,
+    選択カテゴリ: selectedCategory,
+    表示: showPopup
+  });
 
   return (
+    showPopup && (
     <Card 
       className="relative max-w-sm bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 shadow-lg"
       data-post-id={postId}
@@ -37,7 +52,6 @@ export const PostPopup: React.FC<{ post: Post; onLike?: (postId: string) => void
             variant="ghost"
             size="sm"
             className="flex items-center gap-1 p-0 h-auto"
-            onClick={() => onLike?.(postId.toString())}
           >
             <Heart 
               id={`heart-post-${postId}`}
@@ -57,6 +71,7 @@ export const PostPopup: React.FC<{ post: Post; onLike?: (postId: string) => void
         </div>
       </CardContent>
     </Card>
+    )
   );
 };
 
@@ -65,8 +80,22 @@ export const PostPopup: React.FC<{ post: Post; onLike?: (postId: string) => void
 export const ThreadPopup: React.FC<{ thread: Thread }> = ({ thread }) => {
   const threadId = thread.id;
   const createdAt = thread.created_at;
+  
+  // 現在選択されているカテゴリを取得
+  const selectedCategory = useAppSelector(state => state.filters.selectedCategory);
+  
+  // スレッドのカテゴリと選択されたカテゴリが一致するかチェック
+  const category = thread.category || (thread.tags && thread.tags.length > 0 ? thread.tags[0] : '');
+  const showPopup = selectedCategory === category;
+  
+  console.log(`🔍 スレッド${threadId}ポップアップ表示判定:`, {
+    スレッドカテゴリ: category,
+    選択カテゴリ: selectedCategory,
+    表示: showPopup
+  });
 
   return (
+    showPopup && (
     <Card 
       className="relative max-w-sm bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 shadow-lg"
       data-thread-id={threadId}
@@ -111,6 +140,7 @@ export const ThreadPopup: React.FC<{ thread: Thread }> = ({ thread }) => {
         </div>
       </CardContent>
     </Card>
+    )
   );
 };
 
@@ -167,8 +197,22 @@ const getCategoryColors = (category: string) => {
 export const EventPopup: React.FC<{ event: Event; onLike?: (eventId: string) => void }> = ({ event, onLike }) => {
   const eventId = event.id;
   const createdAt = event.created_at;
+  
+  // 現在選択されているカテゴリを取得
+  const selectedCategory = useAppSelector(state => state.filters.selectedCategory);
+  
+  // イベントのカテゴリと選択されたカテゴリが一致するかチェック
+  const category = event.category || 'other';
+  const showPopup = selectedCategory === category;
+  
+  console.log(`🔍 イベント${eventId}ポップアップ表示判定:`, {
+    イベントカテゴリ: category,
+    選択カテゴリ: selectedCategory,
+    表示: showPopup
+  });
 
   return (
+    showPopup && (
     <Card 
       className="relative max-w-sm bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200 shadow-lg"
       data-event-id={eventId}
@@ -215,6 +259,7 @@ export const EventPopup: React.FC<{ event: Event; onLike?: (eventId: string) => 
         </div>
       </CardContent>
     </Card>
+    )
   );
 };
 

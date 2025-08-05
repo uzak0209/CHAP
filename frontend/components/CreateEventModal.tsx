@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { X, Calendar, MapPin, Clock, Users } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { createEvent } from '@/store/eventsSlice';
+import { createEvent, fetchAroundEvents } from '@/store/eventsSlice';
 import { filtersActions } from '@/store/filtersSlice';
 import { Event, EventCategory } from '@/types/types';
 
@@ -20,7 +20,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
   const { loading } = useAppSelector(state => state.events);
   const { location } = useAppSelector(state => state.location);
   const { isAuthenticated } = useAppSelector(state => state.auth);
-  
+  const { selectedCategory } = useAppSelector((state) => state.filters);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<EventCategory | ''>('');
@@ -64,10 +64,15 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
         valid: true,
         tags: [], // モーダルではタグ機能は簡略化
         created_at: new Date().toISOString(),
+        visible: selectedCategory === category
       };
 
       // Redux経由でイベント作成
       await dispatch(createEvent(eventData as any)).unwrap();
+      
+      // POST成功後に周辺のイベントを再取得（地図上に即座に反映）
+      console.log('📍 イベント作成成功 - 周辺データを再取得中...');
+      await dispatch(fetchAroundEvents({ lat: location.lat, lng: location.lng }));
       
       // イベント作成成功後、カテゴリフィルターを作成したイベントのカテゴリに更新
       console.log('🎯 カテゴリフィルターを更新:', category);

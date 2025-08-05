@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, MessageSquareText, MapPin, Hash } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { createThread } from '@/store/threadsSlice';
+import { createThread, fetchAroundThreads } from '@/store/threadsSlice';
 import { Status } from '@/types/types';
 import { PostCategory } from '@/types/thread';
 import { THREAD_CATEGORY_OPTIONS } from '@/constants/categories';
@@ -28,6 +28,7 @@ export function CreateThreadModal({ isOpen, onClose }: CreateThreadModalProps) {
   
   const dispatch = useAppDispatch();
   const { state, location } = useAppSelector((state) => state.location);
+  const { selectedCategory } = useAppSelector((state) => state.filters);
 
   const categoryOptions = THREAD_CATEGORY_OPTIONS;
 
@@ -39,7 +40,24 @@ export function CreateThreadModal({ isOpen, onClose }: CreateThreadModalProps) {
       // カテゴリをタグに追加
       const allTags = category ? [category, ...tags] : tags;
 
+      // createThreadアクションを使って新しいスレッドをデータベースに作成
+      await dispatch(createThread({
+  
+        content,
+        category: category as PostCategory,
+        tags: allTags,
+        coordinate: state === Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
+        valid: true,
+        like: 0,
+        created_at: new Date().toISOString(),
+        visible: selectedCategory === category
+      })).unwrap();
       
+      // POST成功後に周辺のスレッドを再取得（地図上に即座に反映）
+      if (state === Status.LOADED) {
+        console.log('📍 スレッド作成成功 - 周辺データを再取得中...');
+        await dispatch(fetchAroundThreads({ lat: location.lat, lng: location.lng }));
+      }
       
       // 成功したらモーダルを閉じてフォームをリセット
       setContent('');

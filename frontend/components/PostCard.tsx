@@ -9,6 +9,9 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
   console.log("PostCard rendered with post:", post);
+  console.log("PostCard content value:", post.content);
+  console.log("PostCard content type:", typeof post.content);
+  
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
@@ -17,7 +20,7 @@ export function PostCard({ post }: PostCardProps) {
         {post.category && <PostCategoryDisplay category={post.category} />}
         {post.tags && <PostTags tags={post.tags} />}
         <PostFooter
-          createdAt={post.created_time}
+          createdAt={post.created_at}
         />
       </CardContent>
     </Card>
@@ -33,9 +36,13 @@ function PostHeader({ userId }: { userId: string }) {
 }
 
 function PostContent({ content, images }: { content: string; images?: string[] }) {
+  console.log("PostContent rendering with content:", content);
+  console.log("Content exists:", !!content);
+  console.log("Content length:", content?.length);
+  
   return (
     <>
-      <p className="mb-3">{content}</p>
+      <p className="mb-3">{content || "コンテンツがありません"}</p>
       {images?.[0] && (
         <img 
           src={images[0]} 

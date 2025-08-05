@@ -1,8 +1,13 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { renderToString } from 'react-dom/server';
 import mapboxgl from 'mapbox-gl';
 import { Status, Post, Thread, Event } from '@/types/types';
-import { createAndSetupPostPopup, createAndSetupThreadPopup, createAndSetupEventPopup, setupPostLikeHandler } from './popup-handlers';
+import { PostPopup, ThreadPopup, EventPopup } from './popups';
+import { normalizePostData, normalizeThreadData, normalizeEventData, logDataTransformation } from '@/utils/dataTransform';
+
+
+
 
 // カテゴリに基づいてマーカーの色を決定するユーティリティ関数
 export const getMarkerColor = (category: string) => {
@@ -100,59 +105,117 @@ export const createMarkerFunctions = (
 
   // 投稿マーカーを地図に追加する関数
   const addPostMarkers = () => {
+
     if (!mapRef.current || !posts.length) return;
 
     // 既存のマーカーを削除
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
-    // 有効なカテゴリのポストのみをフィルタリング
-    const validCategoryPosts = posts.filter((post) => {
-      const category = post.category || 'other';
-      const isValidCategory = category !== 'other' && category !== 'その他';
-      const matchesSelectedCategory = category === selectedCategory;
-      return isValidCategory && matchesSelectedCategory;
-    });
 
-    validCategoryPosts.forEach((post) => {
-      const postId = (post as any).ID || post.id;
+    // 投稿をフィルタリング（正規化 → フィルタリング）
+    console.log('📊 投稿処理開始:', {
+      全投稿数: posts.length,
+      選択カテゴリ: selectedCategory
+    });
+    
+
+    // 全投稿を処理（フィルタに関係なく）
+    const normalizedPosts = posts.map(rawPost => normalizePostData(rawPost));
+    
+    normalizedPosts.forEach((post) => {
+      
       if (!post.coordinate || !post.coordinate.lat || !post.coordinate.lng) {
-        console.warn('座標が無効な投稿をスキップ:', postId);
+        console.warn('座標が無効な投稿をスキップ:', post.id);
         return;
       }
 
       const coordinates: [number, number] = [post.coordinate.lng, post.coordinate.lat];
 
+      // カテゴリフィルタリング判定
+      const category = post.category || 'other';
+      const isValidCategory = category !== 'other' && category !== 'その他';
+      const matchesSelectedCategory = category === selectedCategory;
+      const shouldShowPopup = isValidCategory && matchesSelectedCategory;
+
+      console.log(`🔍 投稿${post.id}フィルタ判定:`, {
+        カテゴリ: category,
+        選択カテゴリ: selectedCategory,
+        有効カテゴリ: isValidCategory,
+        カテゴリ一致: matchesSelectedCategory,
+        ポップアップ表示: shouldShowPopup
+      });
+
       // マーカーを作成
       const marker = new mapboxgl.Marker({ 
         color: getMarkerColor(post.category),
-        scale: 0.5
+        scale: shouldShowPopup ? 0.5 : 0.3  // フィルタされたマーカーは小さく
       }).setLngLat(coordinates);
 
-      // ポップアップを作成・設定
-      const popup = createAndSetupPostPopup(post, coordinates);
-      marker.setPopup(popup).addTo(mapRef.current!);
+      // フィルタされたマーカーの透明度を調整
+      if (!shouldShowPopup) {
+        const markerElement = marker.getElement();
+        if (markerElement) {
+          markerElement.style.opacity = '0.4';
+        }
+      }
+
+      // showPopupプロパティを使ってポップアップの表示を制御
+      const postPopupHTML = renderToString(React.createElement(PostPopup, { post, showPopup: shouldShowPopup }));
+      console.log(`🔧 投稿${post.id}のHTMLを生成 (showPopup: ${shouldShowPopup}):`, postPopupHTML.substring(0, 100) + '...');
+      
+      // Mapboxポップアップを作成・設定
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        closeOnMove: false,
+        anchor: 'bottom'
+      })
+      .setLngLat(coordinates)
+      .setHTML(postPopupHTML);
+
+      if (shouldShowPopup) {
+        marker.setPopup(popup);
+        console.log(`✅ 投稿${post.id}のポップアップを作成 (フィルタ一致)`);
+      } else {
+        console.log(`❌ 投稿${post.id}のポップアップを非表示 (フィルタ不一致)`);
+      }
+      
+      marker.addTo(mapRef.current!);
+      console.log(`📍 投稿${post.id}のマーカーを地図に追加`);
 
       // マーカーをリストに追加
       markersRef.current.push(marker);
 
-      // ポップアップを即座に表示
-      setTimeout(() => {
-        try {
-          popup.addTo(mapRef.current!);
-          console.log(`✅ 投稿${post.id}のポップアップを表示`);
-          
-          // マーカーのポップアップも確認
-          setTimeout(() => {
+      // ポップアップを即座に表示（フィルタに一致する場合のみ）
+      if (shouldShowPopup) {
+        setTimeout(() => {
+          try {
             const markerPopup = marker.getPopup();
-            if (markerPopup && !markerPopup.isOpen()) {
-              marker.togglePopup();
+            if (markerPopup) {
+              markerPopup.addTo(mapRef.current!);
+              
+              // マーカーのポップアップも確認
+              setTimeout(() => {
+                console.log(`🔍 投稿${post.id}のマーカーポップアップ状態確認`);
+                if (!markerPopup.isOpen()) {
+                  console.log(`🔄 投稿${post.id}のポップアップを開く`);
+                  marker.togglePopup();
+                } else {
+                  console.log(`✅ 投稿${post.id}のポップアップは既に開いています`);
+                }
+              }, 100);
             }
-          }, 100);
-        } catch (error) {
-          console.error(`❌ 投稿${post.id}のポップアップ表示エラー:`, error);
-        }
-      }, post === posts[0] ? 200 : 200 + markersRef.current.length * 50);
+          } catch (error) {
+            console.error(`❌ 投稿${post.id}のポップアップ表示エラー:`, error);
+          }
+        }, normalizedPosts.indexOf(post) === 0 ? 200 : 200 + markersRef.current.length * 50);
+      }
+    });
+
+    console.log('📊 投稿マーカー処理完了:', {
+      全投稿数: normalizedPosts.length,
+      選択カテゴリ: selectedCategory
     });
   };
 
@@ -166,16 +229,25 @@ export const createMarkerFunctions = (
     threadMarkersRef.current.forEach(marker => marker.remove());
     threadMarkersRef.current = [];
 
-    // 有効なカテゴリのスレッドのみをフィルタリング
-    const validCategoryThreads = threads.filter((thread) => {
-      const category = thread.tags && thread.tags.length > 0 ? thread.tags[0] : '';
-      const isValidCategory = category !== 'other' && category !== 'その他' && category !== '';
-      const matchesSelectedCategory = category === selectedCategory;
-      return isValidCategory && matchesSelectedCategory;
-    });
 
+    // スレッドをフィルタリング（正規化 → フィルタリング）
+    const filteredThreads = threads
+      .map(rawThread => normalizeThreadData(rawThread)) // まず正規化
+      .filter(thread => {
+        // スレッドはcategoryフィールドまたはtagsの最初の要素をカテゴリとして使用
+        const category = thread.category || (thread.tags && thread.tags.length > 0 ? thread.tags[0] : '');
+        const isValidCategory = category !== 'other' && category !== 'その他' && category !== '';
+        const matchesSelectedCategory = category === selectedCategory;
+        
+        console.log(`スレッド${thread.id}: カテゴリ="${category}", 選択済み="${selectedCategory}", マッチ=${matchesSelectedCategory}`);
+        
+        return isValidCategory && matchesSelectedCategory;
+      });
+      
 
-    validCategoryThreads.forEach((thread) => {
+    filteredThreads.forEach((thread) => {
+      console.log('🗺️ スレッドマーカー作成中:', thread.id, 'カテゴリ:', thread.category || thread.tags?.[0]);
+      
       if (!thread.coordinate || !thread.coordinate.lat || !thread.coordinate.lng) {
         console.warn('座標が無効なスレッドをスキップ:', thread.id);
         return;
@@ -189,8 +261,18 @@ export const createMarkerFunctions = (
         scale: 0.6 
       }).setLngLat(coordinates);
 
-      // ポップアップを作成・設定
-      const popup = createAndSetupThreadPopup(thread, coordinates, router);
+      // ReactコンポーネントをHTML文字列に変換
+      const threadPopupHTML = renderToString(React.createElement(ThreadPopup, { thread, showPopup: true }));
+      
+      // Mapboxポップアップを作成・設定
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        closeOnMove: false,
+        anchor: 'bottom'
+      })
+      .setLngLat(coordinates)
+      .setHTML(threadPopupHTML);
 
       // マーカーにクリックイベントを追加（スレッドページに遷移）
       marker.getElement().addEventListener('click', () => {
@@ -247,19 +329,6 @@ export const createMarkerFunctions = (
     });
     eventMarkersRef.current = [];
 
-    console.log('📌 新しいイベントマーカーを追加中:', events.length, '件');
-
-    // デバッグ: 現在のフィルタ状態を確認
-    console.log('🔍 イベントフィルタリング詳細:', {
-      selectedCategory: selectedCategory,
-      totalEvents: events.length,
-      eventDetails: events.map(e => ({
-        id: e.id,
-        category: e.category,
-        tags: e.tags,
-        content: e.content?.substring(0, 30)
-      }))
-    });
 
     // 有効なカテゴリのイベントのみをフィルタリング
     const validCategoryEvents = events.filter((event) => {
@@ -267,27 +336,17 @@ export const createMarkerFunctions = (
       const isValidCategory = category !== 'other' && category !== 'その他';
       const matchesSelectedCategory = category === selectedCategory;
       
-      console.log(`🔍 イベント${event.id}フィルタ詳細:`, {
-        category: category,
-        selectedCategory: selectedCategory,
-        isValidCategory: isValidCategory,
-        matchesSelectedCategory: matchesSelectedCategory,
-        finalResult: isValidCategory && matchesSelectedCategory
-      });
-      
       return isValidCategory && matchesSelectedCategory;
-    });
-
-    console.log('🎯 フィルタリング結果:', {
-      totalEvents: events.length,
-      validCategoryEvents: validCategoryEvents.length,
-      validEventIds: validCategoryEvents.map(e => e.id)
     });
 
     // 現在地を取得（ユーザーの位置情報）
     const userLocation = { lat: location.lat, lng: location.lng };
 
-    validCategoryEvents.forEach((event, index) => {
+    validCategoryEvents.forEach((rawEvent, index) => {
+      // データを正規化（大文字フィールドを小文字に変換）
+      const event = normalizeEventData(rawEvent);
+      logDataTransformation(rawEvent, event, 'イベント');
+      
       let coordinates: [number, number];
       
       // イベントに座標がない場合（新規作成時）は現在地を使用
@@ -317,8 +376,6 @@ export const createMarkerFunctions = (
         anchor: 'bottom'
       }).setLngLat(coordinates);
 
-      // デバッグ: マーカーの座標を確認
-      console.log(`📍 イベント${event.id}のマーカー座標:`, coordinates, 'アンカー: bottom');
 
       // マーカー要素にホバーエフェクトを追加
       const markerElement = marker.getElement();
@@ -343,22 +400,24 @@ export const createMarkerFunctions = (
         markerElement.style.zIndex = '1';
       });
 
-      // 新しいイベントポップアップシステムを使用
-      const popup = createAndSetupEventPopup(event, coordinates, router);
+      // ReactコンポーネントをHTML文字列に変換
+      const eventPopupHTML = renderToString(React.createElement(EventPopup, { event, showPopup: true }));
       
-      if (!popup) {
-        console.log(`イベント${event.id}はカテゴリが無効のため表示をスキップ`);
-        return;
-      }
+      // Mapboxポップアップを作成・設定
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        closeOnMove: false,
+        anchor: 'bottom'
+      })
+      .setLngLat(coordinates)
+      .setHTML(eventPopupHTML);
 
       // マーカーにポップアップを設定してから地図に追加
       marker.setPopup(popup).addTo(mapRef.current!);
 
       // イベントマーカーをリストに追加
       eventMarkersRef.current.push(marker);
-
-      console.log(`📌 イベントマーカー${eventMarkersRef.current.length}を作成: イベントID=${event.id}`);
-
       // ポップアップを即座に表示
       setTimeout(() => {
         try {

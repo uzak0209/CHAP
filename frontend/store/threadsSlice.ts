@@ -50,7 +50,7 @@ export const fetchAroundThreads = createAsyncThunk<Thread[], { lat: number; lng:
   }
 )
 
-export const createThread = createAsyncThunk<Thread, Omit<Thread, 'id' | 'created_time' | 'updated_at'>>(
+export const createThread = createAsyncThunk<Thread, Omit<Thread, 'id' | 'user_id' | 'created_time' | 'updated_at'>>(
   'threads/create',
   async (threadData) => {
     return await apiClient.post<Thread>(API_ENDPOINTS.threads.create, threadData);

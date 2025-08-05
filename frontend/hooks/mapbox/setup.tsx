@@ -231,11 +231,6 @@ export const createRestorePopupsFunction = (
         }
       });
       
-      if (restoredCount > 0) {
-        console.log(`✅ ポップアップ復元完了: ${restoredCount}個 (${eventType})`);
-      } else {
-        console.log(`📍 復元不要: 全てのポップアップが正しい状態 (${eventType})`);
-      }
     }, 300); // 300msに調整してより確実に
     
     // // 最終確認として強制的にポップアップを表示（ズーム操作の場合のみ）

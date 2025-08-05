@@ -29,6 +29,7 @@ export default function CreateEventPage() {
   const { loading, error } = useAppSelector(state => state.events);
   const { state:locState,location,error:locError} = useAppSelector(state => state.location);
   const { isAuthenticated } = useAppSelector(state => state.auth);
+  const { selectedCategory } = useAppSelector((state) => state.filters);
   useEffect(() => {
       dispatch(getCurrentLocation()); 
     // エラーがあればクリア
@@ -63,10 +64,11 @@ export default function CreateEventPage() {
         lat: location.lat,
         lng: location.lng,
       },
-      created_time: new Date().toISOString(),
+      created_at: new Date().toISOString(),
       like: 0,
       valid: true,
       tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+      visible: selectedCategory === category
     };
 
     try {
