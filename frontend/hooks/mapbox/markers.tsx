@@ -115,8 +115,9 @@ export const createMarkerFunctions = (
     });
 
     validCategoryPosts.forEach((post) => {
+      const postId = (post as any).ID || post.id;
       if (!post.coordinate || !post.coordinate.lat || !post.coordinate.lng) {
-        console.warn('座標が無効な投稿をスキップ:', post.id);
+        console.warn('座標が無効な投稿をスキップ:', postId);
         return;
       }
 

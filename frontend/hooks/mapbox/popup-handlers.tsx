@@ -7,22 +7,23 @@ import { createPostPopupHTML, createThreadPopupHTML, createEventPopupHTML, check
 
 // 投稿のいいね機能イベントリスナー設定関数
 export const setupPostLikeHandler = (post: Post) => {
-  
+  // バックエンドから返される大文字フィールドに対応
+  const postId = (post as any).ID || post.id;
   
   setTimeout(() => {
-    console.log(`🔍 DOM要素を検索中 - heart-post-${post.id}`);
-    const heartIcon = document.getElementById(`heart-post-${post.id}`);
+    console.log(`🔍 DOM要素を検索中 - heart-post-${postId}`);
+    const heartIcon = document.getElementById(`heart-post-${postId}`);
     
     if (!heartIcon) {
-      console.error(`❌ ハートアイコンが見つかりません - heart-post-${post.id}`);
-      const allElements = document.querySelectorAll(`[id*="post-${post.id}"]`);
+      console.error(`❌ ハートアイコンが見つかりません - heart-post-${postId}`);
+      const allElements = document.querySelectorAll(`[id*="post-${postId}"]`);
       console.log('見つかった要素:', allElements);
       return;
     }
     
     // 既にイベントリスナーが設定されている場合はスキップ
     if (heartIcon.hasAttribute('data-listeners-set')) {
-      console.log(`✅ 投稿${post.id}のイベントリスナーは既に設定済み - スキップ`);
+      console.log(`✅ 投稿${postId}のイベントリスナーは既に設定済み - スキップ`);
       return;
     }
     

@@ -5,9 +5,13 @@ import { Post, Thread, Event } from '@/types/types';
 
 // 投稿ポップアップのHTML生成関数
 export const createPostPopupHTML = (post: Post) => {
+  // バックエンドから返される大文字フィールドに対応
+  const postId = (post as any).ID || post.id;
+  const updatedAt = (post as any).UpdatedAt || post.updated_at;
+  
   return `
     <div class="relative max-w-sm bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 shadow-lg rounded-2xl overflow-hidden" 
-         data-post-id="${post.id}"
+         data-post-id="${postId}"
          style="max-width: 20rem; background: linear-gradient(to bottom right, #eff6ff, #e0e7ff); border: 1px solid #c3dafe; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-radius: 1rem; overflow: hidden; position: relative;">
       
       <!-- 吹き出しの矢印 -->
@@ -31,13 +35,13 @@ export const createPostPopupHTML = (post: Post) => {
         <div class="flex justify-between items-center text-xs" 
              style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
           <div class="flex items-center gap-1">
-            <svg id="heart-post-${post.id}" class="w-3 h-3 cursor-pointer hover:scale-110 transition-transform" fill="white" viewBox="0 0 24 24" style="width: 12px; height: 12px;">
+            <svg id="heart-post-${postId}" class="w-3 h-3 cursor-pointer hover:scale-110 transition-transform" fill="white" viewBox="0 0 24 24" style="width: 12px; height: 12px;">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
-            <span id="like-count-post-${post.id}" class="text-white font-medium" style="color: #efffff; font-weight: 500;">${post.like || 0}</span>
+            <span id="like-count-post-${postId}" class="text-white font-medium" style="color: #efffff; font-weight: 500;">${post.like || 0}</span>
           </div>
           <div class="text-blue-600" style="color: #2563eb;">
-            <span class="ml-2" style="margin-left: 0.5rem;">${new Date(post.updated_at || '').toLocaleDateString()}</span>
+            <span class="ml-2" style="margin-left: 0.5rem;">${new Date(updatedAt || '').toLocaleDateString()}</span>
           </div>
         </div>
       </div>
