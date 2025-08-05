@@ -3,7 +3,7 @@ export type PostCategory = 'entertainment' | 'community' | 'information' | 'disa
 export type EventCategory = 'entertainment' | 'community' | 'information' | 'disaster' | 'food' | 'event';
 
 export interface Post {
-  id: number;           // 自動インクリメントのID
+  ID: number;           // 自動インクリメントのID
   user_id: string;      // UUIDの文字列
   coordinate: {
     lat: number;

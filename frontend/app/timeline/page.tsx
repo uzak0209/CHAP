@@ -144,10 +144,11 @@ export default function PostPage() {
 }
 
 function PostList({ posts }: { posts: Post[] }) {
+ console.log("Rendering PostList with posts:", posts); 
   return (
     <div className="space-y-4 pb-4">
       {posts.map(post => (
-        <PostCard key={post.id} post={post} />
+        <PostCard key={post.ID} post={post} />
       ))}
     </div>
   );
