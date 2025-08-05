@@ -56,6 +56,7 @@ export default function CreateThreadPage() {
       like: 0,
       valid: true,
       tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+      category: '', 
     };
 
     try {

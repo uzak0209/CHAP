@@ -39,7 +39,7 @@ export const API_ENDPOINTS = {
   comments:{
     get: (id: string) => `${API_BASE_URL}/api/v1/comments/${id}`,
     create: `${API_BASE_URL}/api/v1/comments/create`,
-    delete: (id: string) => `${API_BASE_URL}/api/v1/comments/delete`,
+     delete: (id: string) => `${API_BASE_URL}/api/v1/comments/delete`,
   },
   health: `${API_BASE_URL}/health`,
 };

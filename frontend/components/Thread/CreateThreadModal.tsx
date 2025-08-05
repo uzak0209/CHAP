@@ -42,6 +42,8 @@ export function CreateThreadModal({ isOpen, onClose }: CreateThreadModalProps) {
       // カテゴリをタグに追加
       const allTags = category ? [category, ...tags] : tags;
 
+      
+      
       // 成功したらモーダルを閉じてフォームをリセット
       setContent('');
       setCategory('');
