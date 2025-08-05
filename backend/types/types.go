@@ -18,12 +18,12 @@ type Post struct {
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	UserID     uuid.UUID      `json:"user_id"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
-	Coordinate Coordinate     `json:"Coordinate" gorm:"embedded"`
-	Content    string         `json:"Content"`
-	Category   string         `json:"Category" gorm:"default:'other'"`
-	Valid      bool           `json:"Valid"`
-	Like       int            `json:"Like"`
-	Tags       pq.StringArray `json:"Tags" gorm:"type:text[]"`
+	Coordinate Coordinate     `json:"coordinate" gorm:"embedded"`
+	Content    string         `json:"content"`
+	Category   string         `json:"category" gorm:"default:'other'"`
+	Valid      bool           `json:"valid"`
+	Like       int            `json:"like"`
+	Tags       pq.StringArray `json:"tags" gorm:"type:text[]"`
 }
 type Comment struct {
 	ID         uint           `json:"id" gorm:"primaryKey"`
@@ -32,13 +32,13 @@ type Comment struct {
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	UserID     uuid.UUID      `json:"user_id"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
-	Coordinate Coordinate     `json:"Coordinate" gorm:"embedded"`
-	Content    string         `json:"Content"`
-	Valid      bool           `json:"Valid"`
-	Thread     Thread         `json:"Thread" gorm:"foreignKey:ThreadID;constraint:OnUpdate:CASCADE;"`
-	ThreadID   uint           `json:"Thread_id"`
-	Like       int            `json:"Like"`
-	Tags       pq.StringArray `json:"Tags" gorm:"type:text[]"`
+	Coordinate Coordinate     `json:"coordinate" gorm:"embedded"`
+	Content    string         `json:"content"`
+	Valid      bool           `json:"valid"`
+	Thread     Thread         `json:"thread" gorm:"foreignKey:ThreadID;constraint:OnUpdate:CASCADE;"`
+	ThreadID   uint           `json:"thread_id"`
+	Like       int            `json:"like"`
+	Tags       pq.StringArray `json:"tags" gorm:"type:text[]"`
 }
 
 type Thread struct {
@@ -48,12 +48,12 @@ type Thread struct {
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	UserID     uuid.UUID      `json:"user_id"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
-	Coordinate Coordinate     `json:"Coordinate" gorm:"embedded"`
-	Category   string         `json:"Category" gorm:"default:'other'"`
-	Content    string         `json:"Content"`
-	Valid      bool           `json:"Valid"`
-	Like       int            `json:"Like"`
-	Tags       pq.StringArray `json:"Tags" gorm:"type:text[]"`
+	Coordinate Coordinate     `json:"coordinate" gorm:"embedded"`
+	Category   string         `json:"category" gorm:"default:'other'"`
+	Content    string         `json:"content"`
+	Valid      bool           `json:"valid"`
+	Like       int            `json:"like"`
+	Tags       pq.StringArray `json:"tags" gorm:"type:text[]"`
 }
 type Event struct {
 	ID         uint           `json:"id" gorm:"primaryKey"`
@@ -62,12 +62,12 @@ type Event struct {
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	UserID     uuid.UUID      `json:"user_id"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
-	Coordinate Coordinate     `json:"Coordinate" gorm:"embedded"`
-	Category   string         `json:"Category" gorm:"default:'other'"`
-	Content    string         `json:"Content"`
-	Valid      bool           `json:"Valid"`
-	Like       int            `json:"Like"`
-	Tags       pq.StringArray `json:"Tags" gorm:"type:text[]"`
+	Coordinate Coordinate     `json:"coordinate" gorm:"embedded"`
+	Category   string         `json:"category" gorm:"default:'other'"`
+	Content    string         `json:"content"`
+	Valid      bool           `json:"valid"`
+	Like       int            `json:"like"`
+	Tags       pq.StringArray `json:"tags" gorm:"type:text[]"`
 }
 
 type User struct {
@@ -83,40 +83,40 @@ type User struct {
 	DeletedAt time.Time `json:"deleted_at" gorm:"index"`
 }
 type PostLikes struct {
-	UserID uuid.UUID `json:"User_id" `
-	PostID uint      `json:"Post_id" `
+	UserID uuid.UUID `json:"user_id" `
+	PostID uint      `json:"post_id" `
 	User   User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
 	Post   Post      `gorm:"foreignKey:PostID;constraint:OnUpdate:CASCADE;"`
 }
 type ThreadLikes struct {
-	UserID   uuid.UUID `json:"User_id" `
-	ThreadID uint      `json:"Thread_id" `
+	UserID   uuid.UUID `json:"user_id" `
+	ThreadID uint      `json:"thread_id" `
 	User     User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
 	Thread   Thread    `gorm:"foreignKey:ThreadID;constraint:OnUpdate:CASCADE;"`
 }
 type EventLikes struct {
-	UserID  uuid.UUID `json:"User_id" `
+	UserID  uuid.UUID `json:"user_id" `
 	User    User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
-	EventID uint      `json:"Event_id" `
+	EventID uint      `json:"event_id" `
 	Event   Event     `gorm:"foreignKey:EventID;constraint:OnUpdate:CASCADE;"`
 }
 
 type Coordinate struct {
-	Lat float64 `json:"Lat"`
-	Lng float64 `json:"Lng"`
+	Lat float64 `json:"lat"`
+	Lng float64 `json:"lng"`
 }
 type EmailLogin struct {
-	UserID   uuid.UUID `json:"User_id" `
+	UserID   uuid.UUID `json:"user_id" `
 	User     User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
-	Email    string    `json:"Email" gorm:"not null;unique"`
-	Password string    `json:"Password" gorm:"not null"`
+	Email    string    `json:"email" gorm:"not null;unique"`
+	Password string    `json:"password" gorm:"not null"`
 }
 type GoogleLogin struct {
 	User        User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
-	UserID      uuid.UUID `json:"User_id"`
-	AccessToken string    `json:"Access_token" gorm:"not null"`
-	Email       string    `json:"Email" gorm:"not null;unique"`
-	Name        string    `json:"Name" gorm:"not null"`
+	UserID      uuid.UUID `json:"user_id"`
+	AccessToken string    `json:"access_token" gorm:"not null"`
+	Email       string    `json:"email" gorm:"not null;unique"`
+	Name        string    `json:"name" gorm:"not null"`
 }
 type ThreadTable struct {
 	ThreadID   uint   `json:"thread_id" gorm:"primaryKey"`
