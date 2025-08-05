@@ -60,10 +60,10 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
           lat: location.lat,
           lng: location.lng,
         },
-        created_time: new Date().toISOString(),
         like: 0,
         valid: true,
         tags: [], // モーダルではタグ機能は簡略化
+        created_at: new Date().toISOString(),
       };
 
       // Redux経由でイベント作成

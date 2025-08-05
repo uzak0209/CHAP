@@ -37,7 +37,7 @@ export const createPostPopupHTML = (post: Post) => {
             <span id="like-count-post-${post.id}" class="text-white font-medium" style="color: #efffff; font-weight: 500;">${post.like || 0}</span>
           </div>
           <div class="text-blue-600" style="color: #2563eb;">
-            <span class="ml-2" style="margin-left: 0.5rem;">${new Date(post.updated_time || '').toLocaleDateString()}</span>
+            <span class="ml-2" style="margin-left: 0.5rem;">${new Date(post.updated_at || '').toLocaleDateString()}</span>
           </div>
         </div>
       </div>
@@ -111,8 +111,8 @@ export const createEventPopupHTML = (event: Event) => {
   const colors = getCategoryColors(validCategory);
 
   // 新しく作成されたイベントかどうかを判定（作成から5分以内）
-  const isNewEvent = event.created_time && 
-    (Date.now() - new Date(event.created_time).getTime()) < 5 * 60 * 1000;
+  const isNewEvent = event.created_at && 
+    (Date.now() - new Date(event.created_at).getTime()) < 5 * 60 * 1000;
 
   // 安全な日付処理
   const formatDate = () => {

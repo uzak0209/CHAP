@@ -47,7 +47,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
         coordinate: state === Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
         valid: true,
         like: 0,
-        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
       }));
       
       // 成功したらモーダルを閉じてフォームをリセット

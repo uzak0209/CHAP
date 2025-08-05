@@ -303,8 +303,8 @@ export const createMarkerFunctions = (
       }
 
       // 新しく作成されたイベントかどうかを判定（作成から5分以内）
-      const isNewEvent = event.created_time && 
-        (Date.now() - new Date(event.created_time).getTime()) < 5 * 60 * 1000;
+      const isNewEvent = event.created_at && 
+        (Date.now() - new Date(event.created_at).getTime()) < 5 * 60 * 1000;
 
       // イベントのカテゴリを決定（category フィールドまたは tags から取得）
       const eventCategory = event.category || (event.tags && event.tags.length > 0 ? event.tags[0] : 'event');

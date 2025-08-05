@@ -47,7 +47,7 @@ export const fetchAroundEvents = createAsyncThunk<Event[], { lat: number; lng: n
   'events/fetchAround',
   async (params) => {
     // 位置情報検索用の別エンドポイント
-    return await apiClient.post<Event[]>(API_ENDPOINTS.around.events, params);
+    return await apiClient.post<Event[]>(API_ENDPOINTS.events.around, params);
   }
 )
 export const fetchEvent = createAsyncThunk<Event, string>(

@@ -31,7 +31,6 @@ export function CreateThreadModal({ isOpen, onClose }: CreateThreadModalProps) {
   const categoryOptions = [
     { value: 'entertainment', label: 'エンターテイメント' },
     { value: 'community', label: '地域住民コミュニケーション' },
-    { value: 'information', label: '情報共有' },
     { value: 'disaster', label: '災害情報' }
   ];
 

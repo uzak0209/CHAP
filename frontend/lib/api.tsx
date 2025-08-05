@@ -13,7 +13,7 @@ export const API_ENDPOINTS = {
   },
   events: {
     list: `${API_BASE_URL}/api/v1/events`,
-    create: `${API_BASE_URL}/api/v1/events`,
+    create: `${API_BASE_URL}/api/v1/create/event`,
     around: `${API_BASE_URL}/api/v1/around/event`,
     get: (id: string) => `${API_BASE_URL}/api/v1/events/${id}`,
     update: (id: string) => `${API_BASE_URL}/api/v1/events/${id}`,
@@ -22,14 +22,15 @@ export const API_ENDPOINTS = {
   },
   threads: {
     list: `${API_BASE_URL}/api/v1/threads`,
-    create: `${API_BASE_URL}/api/v1/threads`,
+    create: `${API_BASE_URL}/api/v1/create/thread`,
     get: (id: string) => `${API_BASE_URL}/api/v1/threads/${id}`,
     update: (id: string) => `${API_BASE_URL}/api/v1/threads/${id}`,
     delete: (id: string) => `${API_BASE_URL}/api/v1/threads/${id}`,
   },
   posts: {
     list: `${API_BASE_URL}/api/v1/posts`,
-    create: `${API_BASE_URL}/api/v1/posts`,
+    create: `${API_BASE_URL}/api/v1/create/post`,
+    around: `${API_BASE_URL}/api/v1/around/post`,
     get: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
     update: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
     delete: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
@@ -54,7 +55,7 @@ export const defaultFetchOptions: RequestInit = {
 // API Client with token support
 export class ApiClient {
   private getAuthHeaders(): HeadersInit {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authtoken') : null;
     return {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
