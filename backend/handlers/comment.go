@@ -33,6 +33,7 @@ func GetCommentsByThreadID(c *gin.Context) {
 		return
 	}
 }
+
 func CreateComment(c *gin.Context) {
 	var comment types.Comment
 	if err := c.ShouldBindJSON(&comment); err != nil {
@@ -55,6 +56,7 @@ func CreateComment(c *gin.Context) {
 	}
 	c.JSON(201, gin.H{"message": "Comment created successfully", "comment": comment})
 }
+
 func DeleteComment(c *gin.Context) {
 	comment_id := c.Param("comment_id")
 	dbConn := db.SafeDB()
@@ -62,6 +64,5 @@ func DeleteComment(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "Failed to delete comment"})
 		return
 	}
-
 	c.JSON(200, gin.H{"message": "Comment deleted successfully"})
 }
