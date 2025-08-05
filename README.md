@@ -1,17 +1,5 @@
 # CHAP Application
 
-## 現在のインフラストラクチャ
-
-### AWS リソース
-- **VPC:** vpc-0424a6dde1f0399ba (10.0.0.0/16)
-- **EC2:** i-08e28edd6391df734 (t2.micro, 56.155.98.63)
-- **RDS:** PostgreSQL 17.2 (db.t3.micro)
-- **リージョン:** ap-northeast-3 (Asia Pacific - Osaka)
-
-### エンドポイント
-- **API Server:** http://56.155.98.63:8080
-- **Database:** terraform-20250725215706850000000002.cta6geu24oet.ap-northeast-3.rds.amazonaws.com:5432
-
 ## 技術スタック
 
 ### バックエンド
