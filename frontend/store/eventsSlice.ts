@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Event } from '../types/types'
-import { getAuthToken } from './authSlice';
-import { Lateef } from 'next/font/google';
-import { Status,LocationState } from '../types/types';
+import { Status, LocationState } from '../types/types';
 import { apiClient, API_ENDPOINTS } from '../lib/api';
+import { getAuthToken } from './authSlice';
+
 export interface EventsState {
   items: Event[];
   loading: {
@@ -36,10 +36,18 @@ const initialState: EventsState = {
   },
 }
 
+export const fetchEvents = createAsyncThunk<Event[], void>(
+  'events/fetchEvents',
+  async () => {
+    return await apiClient.get<Event[]>(API_ENDPOINTS.events.list);
+  }
+)
+
 export const fetchAroundEvents = createAsyncThunk<Event[], { lat: number; lng: number }>(
   'events/fetchAround',
-  async () => {
-    return await apiClient.post<Event[]>(`${API_ENDPOINTS.events}`);
+  async (params) => {
+    // 位置情報検索用の別エンドポイント
+    return await apiClient.post<Event[]>(API_ENDPOINTS.around.events, params);
   }
 )
 export const fetchEvent = createAsyncThunk<Event, string>(
@@ -48,50 +56,25 @@ export const fetchEvent = createAsyncThunk<Event, string>(
     return await apiClient.get<Event>(API_ENDPOINTS.events.get(id));
   }
 )
-export const createEvent = createAsyncThunk(
+export const createEvent = createAsyncThunk<Event, Omit<Event, 'id' | 'created_time'>>(
   'events/create',
-  async (eventData: Omit<Event, 'id' | 'created_time'>) => {
-    const token=getAuthToken();
-    const headers={
-      'Content-Type':'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` } )
-    }
-    const response = await fetch('http://localhost:8080/api/v1/create/event', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(eventData),
-    })
-    if (!response.ok) throw new Error('Failed to create event')
-    const result = await response.json()
-    return result.event || result
+  async (eventData) => {
+    return await apiClient.post<Event>(API_ENDPOINTS.events.create, eventData);
   }
 )
 
-export const updateEvent = createAsyncThunk(
+export const updateEvent = createAsyncThunk<Event, { id: string; data: Partial<Event> }>(
   'events/update',
-  async ({ id, data }: { id: string; data: Partial<Event> }) => {
-    const response = await fetch(`http://localhost:8080/api/v1/update/event/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) throw new Error('Failed to update event')
-    return response.json()
+  async ({ id, data }) => {
+    return await apiClient.put<Event>(API_ENDPOINTS.events.update(id), data);
   }
 )
 
-export const deleteEvent= createAsyncThunk(
+export const deleteEvent = createAsyncThunk<string, string>(
   'events/delete',
-  async (id: string): Promise<void> => {
-    const token = getAuthToken();
-    const response = await fetch(`http://localhost:8080/api/v1/delete/event/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      }
-    })
-    if (!response.ok) throw new Error('Failed to delete event')
+  async (id: string) => {
+    await apiClient.delete(API_ENDPOINTS.events.delete(id));
+    return id;
   }
 )
 
@@ -110,6 +93,8 @@ const eventsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+
+      // fetchAroundEvents
       .addCase(fetchAroundEvents.pending, (state) => {
         state.loading.fetch = true
         state.error.fetch = null
