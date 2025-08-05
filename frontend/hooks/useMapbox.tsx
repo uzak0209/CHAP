@@ -6,7 +6,7 @@ import { useAppSelector } from '@/store';
 import { Status } from '@/types/types';
 import { createMarkerFunctions } from '@/hooks/mapbox/markers';
 import { initializeMapboxToken, createMapInstance, setupMapLabels, setupMapStyle, hideRoadLayers, createMapStyles, createRestorePopupsFunction } from '@/hooks/mapbox/setup';
-// import { checkInitialLikeStatus, checkInitialThreadLikeStatus, checkInitialEventLikeStatus } from '@/hooks/mapbox/popups';
+
 
 export const useMapbox = () => {
   const router = useRouter();
@@ -69,58 +69,7 @@ export const useMapbox = () => {
 
   const changeMapView = (view: number) => {
     if (!mapRef.current || !mapContainerRef.current) return;
-    
     mapRef.current.remove();
-    
-    // switch(view) {
-    //   case 1:
-    //     mapRef.current = new mapboxgl.Map({
-    //       container: mapContainerRef.current,
-    //       center: MAPBOX_CONFIG.CENTER,
-    //       zoom: MAPBOX_CONFIG.ZOOM,
-    //       pitch: MAPBOX_CONFIG.PITCH,
-    //       bearing: MAPBOX_CONFIG.BEARING,
-    //       style: MAPBOX_CONFIG.STYLE,
-    //       minZoom: 15,
-    //       maxZoom: 16,
-    //       localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
-    //       language: MAPBOX_CONFIG.LANGUAGE
-    //     });
-    //     break;
-    //   case 2:
-    //     mapRef.current = new mapboxgl.Map({
-    //       container: mapContainerRef.current,
-    //       center: MAPBOX_CONFIG.CENTER,
-    //       zoom: 5.100,
-    //       pitch: MAPBOX_CONFIG.PITCH,
-    //       bearing: MAPBOX_CONFIG.BEARING,
-    //       style: MAPBOX_CONFIG.STYLE,
-    //       minZoom: 5,
-    //       maxZoom: 100,
-    //       localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
-    //       language: MAPBOX_CONFIG.LANGUAGE
-    //     });
-
-    //     mapRef.current.on('style.load', () => {
-    //       if (!mapRef.current) return;
-    //       hideRoadLayers(mapRef.current);
-    //     });
-    //     break;
-    //   case 3:
-    //     mapRef.current = new mapboxgl.Map({
-    //       container: mapContainerRef.current,
-    //       center: MAPBOX_CONFIG.CENTER,
-    //       zoom: MAPBOX_CONFIG.ZOOM,
-    //       pitch: MAPBOX_CONFIG.PITCH,
-    //       bearing: MAPBOX_CONFIG.BEARING,
-    //       style: MAPBOX_CONFIG.STYLE,
-    //       minZoom: 15,
-    //       maxZoom: 16,
-    //       localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
-    //       language: MAPBOX_CONFIG.LANGUAGE
-    //     });
-    //     break;
-    // }
   };
 
   useEffect(() => {
@@ -253,7 +202,7 @@ export const useMapbox = () => {
       // IDリストが変更された場合のみマーカーを更新
       const hasEventsChanged = 
         currentEventIds.length !== prevEventIds.length ||
-        currentEventIds.some((id, index) => id !== prevEventIds[index]);
+        currentEventIds.some((id, index) => String(id) !== prevEventIds[index]);
       
       console.log(`🎉 イベントデータ確認: ${events.length}個のイベント`, {
         currentIds: currentEventIds,
@@ -278,43 +227,6 @@ export const useMapbox = () => {
       }
     }
   }, [posts, threads, events, selectedCategory, addPostMarkers, addThreadMarkers, addEventMarkers]);
-
-  // 認証状態が変更された時にいいね状態を再確認
-  useEffect(() => {
-    if (isAuthenticated && mapRef.current) {
-      console.log('🔐 認証状態が変更されました。いいね状態を再確認中...');
-      
-      // 少し遅延させてからいいね状態を確認（個別に処理）
-      setTimeout(() => {
-        posts.forEach((post, index) => {
-          if (post.coordinate && post.coordinate.lat && post.coordinate.lng) {
-            setTimeout(() => {
-              console.log(`🔐 認証後: 投稿${post.id}のいいね状態を確認中 (${index + 1}/${posts.length})`);
-              // checkInitialLikeStatus(post);
-            }, index * 100); // 100msずつ遅延（200msから短縮）
-          }
-        });
-        
-        threads.forEach((thread, index) => {
-          if (thread.coordinate && thread.coordinate.lat && thread.coordinate.lng) {
-            setTimeout(() => {
-              console.log(`🔐 認証後: スレッド${thread.id}のいいね状態を確認中 (${index + 1}/${threads.length})`);
-              // checkInitialThreadLikeStatus(thread);
-            }, index * 100); // 100msずつ遅延（200msから短縮）
-          }
-        });
-
-        events.forEach((event, index) => {
-          if (event.coordinate && event.coordinate.lat && event.coordinate.lng) {
-            setTimeout(() => {
-              console.log(`🔐 認証後: イベント${event.id}のいいね状態を確認中 (${index + 1}/${events.length})`);
-              // checkInitialEventLikeStatus(event);
-            }, index * 100); // 100msずつ遅延
-          }
-        });
-      }, 500); // 1000msから短縮
-    }
-  }, [isAuthenticated, posts, threads, events]);
 
   return {
     mapContainerRef,

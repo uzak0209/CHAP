@@ -17,7 +17,7 @@ export function PostCard({ post }: PostCardProps) {
         {post.category && <PostCategoryDisplay category={post.category} />}
         {post.tags && <PostTags tags={post.tags} />}
         <PostFooter
-          createdAt={post.created_time}
+          createdAt={post.created_at}
         />
       </CardContent>
     </Card>
