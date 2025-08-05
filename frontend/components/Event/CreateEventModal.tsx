@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { X, Calendar, MapPin, Clock, Users } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { createEvent } from '@/store/eventsSlice';
-import { Event } from '@/types/types';
+import { filtersActions } from '@/store/filtersSlice';
+import { Event, EventCategory } from '@/types/types';
 
 interface CreateEventModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState<EventCategory | ''>('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [locationInput, setLocationInput] = useState('');
@@ -31,6 +33,11 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description) return;
+
+    if (!category) {
+      alert('カテゴリを選択してください。');
+      return;
+    }
 
     if (!isAuthenticated) {
       alert('イベントを作成するにはログインが必要です。');
@@ -48,6 +55,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
       // イベントデータを作成
       const eventData: Omit<Event, 'user_id' | 'id' | 'updated_at' | 'deleted_time'> = {
         content: `${title}: ${description}`, // タイトルと説明を結合
+        category: category,
         coordinate: {
           lat: location.lat,
           lng: location.lng,
@@ -61,10 +69,15 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
       // Redux経由でイベント作成
       await dispatch(createEvent(eventData as any)).unwrap();
       
+      // イベント作成成功後、カテゴリフィルターを作成したイベントのカテゴリに更新
+      console.log('🎯 カテゴリフィルターを更新:', category);
+      dispatch(filtersActions.setSelectedCategory(category as any));
+      
       // 成功後にモーダルを閉じてフォームをリセット
       onClose();
       setTitle('');
       setDescription('');
+      setCategory('');
       setDate('');
       setTime('');
       setLocationInput('');
@@ -138,6 +151,42 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
               className="w-full h-24 resize-none"
               required
             />
+          </div>
+
+          {/* カテゴリ選択 */}
+          <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
+            <label className="block text-sm font-medium text-orange-700 mb-2">
+              カテゴリ * （必須選択）
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as EventCategory | '')}
+              className="w-full px-3 py-2 border-2 border-orange-300 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              required
+            >
+              <option value="">カテゴリを選択してください</option>
+              <option value="entertainment">エンターテイメント</option>
+              <option value="community">地域住民コミュニケーション</option>
+              <option value="information">情報共有</option>
+              <option value="disaster">災害情報</option>
+              <option value="food">食事・グルメ</option>
+              <option value="event">イベント・集会</option>
+            </select>
+            {category && (
+              <p className="text-xs text-green-600 font-medium mt-1">
+                ✓ 選択済み: {category === 'entertainment' ? 'エンターテイメント' :
+                           category === 'community' ? '地域住民コミュニケーション' :
+                           category === 'information' ? '情報共有' :
+                           category === 'disaster' ? '災害情報' :
+                           category === 'food' ? '食事・グルメ' :
+                           category === 'event' ? 'イベント・集会' : category}
+              </p>
+            )}
+            {!category && (
+              <p className="text-xs text-red-600 mt-1">
+                ⚠ カテゴリの選択が必要です
+              </p>
+            )}
           </div>
 
           {/* 日付と時間 */}
@@ -215,7 +264,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
             <Button
               type="submit"
               className="flex-1 bg-orange-600 hover:bg-orange-700"
-              disabled={isSubmitting || loading.create || !title || !description}
+              disabled={isSubmitting || loading.create || !title || !description || !category}
             >
               {isSubmitting || loading.create ? '作成中...' : 'イベント作成'}
             </Button>

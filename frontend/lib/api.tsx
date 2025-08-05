@@ -240,3 +240,67 @@ export const getThreadLikeStatus = async (threadId: number): Promise<{ liked: bo
 
   return response.json();
 };
+
+// イベントのいいね機能API
+export const likeEvent = async (eventId: string): Promise<{ liked: boolean; like_count: number }> => {
+  const token = localStorage.getItem('authtoken');
+  
+  console.log('🔍 イベントいいねAPI呼び出し詳細:', {
+    eventId,
+    hasToken: !!token,
+    apiUrl: `${API_BASE_URL}/api/v1/event/${eventId}/like`
+  });
+
+  const response = await fetch(`${API_BASE_URL}/api/v1/event/${eventId}/like`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+    },
+  });
+
+  console.log('🔍 イベントいいねAPIレスポンス詳細:', {
+    status: response.status,
+    statusText: response.statusText,
+    ok: response.ok
+  });
+
+  if (!response.ok) {
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    try {
+      const responseClone = response.clone();
+      const errorData = await responseClone.json();
+      console.error('❌ イベントいいねAPIエラーレスポンス:', errorData);
+      errorMessage = errorData.error || errorMessage;
+    } catch (parseError) {
+      console.error('❌ エラーレスポンスのJSON解析に失敗:', parseError);
+      try {
+        const responseText = await response.text();
+        console.error('❌ レスポンステキスト:', responseText);
+        errorMessage = responseText || errorMessage;
+      } catch (textError) {
+        console.error('❌ レスポンステキストの取得にも失敗:', textError);
+      }
+    }
+    throw new Error(`Failed to toggle event like: ${errorMessage}`);
+  }
+
+  return response.json();
+};
+
+export const getEventLikeStatus = async (eventId: string): Promise<{ liked: boolean; like_count: number }> => {
+  const token = localStorage.getItem('authtoken');
+  const response = await fetch(`${API_BASE_URL}/api/v1/event/${eventId}/like/status`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to get event like status');
+  }
+
+  return response.json();
+};

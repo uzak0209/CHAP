@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useMapbox } from '@/hooks/useMapbox';
-import { useThreads } from '@/hooks/useThreads';
+// import { useThreads } from '@/hooks/useThreads'; // 不要 - useMapboxで管理
 import { useAppSelector, useAppDispatch } from '@/store';
 import { fetchAroundPosts } from '@/store/postsSlice';
 import { fetchAroundThreads } from '@/store/threadsSlice';
@@ -27,8 +27,8 @@ export default function MapBackPage() {
   // 地図関連のロジック（地図コンテナ、3D切り替え、視点変更）
   const { mapContainerRef, mapRef, is3D, toggle3D, changeMapView } = useMapbox();
   
-  // スレッド表示関連のロジック
-  const { displayThreads } = useThreads(mapRef);
+  // スレッド表示関連のロジック（useMapboxで管理されるため不要）
+  // const { displayThreads } = useThreads(mapRef);
   
   // === Redux状態管理 ===
   const dispatch = useAppDispatch();

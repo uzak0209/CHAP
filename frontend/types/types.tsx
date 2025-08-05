@@ -1,5 +1,6 @@
 // Goのtypes.goに合わせた正しい型定義
 export type PostCategory = 'entertainment' | 'community' | 'information' | 'disaster';
+export type EventCategory = 'entertainment' | 'community' | 'information' | 'disaster' | 'food' | 'event';
 
 export interface Post {
   id: number;           // 自動インクリメントのID
@@ -46,6 +47,7 @@ export interface Event {
   deleted_time?: string;
   updated_at: string;
   content: string;
+  category?: string;    // カテゴリフィールド（オプショナル）
   valid: boolean;
   like: number;         // int
   tags: string[];

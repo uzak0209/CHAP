@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useMemo } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { Thread } from '@/types/thread';
-import { THREADS_DATA } from '@/constants/map';
+
 import { createThreadDisplay, clearExistingPopups, setMapInstance } from '@/utils/threadDisplay';
 import { useAppSelector } from '@/store';
 
@@ -10,13 +10,10 @@ export const useThreads = (mapRef: React.RefObject<mapboxgl.Map | null>) => {
   
   // デバッグ用ログ
   console.log('useThreads - selectedCategory:', selectedCategory);
-  console.log('useThreads - THREADS_DATA:', THREADS_DATA);
 
-  // カテゴリでフィルタリングされたスレッドを取得
+  // カテゴリでフィルタリングされたスレッドを取得（現在はデータなし）
   const filteredThreads = useMemo(() => {
-    const filtered = THREADS_DATA.filter((thread: Thread) => 
-      thread.category === selectedCategory
-    );
+    const filtered: Thread[] = []; // 空の配列（データがないため）
     console.log('useThreads - filteredThreads:', filtered);
     return filtered;
   }, [selectedCategory]);
@@ -29,10 +26,11 @@ export const useThreads = (mapRef: React.RefObject<mapboxgl.Map | null>) => {
 
   const handleZoomEnd = useCallback(() => {
     if (!mapRef.current) return;
-    console.log('Zoom changed, clearing and re-displaying threads');
-    clearExistingPopups();
-    displayThreads();
-  }, [mapRef, displayThreads]);
+    // ズーム時のクリア・再表示は無効化（ポップアップ復元システムが処理）
+    console.log('Zoom changed - skipping thread clearing (handled by popup restoration system)');
+    // clearExistingPopups(); // コメントアウト
+    // displayThreads(); // コメントアウト
+  }, [mapRef]);
 
   useEffect(() => {
     const map = mapRef.current;
