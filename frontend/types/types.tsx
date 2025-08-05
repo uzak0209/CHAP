@@ -11,17 +11,16 @@ export interface Post {
   };
   created_at: string;
   deleted_at?: string;
-  updated_at: string;
+  updated_at?: string;
   content: string;
   category: string;     // カテゴリフィールド（必須）
   valid: boolean;
-  parent?: number;      // int
   like: number;         // int
   tags: string[];
 }
 
 export interface Thread {
-  id: string;           // UUIDの文字列
+  id: number;           
   user_id: string;      // UUIDの文字列
   coordinate: {
     lat: number;
@@ -29,15 +28,16 @@ export interface Thread {
   };
   created_time: string;
   deleted_time?: string;
-  updated_at: string;
+  updated_at?: string;
   content: string;
+  category: string;    // カテゴリフィールドを追加（必須）
   valid: boolean;
   like: number;         // int
   tags: string[];
 }
 
 export interface Event {
-  id: string;           // UUIDの文字列
+  id:number;          
   user_id: string;      // UUIDの文字列
   coordinate: {
     lat: number;
@@ -45,40 +45,49 @@ export interface Event {
   };
   created_at: string;
   deleted_at?: string;
-  updated_at: string;
+  updated_at?: string;
   content: string;
-  category?: string;    // カテゴリフィールド（オプショナル）
+  category: string;    // カテゴリフィールド（必須）
   valid: boolean;
   like: number;         // int
   tags: string[];
 }
+export interface Comment{
+  id: number;          
+  user_id: string;      // UUIDの文字列
+  content: string;
+  created_at: string;
+  updated_at?: string;
+  deleted_at?: string;
+  thread_id: number;
 
+}
 export interface User {
   id: string;           // UUIDの文字列
   name: string;
-  image?: string;
 }
 
 // いいね関連
 export interface PostLikes {
   user_id: string;      // UUIDの文字列
-  post_id: string;      // UUIDの文字列
+  post_id:  number;    
 }
 
 export interface ThreadLikes {
   user_id: string;      // UUIDの文字列
-  thread_id: string;    // UUIDの文字列
+  thread_id: number;  
 }
 
 export interface EventLikes {
   user_id: string;      // UUIDの文字列
-  event_id: string;     // UUIDの文字列
+  event_id: number;     
 }
 
 export interface Coordinate {
   lat: number;
   lng: number;
 }
+
 export type LatLng = { lat: number; lng: number };
 
 // Immerと互換性のある型定義に修正
@@ -86,7 +95,6 @@ export type LocationState = {
   state: Status;
   location: LatLng;
   error: string | undefined;
-
 };
 export enum Permission {
   GRANTED = "granted",

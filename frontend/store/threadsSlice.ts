@@ -46,7 +46,7 @@ export const fetchAroundThreads = createAsyncThunk<Thread[], { lat: number; lng:
   'threads/fetchAround',
   async (params: { lat: number; lng: number }) => {
     // 位置情報検索用の既存エンドポイント
-    return await apiClient.post<Thread[]>(API_ENDPOINTS.around.threads, params);
+    return await apiClient.post<Thread[]>(API_ENDPOINTS.threads.around, params);
   }
 )
 
@@ -160,7 +160,7 @@ const threadsSlice = createSlice({
       })
       .addCase(deleteThread.fulfilled, (state, action) => {
         state.loading.delete = false
-        state.items = state.items.filter(t => t.id !== action.payload)
+        state.items = state.items.filter(t => String(t.id) !== action.payload)
       })
       .addCase(deleteThread.rejected, (state, action) => {
         state.loading.delete = false

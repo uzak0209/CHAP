@@ -50,6 +50,7 @@ func SetupRoutes(r *gin.Engine) {
 		{
 			// 現在のユーザー情報取得
 			auth.GET("/auth/me", handlers.GetCurrentUser)
+
 			// ログアウト
 			auth.POST("/auth/logout", handlers.Logout)
 

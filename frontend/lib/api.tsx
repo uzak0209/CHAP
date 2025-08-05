@@ -9,7 +9,7 @@ export const API_ENDPOINTS = {
     register: `${API_BASE_URL}/api/v1/auth/register`,
     googleLogin: `${API_BASE_URL}/api/v1/auth/google`,
     logout: `${API_BASE_URL}/api/v1/auth/logout`,
-    verify: `${API_BASE_URL}/api/v1/auth/verify`,
+    verify: `${API_BASE_URL}/api/v1/auth/me`,
   },
   events: {
     list: `${API_BASE_URL}/api/v1/events`,
@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
     
   },
   threads: {
+    around: `${API_BASE_URL}/api/v1/around/thread`,
     list: `${API_BASE_URL}/api/v1/threads`,
     create: `${API_BASE_URL}/api/v1/create/thread`,
     get: (id: string) => `${API_BASE_URL}/api/v1/threads/${id}`,
@@ -58,6 +59,7 @@ export class ApiClient {
     const token = typeof window !== 'undefined' ? localStorage.getItem('authtoken') : null;
     return {
       'Content-Type': 'application/json',
+
       ...(token && { Authorization: `Bearer ${token}` }),
     };
   }

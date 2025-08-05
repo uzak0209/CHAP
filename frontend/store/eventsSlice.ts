@@ -129,7 +129,7 @@ const eventsSlice = createSlice({
       })
       .addCase(updateEvent.fulfilled, (state, action) => {
         state.loading.update = false
-        const index = state.items.findIndex(e => e.id === action.meta.arg.id)
+        const index = state.items.findIndex(e => String(e.id )=== action.meta.arg.id)
         if (index !== -1) {
           state.items[index] = action.payload
         }
@@ -145,7 +145,7 @@ const eventsSlice = createSlice({
       })
       .addCase(deleteEvent.fulfilled, (state, action) => {
         state.loading.delete = false
-        state.items = state.items.filter(e => e.id !== action.meta.arg)
+        state.items = state.items.filter(e => String(e.id) !== action.meta.arg)
       })
       .addCase(deleteEvent.rejected, (state, action) => {
         state.loading.delete = false

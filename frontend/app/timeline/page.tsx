@@ -99,6 +99,7 @@ export default function PostPage() {
       </AppLayout>
     );
   }
+  console.log("Posts:", posts);
   return (
     <AppLayout title="タイムライン">
       <div className="p-4 max-w-2xl mx-auto">
@@ -114,6 +115,7 @@ export default function PostPage() {
             周辺に投稿がありません
           </div>
         ) : (
+          
           <PostList posts={posts} />
         )}
 
