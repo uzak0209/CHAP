@@ -4,91 +4,91 @@ export type EventCategory = 'entertainment' | 'community' | 'information' | 'dis
 
 export interface Post {
   ID: number;           // 自動インクリメントのID
-  user_id: string;      // UUIDの文字列
-  coordinate: {
-    lat: number;
-    lng: number;
+  User_id: string;      // UUIDの文字列
+  Coordinate: {
+    Lat: number;
+    Lng: number;
   };
-  created_at: string;
-  deleted_at?: string;
-  updated_at?: string;
-  content: string;
-  category: string;     // カテゴリフィールド（必須）
-  valid: boolean;
-  like: number;         // int
-  tags: string[];
+  Created_at: string;
+  Deleted_at?: string;
+  Updated_at?: string;
+  Content: string;
+  Category: string;     // カテゴリフィールド（必須）
+  Valid: boolean;
+  Like: number;         // int
+  Tags: string[];
 }
 
 export interface Thread {
-  id: number;           
-  user_id: string;      // UUIDの文字列
-  coordinate: {
-    lat: number;
-    lng: number;
+  ID: number;
+  User_id: string;      // UUIDの文字列
+  Coordinate: {
+    Lat: number;
+    Lng: number;
   };
-  created_time: string;
-  deleted_time?: string;
-  updated_at?: string;
-  content: string;
-  category: string;    // カテゴリフィールドを追加（必須）
-  valid: boolean;
-  like: number;         // int
-  tags: string[];
+  Created_time: string;
+  Deleted_time?: string;
+  Updated_at?: string;
+  Content: string;
+  Category: string;    // カテゴリフィールドを追加（必須）
+  Valid: boolean;
+  Like: number;         // int
+  Tags: string[];
 }
 
 export interface Event {
-  id:number;          
-  user_id: string;      // UUIDの文字列
-  coordinate: {
-    lat: number;
-    lng: number;
+  ID: number;
+  User_id: string;      // UUIDの文字列
+  Coordinate: {
+    Lat: number;
+    Lng: number;
   };
-  created_at: string;
-  deleted_at?: string;
-  updated_at?: string;
-  content: string;
-  category: string;    // カテゴリフィールド（必須）
-  valid: boolean;
-  like: number;         // int
-  tags: string[];
+  Created_at: string;
+  Deleted_at?: string;
+  Updated_at?: string;
+  Content: string;
+  Category: string;    // カテゴリフィールド（必須）
+  Valid: boolean;
+  Like: number;         // int
+  Tags: string[];
 }
 export interface Comment{
-  id: number;          
-  user_id: string;      // UUIDの文字列
-  content: string;
-  created_at: string;
-  updated_at?: string;
-  deleted_at?: string;
-  thread_id: number;
+  ID: number;
+  User_id: string;      // UUIDの文字列
+  Content: string;
+  Created_at: string;
+  Updated_at?: string;
+  Deleted_at?: string;
+  Thread_id: number;
 
 }
 export interface User {
-  id: string;           // UUIDの文字列
-  name: string;
+  ID: string;           // UUIDの文字列
+  Name: string;
 }
 
 // いいね関連
 export interface PostLikes {
-  user_id: string;      // UUIDの文字列
-  post_id:  number;    
+  User_id: string;      // UUIDの文字列
+  Post_id:  number;    
 }
 
 export interface ThreadLikes {
-  user_id: string;      // UUIDの文字列
-  thread_id: number;  
+  User_id: string;      // UUIDの文字列
+  Thread_id: number;  
 }
 
 export interface EventLikes {
-  user_id: string;      // UUIDの文字列
-  event_id: number;     
+  User_id: string;      // UUIDの文字列
+  Event_id: number;     
 }
 
 export interface Coordinate {
-  lat: number;
-  lng: number;
+  Lat: number;
+  Lng: number;
 }
 
-export type LatLng = { lat: number; lng: number };
+export type LatLng = { Lat: number; Lng: number };
 
 // Immerと互換性のある型定義に修正
 export type LocationState = {
