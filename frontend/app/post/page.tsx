@@ -13,7 +13,9 @@ import { useRouter } from 'next/navigation';
 import { createPost, useAppDispatch,useAppSelector } from '@/store';
 import { LatLng ,Status,LocationState, PostCategory} from '@/types/types';
 import { POST_CATEGORY_OPTIONS } from '@/constants/categories';
+import { POST_CATEGORY_OPTIONS } from '@/constants/categories';
 
+const categoryOptions = POST_CATEGORY_OPTIONS;
 const categoryOptions = POST_CATEGORY_OPTIONS;
 
 export default function PostPage() {
@@ -33,13 +35,13 @@ export default function PostPage() {
     setLoading(true);
     try {
       dispatch(createPost({
-        content,
-        category: category as PostCategory,
-        tags,
+        content: content,
+        tags: tags,
         coordinate: state===Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
         valid: true,
         like: 0,
         created_at: new Date().toISOString(),
+        category: category as PostCategory,
       }));
       router.push('/timeline');
     } catch (error) {
@@ -191,6 +193,7 @@ function TagsSection({
   onRemoveTag: (tag: string) => void;
 }) {
   
+  
   const dispatch = useAppDispatch();
   return (
     <div>
@@ -224,7 +227,7 @@ function TagsSection({
 function LocationInfo({ 
   location, locationState
 }: { 
-  location: { lat: number; lng: number }; 
+  location: LatLng; 
   locationState: Status;
 }) {
   return (

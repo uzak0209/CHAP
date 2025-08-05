@@ -12,8 +12,11 @@ const AROUND = 0.01 // 検索範囲の定数
 
 // メッセージ用構造体
 type Post struct {
-	gorm.Model
-	UserID     uuid.UUID      `json:"User_id" `
+	ID         uint           `json:"id" gorm:"primaryKey"`
+	CreatedAt  time.Time      `json:"created_at"`
+	UpdatedAt  time.Time      `json:"updated_at"`
+	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	UserID     uuid.UUID      `json:"user_id"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
 	Coordinate Coordinate     `json:"Coordinate" gorm:"embedded"`
 	Content    string         `json:"Content"`
@@ -23,8 +26,11 @@ type Post struct {
 	Tags       pq.StringArray `json:"Tags" gorm:"type:text[]"`
 }
 type Comment struct {
-	gorm.Model
-	UserID     uuid.UUID      `json:"User_id" `
+	ID         uint           `json:"id" gorm:"primaryKey"`
+	CreatedAt  time.Time      `json:"created_at"`
+	UpdatedAt  time.Time      `json:"updated_at"`
+	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	UserID     uuid.UUID      `json:"user_id"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
 	Coordinate Coordinate     `json:"Coordinate" gorm:"embedded"`
 	Content    string         `json:"Content"`
@@ -36,8 +42,11 @@ type Comment struct {
 }
 
 type Thread struct {
-	gorm.Model
-	UserID     uuid.UUID      `json:"User_id" `
+	ID         uint           `json:"id" gorm:"primaryKey"`
+	CreatedAt  time.Time      `json:"created_at"`
+	UpdatedAt  time.Time      `json:"updated_at"`
+	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	UserID     uuid.UUID      `json:"user_id"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
 	Coordinate Coordinate     `json:"Coordinate" gorm:"embedded"`
 	Category   string         `json:"Category" gorm:"default:'other'"`
@@ -47,8 +56,11 @@ type Thread struct {
 	Tags       pq.StringArray `json:"Tags" gorm:"type:text[]"`
 }
 type Event struct {
-	gorm.Model
-	UserID     uuid.UUID      `json:"User_id" `
+	ID         uint           `json:"id" gorm:"primaryKey"`
+	CreatedAt  time.Time      `json:"created_at"`
+	UpdatedAt  time.Time      `json:"updated_at"`
+	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	UserID     uuid.UUID      `json:"user_id"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
 	Coordinate Coordinate     `json:"Coordinate" gorm:"embedded"`
 	Category   string         `json:"Category" gorm:"default:'other'"`
@@ -59,14 +71,16 @@ type Event struct {
 }
 
 type User struct {
-	ID        uuid.UUID `json:"ID" gorm:"type:uuid;primaryKey"`
-	Name      string    `json:"Name" gorm:"not null"`
-	Image     string    `json:"Image"`
-	Email     string    `json:"Email" gorm:"not null;unique"`
-	CreatedAt time.Time `json:"Created_at" gorm:"autoCreateTime"`
-	Valid     bool      `json:"Valid" gorm:"default:true"`
-	Password  string    `json:"Password" gorm:"not null"`
-	LoginType string    `json:"Login_type" gorm:"default:'email'"`
+	ID        uuid.UUID `json:"id" gorm:"type:uuid;primaryKey"`
+	Name      string    `json:"name" gorm:"not null"`
+	Image     string    `json:"image"`
+	Email     string    `json:"email" gorm:"not null;unique"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+	Valid     bool      `json:"valid" gorm:"default:true"`
+	Password  string    `json:"password" gorm:"not null"`
+	LoginType string    `json:"login_type" gorm:"default:'email'"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt time.Time `json:"deleted_at" gorm:"index"`
 }
 type PostLikes struct {
 	UserID uuid.UUID `json:"User_id" `
@@ -105,7 +119,7 @@ type GoogleLogin struct {
 	Name        string    `json:"Name" gorm:"not null"`
 }
 type ThreadTable struct {
-	Thread_id  uint   `json:"Thread_id" gorm:"primaryKey"`
-	Thread     Thread `gorm:"foreignKey:Thread_id;constraint:OnUpdate:CASCADE;"`
-	CommentIDs []uint `json:"Comment_ids" gorm:"type:integer[]"`
+	ThreadID   uint   `json:"thread_id" gorm:"primaryKey"`
+	Thread     Thread `gorm:"foreignKey:ThreadID;constraint:OnUpdate:CASCADE;"`
+	CommentIDs []uint `json:"comment_ids" gorm:"type:integer[]"`
 }

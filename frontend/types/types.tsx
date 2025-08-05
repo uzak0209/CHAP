@@ -20,28 +20,28 @@ export interface Post {
 }
 
 export interface Thread {
-  ID: number;
-  User_id: string;      // UUIDの文字列
-  Coordinate: {
-    Lat: number;
-    Lng: number;
+  id: number;
+  user_id: string;      // UUIDの文字列
+  coordinate: {
+    lat: number;
+    lng: number;
   };
-  Created_time: string;
-  Deleted_time?: string;
-  Updated_at?: string;
-  Content: string;
-  Category: string;    // カテゴリフィールドを追加（必須）
-  Valid: boolean;
-  Like: number;         // int
-  Tags: string[];
+  created_at: string;
+  deleted_at?: string;
+  updated_at?: string;
+  content: string;
+  category: string;    // カテゴリフィールドを追加（必須）
+  valid: boolean;
+  like: number;         // int
+  tags: string[];
 }
 
 export interface Event {
-  ID: number;
-  User_id: string;      // UUIDの文字列
-  Coordinate: {
-    Lat: number;
-    Lng: number;
+  id: number;
+  user_id: string;      // UUIDの文字列
+  coordinate: {
+    lat: number;
+    lng: number;
   };
   Created_at: string;
   Deleted_at?: string;
@@ -53,13 +53,13 @@ export interface Event {
   Tags: string[];
 }
 export interface Comment{
-  ID: number;
-  User_id: string;      // UUIDの文字列
-  Content: string;
-  Created_at: string;
-  Updated_at?: string;
-  Deleted_at?: string;
-  Thread_id: number;
+  id: number;
+  user_id: string;      // UUIDの文字列
+  content: string;
+  created_at: string;
+  updated_at?: string;
+  deleted_at?: string;
+  thread_id: number;
 
 }
 export interface User {
