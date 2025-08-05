@@ -40,6 +40,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
     
     setLoading(true);
     try {
+      //createPostアクションを使って新しい投稿をデータベースや状態管理システムに作成する
       await dispatch(createPost({
         content,
         category: category as PostCategory,

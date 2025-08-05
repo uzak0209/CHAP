@@ -72,55 +72,55 @@ export const useMapbox = () => {
     
     mapRef.current.remove();
     
-    switch(view) {
-      case 1:
-        mapRef.current = new mapboxgl.Map({
-          container: mapContainerRef.current,
-          center: MAPBOX_CONFIG.CENTER,
-          zoom: MAPBOX_CONFIG.ZOOM,
-          pitch: MAPBOX_CONFIG.PITCH,
-          bearing: MAPBOX_CONFIG.BEARING,
-          style: MAPBOX_CONFIG.STYLE,
-          minZoom: 15,
-          maxZoom: 16,
-          localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
-          language: MAPBOX_CONFIG.LANGUAGE
-        });
-        break;
-      case 2:
-        mapRef.current = new mapboxgl.Map({
-          container: mapContainerRef.current,
-          center: MAPBOX_CONFIG.CENTER,
-          zoom: 5.100,
-          pitch: MAPBOX_CONFIG.PITCH,
-          bearing: MAPBOX_CONFIG.BEARING,
-          style: MAPBOX_CONFIG.STYLE,
-          minZoom: 5,
-          maxZoom: 100,
-          localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
-          language: MAPBOX_CONFIG.LANGUAGE
-        });
+    // switch(view) {
+    //   case 1:
+    //     mapRef.current = new mapboxgl.Map({
+    //       container: mapContainerRef.current,
+    //       center: MAPBOX_CONFIG.CENTER,
+    //       zoom: MAPBOX_CONFIG.ZOOM,
+    //       pitch: MAPBOX_CONFIG.PITCH,
+    //       bearing: MAPBOX_CONFIG.BEARING,
+    //       style: MAPBOX_CONFIG.STYLE,
+    //       minZoom: 15,
+    //       maxZoom: 16,
+    //       localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
+    //       language: MAPBOX_CONFIG.LANGUAGE
+    //     });
+    //     break;
+    //   case 2:
+    //     mapRef.current = new mapboxgl.Map({
+    //       container: mapContainerRef.current,
+    //       center: MAPBOX_CONFIG.CENTER,
+    //       zoom: 5.100,
+    //       pitch: MAPBOX_CONFIG.PITCH,
+    //       bearing: MAPBOX_CONFIG.BEARING,
+    //       style: MAPBOX_CONFIG.STYLE,
+    //       minZoom: 5,
+    //       maxZoom: 100,
+    //       localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
+    //       language: MAPBOX_CONFIG.LANGUAGE
+    //     });
 
-        mapRef.current.on('style.load', () => {
-          if (!mapRef.current) return;
-          hideRoadLayers(mapRef.current);
-        });
-        break;
-      case 3:
-        mapRef.current = new mapboxgl.Map({
-          container: mapContainerRef.current,
-          center: MAPBOX_CONFIG.CENTER,
-          zoom: MAPBOX_CONFIG.ZOOM,
-          pitch: MAPBOX_CONFIG.PITCH,
-          bearing: MAPBOX_CONFIG.BEARING,
-          style: MAPBOX_CONFIG.STYLE,
-          minZoom: 15,
-          maxZoom: 16,
-          localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
-          language: MAPBOX_CONFIG.LANGUAGE
-        });
-        break;
-    }
+    //     mapRef.current.on('style.load', () => {
+    //       if (!mapRef.current) return;
+    //       hideRoadLayers(mapRef.current);
+    //     });
+    //     break;
+    //   case 3:
+    //     mapRef.current = new mapboxgl.Map({
+    //       container: mapContainerRef.current,
+    //       center: MAPBOX_CONFIG.CENTER,
+    //       zoom: MAPBOX_CONFIG.ZOOM,
+    //       pitch: MAPBOX_CONFIG.PITCH,
+    //       bearing: MAPBOX_CONFIG.BEARING,
+    //       style: MAPBOX_CONFIG.STYLE,
+    //       minZoom: 15,
+    //       maxZoom: 16,
+    //       localIdeographFontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif',
+    //       language: MAPBOX_CONFIG.LANGUAGE
+    //     });
+    //     break;
+    // }
   };
 
   useEffect(() => {
@@ -245,7 +245,7 @@ export const useMapbox = () => {
       }
     }
     
-    // イベントマーカー更新（重複回避ロジック付き）
+    // イベントマーカー更新
     if (mapRef.current) {
       const currentEventIds = events.map(e => e.id).sort();
       const prevEventIds = prevEventIdsRef.current;

@@ -135,8 +135,8 @@ export default function PostPage() {
         </div>
       </div>
       
-      {/* フローティング投稿ボタン */}
-      <FloatingActionButton href="/post" />
+      {/* フローティング投稿ボタン
+      <FloatingActionButton href="/post" /> */}
     </AppLayout>
   );
 }

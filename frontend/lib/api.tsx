@@ -26,11 +26,11 @@ export const API_ENDPOINTS = {
     delete: (id: string) => `${API_BASE_URL}/api/v1/threads/${id}`,
   },
   posts: {
-    list: `${API_BASE_URL}/api/v1/posts`,
-    create: `${API_BASE_URL}/api/v1/posts`,
-    get: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
-    update: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
-    delete: (id: string) => `${API_BASE_URL}/api/v1/posts/${id}`,
+    list: `${API_BASE_URL}/api/v1/timeline`,
+    create: `${API_BASE_URL}/api/v1/timeline`,
+    get: (id: string) => `${API_BASE_URL}/api/v1/timeline/${id}`,
+    update: (id: string) => `${API_BASE_URL}/api/v1/timeline/${id}`,
+    delete: (id: string) => `${API_BASE_URL}/api/v1/timeline/${id}`,
   },
   health: `${API_BASE_URL}/health`,
 };

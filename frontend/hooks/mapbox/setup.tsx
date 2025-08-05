@@ -238,43 +238,43 @@ export const createRestorePopupsFunction = (
       }
     }, 300); // 300msに調整してより確実に
     
-    // 最終確認として強制的にポップアップを表示（ズーム操作の場合のみ）
-    if (eventType === 'zoomend') {
-      setTimeout(() => {
-        let finalCheckCount = 0;
+    // // 最終確認として強制的にポップアップを表示（ズーム操作の場合のみ）
+    // if (eventType === 'zoomend') {
+    //   setTimeout(() => {
+    //     let finalCheckCount = 0;
         
-        const allMarkers = [...markersRef.current, ...threadMarkersRef.current, ...eventMarkersRef.current];
-        const totalMarkers = allMarkers.length;
+    //     const allMarkers = [...markersRef.current, ...threadMarkersRef.current, ...eventMarkersRef.current];
+    //     const totalMarkers = allMarkers.length;
         
-        if (totalMarkers > 0) {
-          console.log(`🔍 最終確認開始（ズーム後）: ${totalMarkers}個のマーカーをチェック`);
+    //     if (totalMarkers > 0) {
+    //       console.log(`🔍 最終確認開始（ズーム後）: ${totalMarkers}個のマーカーをチェック`);
           
-          allMarkers.forEach((marker, index) => {
-            try {
-              const popup = marker.getPopup();
-              const markerKey = `marker-${index}`;
-              const shouldBeOpen = savedPopupStates.get(markerKey);
+    //       allMarkers.forEach((marker, index) => {
+    //         try {
+    //           const popup = marker.getPopup();
+    //           const markerKey = `marker-${index}`;
+    //           const shouldBeOpen = savedPopupStates.get(markerKey);
               
-              // ズーム後は保存状態に関係なく、デフォルトで全て表示
-              const targetState = shouldBeOpen !== undefined ? shouldBeOpen : true;
+    //           // ズーム後は保存状態に関係なく、デフォルトで全て表示
+    //           const targetState = shouldBeOpen !== undefined ? shouldBeOpen : true;
               
-              if (popup && targetState && !popup.isOpen()) {
-                marker.togglePopup();
-                finalCheckCount++;
-                console.log(`🔄 最終復元: マーカー${index}`);
-              }
-            } catch (error) {
-              console.warn(`⚠️ マーカー${index}の最終復元エラー:`, error instanceof Error ? error.message : String(error));
-            }
-          });
+    //           if (popup && targetState && !popup.isOpen()) {
+    //             marker.togglePopup();
+    //             finalCheckCount++;
+    //             console.log(`🔄 最終復元: マーカー${index}`);
+    //           }
+    //         } catch (error) {
+    //           console.warn(`⚠️ マーカー${index}の最終復元エラー:`, error instanceof Error ? error.message : String(error));
+    //         }
+    //       });
           
-          if (finalCheckCount > 0) {
-            console.log(`✅ 最終復元完了: ${finalCheckCount}個/${totalMarkers}個`);
-          } else {
-            console.log(`✨ 最終確認OK: 全${totalMarkers}個のポップアップが正常表示中`);
-          }
-        }
-      }, 600); // より遅延させて確実に
-    }
+    //       if (finalCheckCount > 0) {
+    //         console.log(`✅ 最終復元完了: ${finalCheckCount}個/${totalMarkers}個`);
+    //       } else {
+    //         console.log(`✨ 最終確認OK: 全${totalMarkers}個のポップアップが正常表示中`);
+    //       }
+    //     }
+    //   }, 600); // より遅延させて確実に
+    // }
   };
 };

@@ -14,6 +14,8 @@ import { createEvent, eventsActions } from '@/store/eventsSlice';
 import { filtersActions } from '@/store/filtersSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
 import { Event, EventCategory, Status } from '@/types/types';
+
+
 export default function CreateEventPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -34,6 +36,7 @@ export default function CreateEventPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('イベントを作成します');
 
     if (!isAuthenticated) {
       alert('イベントを作成するにはログインが必要です。');
@@ -162,10 +165,7 @@ function EventCategorySection({
     { value: '', label: 'カテゴリを選択してください' },
     { value: 'entertainment', label: 'エンターテイメント' },
     { value: 'community', label: '地域住民コミュニケーション' },
-    { value: 'information', label: '情報共有' },
     { value: 'disaster', label: '災害情報' },
-    { value: 'food', label: '食事・グルメ' },
-    { value: 'event', label: 'イベント・集会' }
   ];
 
   return (

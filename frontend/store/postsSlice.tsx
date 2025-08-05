@@ -37,7 +37,7 @@ const initialState: PostsState = {
 
 // Async Thunks
 export const fetchAroundPosts = createAsyncThunk(
-  'posts/fetchAround',
+  'timeline/fetchAround',
   async (params: { lat: number; lng: number }) => {
     const response = await fetch('http://localhost:8080/api/v1/around/post', {
       method: 'POST',

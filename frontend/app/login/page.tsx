@@ -30,7 +30,7 @@ export default function LoginPage() {
   // ログイン成功時のリダイレクト処理
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/posts');
+      router.push('/timeline');
     }
   }, [isAuthenticated, router]);
 

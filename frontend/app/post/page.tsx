@@ -13,6 +13,12 @@ import { useRouter } from 'next/navigation';
 import { createPost, useAppDispatch,useAppSelector } from '@/store';
 import { LatLng ,Status,LocationState, PostCategory} from '@/types/types';
 
+const categoryOptions = [
+  { value: 'entertainment', label: 'エンターテイメント' },
+  { value: 'community', label: '地域住民コミュニケーション' },
+  { value: 'disaster', label: '災害情報' }
+];
+
 export default function PostPage() {
   const [content, setContent] = useState('');
   const [category, setCategory] = useState<PostCategory | ''>('');
@@ -23,13 +29,6 @@ export default function PostPage() {
   const dispatch = useAppDispatch();
   const {state, location, error } = useAppSelector((state) => state.location);
   const router = useRouter();
-
-  const categoryOptions = [
-    { value: 'entertainment', label: 'エンターテイメント' },
-    { value: 'community', label: '地域住民コミュニケーション' },
-    { value: 'information', label: '情報共有' },
-    { value: 'disaster', label: '災害情報' }
-  ];
   
   const handleSubmit = async () => {
     if (!content.trim() || !category) return;
@@ -45,7 +44,7 @@ export default function PostPage() {
         like: 0,
         updated_time: new Date().toISOString(),
       }));
-      router.push('/posts');
+      router.push('/timeline');
     } catch (error) {
       console.error('Post submission error:', error);
     } finally {
@@ -110,12 +109,6 @@ function CategorySection({
   category: PostCategory | ''; 
   onCategoryChange: (value: PostCategory | '') => void;
 }) {
-  const categoryOptions = [
-    { value: 'entertainment', label: 'エンターテイメント' },
-    { value: 'community', label: '地域住民コミュニケーション' },
-    { value: 'information', label: '情報共有' },
-    { value: 'disaster', label: '災害情報' }
-  ];
 
   return (
     <div>

@@ -12,7 +12,7 @@ export default function Home() {
       dispatch(verifyToken()).then((result) => {
         if (result.type === 'auth/verifyToken/fulfilled') {
 
-          router.push('/posts');
+          router.push('/timeline');
         }else{
           router.replace('/login');
         }

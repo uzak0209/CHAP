@@ -7,7 +7,7 @@ import { createPostPopupHTML, createThreadPopupHTML, createEventPopupHTML, check
 
 // 投稿のいいね機能イベントリスナー設定関数
 export const setupPostLikeHandler = (post: Post) => {
-  console.log(`🔍 setupPostLikeHandler開始 - 投稿ID: ${post.id}`);
+  
   
   setTimeout(() => {
     console.log(`🔍 DOM要素を検索中 - heart-post-${post.id}`);
@@ -15,13 +15,10 @@ export const setupPostLikeHandler = (post: Post) => {
     
     if (!heartIcon) {
       console.error(`❌ ハートアイコンが見つかりません - heart-post-${post.id}`);
-      console.log('🔍 現在のDOM内の全要素をチェック:');
       const allElements = document.querySelectorAll(`[id*="post-${post.id}"]`);
       console.log('見つかった要素:', allElements);
       return;
     }
-    
-    console.log(`✅ ハートアイコンが見つかりました - heart-post-${post.id}`, heartIcon);
     
     // 既にイベントリスナーが設定されている場合はスキップ
     if (heartIcon.hasAttribute('data-listeners-set')) {
@@ -31,13 +28,11 @@ export const setupPostLikeHandler = (post: Post) => {
     
     // processing フラグを設定
     heartIcon.setAttribute('data-processing', 'true');
-    console.log(`🏷️ 投稿${post.id}にprocessingフラグを設定`);
-    
+      
     // 一回だけ実行される強力なイベントリスナー
     let isProcessing = false;
     
     const handleLikeClick = async (e: MouseEvent) => {
-      console.log(`🎯 ハートアイコンがクリックされました！投稿ID: ${post.id}`);
       e.stopPropagation();
       e.preventDefault();
       
@@ -70,7 +65,7 @@ export const setupPostLikeHandler = (post: Post) => {
             likeCountElement.style.transform = 'scale(1)';
           }, 150);
           
-          console.log(`📊 いいね数を更新: ${result.like_count}`);
+  
         } else {
           console.error(`❌ いいね数表示要素が見つかりません - like-count-post-${post.id}`);
           // DOM要素が見つからない場合は、少し遅延して再試行
@@ -178,7 +173,7 @@ export const setupPostLikeHandler = (post: Post) => {
       parentElement: heartIcon.parentElement,
       boundingBox: heartIcon.getBoundingClientRect()
     });
-    
+
   }, 500);
 };
 
@@ -192,13 +187,10 @@ export const setupThreadLikeHandler = (thread: Thread) => {
     
     if (!heartIcon) {
       console.error(`❌ スレッドハートアイコンが見つかりません - heart-thread-${thread.id}`);
-      console.log('🔍 現在のDOM内の全スレッド要素をチェック:');
       const allElements = document.querySelectorAll(`[id*="thread-${thread.id}"]`);
       console.log('見つかった要素:', allElements);
       return;
     }
-    
-    console.log(`✅ スレッドハートアイコンが見つかりました - heart-thread-${thread.id}`, heartIcon);
     
     // 既にイベントリスナーが設定されている場合はスキップ
     if (heartIcon.hasAttribute('data-listeners-set')) {
@@ -208,7 +200,6 @@ export const setupThreadLikeHandler = (thread: Thread) => {
     
     // processing フラグを設定
     heartIcon.setAttribute('data-processing', 'true');
-    console.log(`🏷️ スレッド${thread.id}にprocessingフラグを設定`);
     
     // 一回だけ実行される強力なイベントリスナー
     let isProcessing = false;
@@ -310,7 +301,6 @@ export const setupThreadLikeHandler = (thread: Thread) => {
         
       } catch (error) {
         console.error(`❌ スレッド${thread.id}のいいね処理エラー:`, error);
-        console.warn('スレッドいいね処理に失敗しました。ログインしているか確認してください。');
       } finally {
         setTimeout(() => {
           isProcessing = false;
@@ -441,8 +431,7 @@ export const setupEventLikeHandler = (event: Event) => {
       console.log('見つかった要素:', allElements);
       return;
     }
-    
-    console.log(`✅ イベントハートアイコンが見つかりました - heart-event-${event.id}`, heartIcon);
+  
     
     // 既にイベントリスナーが設定されている場合はスキップ
     if (heartIcon.hasAttribute('data-listeners-set')) {

@@ -31,6 +31,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('イベントを作成します');
     e.preventDefault();
     if (!title || !description) return;
 
@@ -167,10 +168,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
               <option value="">カテゴリを選択してください</option>
               <option value="entertainment">エンターテイメント</option>
               <option value="community">地域住民コミュニケーション</option>
-              <option value="information">情報共有</option>
               <option value="disaster">災害情報</option>
-              <option value="food">食事・グルメ</option>
-              <option value="event">イベント・集会</option>
             </select>
             {category && (
               <p className="text-xs text-green-600 font-medium mt-1">
@@ -201,7 +199,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="w-full"
-                required
+                // required
               />
             </div>
             <div>
@@ -214,7 +212,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 className="w-full"
-                required
+                // required
               />
             </div>
           </div>
