@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { AppLayout } from '@/components/Layout/AppLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -33,7 +33,7 @@ const ThreadCard = ({ thread }: { thread: Thread }) => {
           <MessageCircle className="w-5 h-5 mr-3 text-gray-600" />
           <div>
             <p className="font-semibold">作成日時</p>
-            <p>{new Date(thread.created_time).toLocaleString()}</p>
+            <p>{new Date(thread.created_at).toLocaleString()}</p>
           </div>
         </div>
         {/* <div className="flex items-center">
@@ -97,7 +97,7 @@ export default function ThreadsPage() {
   const sortedThreads = useMemo(() => {
     return [...threads].sort((a, b) => {
       if (sortBy === 'time') {
-        return new Date(b.created_time).getTime() - new Date(a.created_time).getTime();
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
       // TODO: 距離でのソート
       return 0;

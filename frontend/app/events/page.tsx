@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { AppLayout } from "@/components/Layout/AppLayout";
+import { AppLayout } from "@/components/AppLayout";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { Button } from "@/components/ui/button";
 import {

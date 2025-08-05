@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AppLayout } from '@/components/Layout/AppLayout';
-import { PostCard } from '@/components/Post/PostCard';
-import { PostFilters } from '@/components/Post/PostFilters';
+import { AppLayout } from '@/components/AppLayout';
+import { PostCard } from '@/components/PostCard';
+import { PostFilters } from '@/components/PostFilters';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { Post, Status } from '@/types/types';
@@ -148,7 +148,7 @@ function PostList({ posts }: { posts: Post[] }) {
   return (
     <div className="space-y-4 pb-4">
       {posts.map(post => (
-        <PostCard key={post.ID} post={post} />
+        <PostCard key={post.id} post={post} />
       ))}
     </div>
   );

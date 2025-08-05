@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import { Button } from './button';
 import { Plus, MessageSquareText, Image, X, Calendar } from 'lucide-react';
-import { CreatePostModal } from '@/components/Post/CreatePostModal';
-import { CreateThreadModal } from '@/components/Thread/CreateThreadModal';
-import { CreateEventModal } from '@/components/Event/CreateEventModal';
+import { CreatePostModal } from '@/components/CreatePostModal';
+import { CreateThreadModal } from '@/components/CreateThreadModal';
+import { CreateEventModal } from '@/components/CreateEventModal';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchAroundEvents } from '@/store/eventsSlice';
 import { Status } from '@/types/types';

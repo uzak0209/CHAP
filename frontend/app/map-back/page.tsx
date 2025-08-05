@@ -9,7 +9,7 @@ import { fetchAroundThreads } from '@/store/threadsSlice';
 import { fetchAroundEvents } from '@/store/eventsSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
 import { Status } from '@/types/types';
-import MapControls from '@/components/Map/MapControls';
+import MapControls from '@/components/MapControls';
 import { MultiModalFAB } from '@/components/ui/multi-modal-fab';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
