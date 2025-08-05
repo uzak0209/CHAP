@@ -12,12 +12,13 @@ export const API_ENDPOINTS = {
     verify: `${API_BASE_URL}/api/v1/auth/verify`,
   },
   events: {
-    around: `${API_BASE_URL}/api/v1/around/event`,
     list: `${API_BASE_URL}/api/v1/events`,
     create: `${API_BASE_URL}/api/v1/events`,
+    around: `${API_BASE_URL}/api/v1/around/event`,
     get: (id: string) => `${API_BASE_URL}/api/v1/events/${id}`,
     update: (id: string) => `${API_BASE_URL}/api/v1/events/${id}`,
     delete: (id: string) => `${API_BASE_URL}/api/v1/events/${id}`,
+    
   },
   threads: {
     list: `${API_BASE_URL}/api/v1/threads`,

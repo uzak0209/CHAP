@@ -9,9 +9,9 @@ export interface Post {
     lat: number;
     lng: number;
   };
-  created_time: string;
-  deleted_time?: string;
-  updated_time: string;
+  created_at: string;
+  deleted_at?: string;
+  updated_at: string;
   content: string;
   category: string;     // カテゴリフィールド（必須）
   valid: boolean;
@@ -43,8 +43,8 @@ export interface Event {
     lat: number;
     lng: number;
   };
-  created_time: string;
-  deleted_time?: string;
+  created_at: string;
+  deleted_at?: string;
   updated_at: string;
   content: string;
   category?: string;    // カテゴリフィールド（オプショナル）
