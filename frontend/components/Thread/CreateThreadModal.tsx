@@ -157,7 +157,7 @@ export function CreateThreadModal({ isOpen, onClose }: CreateThreadModalProps) {
           {state === Status.LOADED && (
             <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
               <MapPin className="h-4 w-4" />
-              <span>現在地: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}</span>
+              <span>現在地: {location.Lat}, {location.Lng}</span>
             </div>
           )}
 
