@@ -29,7 +29,8 @@ type Comment struct {
 	Coordinate Coordinate     `json:"coordinate" gorm:"embedded"`
 	Content    string         `json:"content"`
 	Valid      bool           `json:"valid"`
-	Parent     uint           `json:"parent"`
+	Thread     Thread         `json:"thread" gorm:"foreignKey:ThreadID;constraint:OnUpdate:CASCADE;"`
+	ThreadID   uint           `json:"thread_id"`
 	Like       int            `json:"like"`
 	Tags       pq.StringArray `json:"tags" gorm:"type:text[]"`
 }

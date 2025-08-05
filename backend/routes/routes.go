@@ -21,6 +21,7 @@ func SetupRoutes(r *gin.Engine) {
 	// API v1グループ
 	v1 := r.Group("/api/v1")
 	{
+		v1.GET("/comments", handlers.GetCommentsByThreadID)
 		// 認証関連（認証不要）
 		v1.POST("/auth/login", handlers.Login)
 		v1.POST("/auth/register", handlers.Register)
