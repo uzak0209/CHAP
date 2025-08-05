@@ -131,7 +131,7 @@ const threadsSlice = createSlice({
       })
       .addCase(fetchThread.fulfilled, (state, action) => {
         state.loading.fetch = false
-        const index = state.items.findIndex(t => t.id === action.payload.id)
+        const index = state.items.findIndex(t => t.ID === action.payload.ID)
         if (index !== -1) {
           state.items[index] = action.payload
         } else {
@@ -160,7 +160,7 @@ const threadsSlice = createSlice({
       })
       .addCase(deleteThread.fulfilled, (state, action) => {
         state.loading.delete = false
-        state.items = state.items.filter(t => String(t.id) !== action.payload)
+        state.items = state.items.filter(t => String(t.ID) !== action.payload)
       })
       .addCase(deleteThread.rejected, (state, action) => {
         state.loading.delete = false
