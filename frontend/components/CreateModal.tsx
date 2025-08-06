@@ -144,9 +144,13 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
               <SelectTrigger>
                 <SelectValue placeholder="カテゴリを選択してください" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-md z-50">
                 {categoryOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem 
+                    key={option.value} 
+                    value={option.value}
+                    className="hover:bg-gray-100 cursor-pointer px-3 py-2"
+                  >
                     {option.label}
                   </SelectItem>
                 ))}
