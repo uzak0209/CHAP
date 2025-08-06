@@ -10,6 +10,7 @@ export const useMapbox = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const [is3D, setIs3D] = useState(true);
+  const [isMapReady, setIsMapReady] = useState(false);
   const currentLocationMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const currentMarksRef = useRef<mapboxgl.Marker[]>([]);
   // Redux storeから位置情報を取得
@@ -56,9 +57,24 @@ export const useMapbox = () => {
     // マップインスタンスを作成
     mapRef.current = createMapInstance(mapContainerRef.current, location, locationState);
 
+    // マップが完全に読み込まれたときの処理
+    mapRef.current.on('load', () => {
+      console.log('Map is fully loaded and ready');
+      setIsMapReady(true);
+    });
+
+    // マップのスタイルが読み込まれたときの処理（フォールバック）
+    mapRef.current.on('style.load', () => {
+      console.log('Map style is loaded');
+      if (!isMapReady) {
+        setIsMapReady(true);
+      }
+    });
+
     // クリーンアップ関数
     return () => {
       if (mapRef.current) {
+        setIsMapReady(false);
         mapRef.current.remove();
       }
     };
@@ -85,6 +101,7 @@ export const useMapbox = () => {
     mapContainerRef,
     mapRef,
     is3D,
+    isMapReady,
     currentLocationMarkerRef,
     currentMarksRef,
     toggle3D,

@@ -53,6 +53,12 @@ export const addCurrentLocationMarker = (
 ) => {
   if (!mapRef.current) return;
 
+  // マップが正しく初期化されているかチェック
+  if (!mapRef.current.getContainer()) {
+    console.warn('Map container is not ready yet for current location marker');
+    return;
+  }
+
   // 既存の現在地マーカーを削除
   if (currentLocationMarkerRef.current) {
     currentLocationMarkerRef.current.remove();
@@ -84,6 +90,17 @@ export const addContentMarker = (
   selectedCategory: string = 'all'
 ) => {
   if (!mapRef.current || !markersRef.current) return;
+
+  // マップが正しく初期化されているかチェック
+  if (!mapRef.current.getContainer()) {
+    console.warn('Map container is not ready yet');
+    return;
+  }
+
+  // フィルタリング: 選択されたカテゴリに一致しない場合はマーカーを作成しない
+  if (selectedCategory !== 'all' && content.category !== selectedCategory) {
+    return;
+  }
 
   try {
     const marker = createMarkerWithPopup(content, selectedCategory);

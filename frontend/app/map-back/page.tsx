@@ -24,6 +24,7 @@ export default function MapBackPage() {
     mapContainerRef,
     mapRef,
     is3D,
+    isMapReady,
     currentLocationMarkerRef,
     currentMarksRef,
     toggle3D,
@@ -64,28 +65,41 @@ export default function MapBackPage() {
       );
     }
   }, [dispatch, locationState, location]);
+  // マーカーを更新する関数
+  const updateMarkers = () => {
+    if (locationState === Status.LOADED && isMapReady) {
+      clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
+      posts.forEach((post) => {
+        addContentMarker(post, mapRef, currentMarksRef, selectedCategory);
+      });
+      threads.forEach((thread) => {
+        addContentMarker(thread, mapRef, currentMarksRef, selectedCategory);
+      });
+      events.forEach((event) => {
+        addContentMarker(event, mapRef, currentMarksRef, selectedCategory);
+      });
+      addCurrentLocationMarker(
+        location.lat,
+        location.lng,
+        mapRef,
+        currentLocationMarkerRef
+      );
+    }
+  };
+
+  // フィルタ変更時にマーカーを更新
   useEffect(() => {
-    setInterval(() => {
-      if (locationState === Status.LOADED) {
-        clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
-        posts.forEach((post) => {
-          addContentMarker(post, mapRef, currentMarksRef, selectedCategory);
-        });
-        threads.forEach((thread) => {
-          addContentMarker(thread, mapRef, currentMarksRef, selectedCategory);
-        });
-        events.forEach((event) => {
-          addContentMarker(event, mapRef, currentMarksRef, selectedCategory);
-        });
-        addCurrentLocationMarker(
-          location.lat,
-          location.lng,
-          mapRef,
-          currentLocationMarkerRef
-        );
-      }
-    }, 3000); // 3秒
-  }, []);
+    updateMarkers();
+  }, [selectedCategory, posts, threads, events, locationState, location, isMapReady]);
+
+  // 定期的な更新（3秒間隔）
+  useEffect(() => {
+    const interval = setInterval(() => {
+      updateMarkers();
+    }, 3000);
+
+    return () => clearInterval(interval); // クリーンアップ
+  }, [selectedCategory, posts, threads, events, locationState, location, isMapReady]);
   return (
     <div className="h-full w-full relative">
       <div id="map" className="h-full w-full" ref={mapContainerRef} />
