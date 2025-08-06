@@ -18,7 +18,6 @@ import {
   clearAllMarkers,
 } from "@/lib/mapbox/markers";
 
-
 export default function MapBackPage() {
   const {
     mapContainerRef,
@@ -64,6 +63,7 @@ export default function MapBackPage() {
       );
     }
   }, [dispatch, locationState, location]);
+
   useEffect(() => {
     setInterval(() => {
       if (locationState === Status.LOADED) {
@@ -100,4 +100,3 @@ export default function MapBackPage() {
     </div>
   );
 }
-
