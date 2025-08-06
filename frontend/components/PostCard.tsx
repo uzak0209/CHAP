@@ -10,7 +10,7 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   console.log("PostCard rendered with post:", post);
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="bg-white">
       <CardContent className="p-4">
         <PostHeader userId={String(post.user_id)} />
         <PostContent content={post.content} />

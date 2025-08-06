@@ -54,7 +54,7 @@ const MapControls: React.FC<MapControlsProps> = ({ is3D, onToggle3D, onChangeMap
           fontFamily: 'system-ui, -apple-system, sans-serif',
           fontSize: '14px',
           fontWeight: 'bold',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+          // boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
           transition: 'all 0.3s ease',
           zIndex: 1000
         }}

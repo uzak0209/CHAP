@@ -69,7 +69,7 @@ export const Popup: React.FC<{ popup: Context; selectedCategory?: string }> = ({
   return (
     showPopup && (
     <Card 
-      className={`relative max-w-sm ${colors.background} ${colors.border} shadow-md`}
+      className={`relative max-w-sm ${colors.background} ${colors.border}`}
       key={popID}
       style={{ maxWidth: '20rem' }}
     >

@@ -35,7 +35,7 @@ const createMarkerWithPopup = (content: Content, selectedCategory: string = 'all
   markerElement.style.borderRadius = '50%';
   markerElement.style.border = '2px solid white';
   markerElement.style.cursor = 'pointer';
-  markerElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+  // markerElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
 
   // マーカーを作成
   const marker = new mapboxgl.Marker(markerElement)
@@ -67,7 +67,7 @@ export const addCurrentLocationMarker = (
   locationElement.style.backgroundColor = '#10b981'; // 緑色
   locationElement.style.borderRadius = '50%';
   locationElement.style.border = '3px solid white';
-  locationElement.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+  // locationElement.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
 
   // 現在地マーカーを作成・追加
   const marker = new mapboxgl.Marker(locationElement)

@@ -22,7 +22,7 @@ const Thread: React.FC<ThreadProps> = ({ message, author, timestamp, className, 
       className
     )}>
       {/* 吹き出しの矢印 */}
-      <div className="absolute -bottom-2 left-5 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-50 drop-shadow-sm" />
+      <div className="absolute -bottom-2 left-5 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-50 " />
       
       {/* 閉じるボタン */}
       {onClose && (
