@@ -150,7 +150,6 @@ func GetUpdateEvent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid 'from' parameter"})
 		return
 	}
-
 	// 条件に合う投稿を取得（updated_at > from）
 	if err := db.SafeDB().
 		Where("updated_at > ?", time.Unix(fromTime, 0)).
@@ -158,6 +157,5 @@ func GetUpdateEvent(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch updated events"})
 		return
 	}
-
 	c.JSON(http.StatusOK, events)
 }
