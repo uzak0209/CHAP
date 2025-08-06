@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, MessageCircle, Reply } from "lucide-react";
+import { X, MessageCircle, Reply, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ThreadReply {
@@ -58,7 +58,10 @@ const ThreadDetail: React.FC<ThreadDetailProps> = ({
         <div className="space-y-2">
           <p className="text-sm text-gray-900 leading-relaxed">{message}</p>
           <div className="flex justify-between items-center text-xs">
-            <span className="text-red-500 font-medium">❤️ {like} いいね</span>
+            <div className="flex items-center gap-1">
+              <Heart className="w-3 h-3" />
+              <span className="text-red-500 font-medium">{like}</span>
+            </div>
             <div className="text-gray-500">
               <span className="font-medium">{author}</span>
               <span className="ml-2">{timestamp}</span>

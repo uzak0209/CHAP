@@ -1,5 +1,5 @@
 // API Base URL Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.chap-app.jp';
+const API_BASE_URL =  'http://localhost:8080';
 const USE_HTTPS = process.env.NEXT_PUBLIC_USE_HTTPS === 'true';
 
 console.log('🌟 API Configuration:', { 
@@ -15,28 +15,39 @@ export const API_ENDPOINTS = {
     register: `${API_BASE_URL}/api/v1/auth/register`,
     googleLogin: `${API_BASE_URL}/api/v1/auth/google`,
     logout: `${API_BASE_URL}/api/v1/auth/logout`,
-    verify: `${API_BASE_URL}/api/v1/auth/me`, // バックエンドの /auth/me を使用
+    verify: `${API_BASE_URL}/api/v1/auth/me`,
   },
   events: {
-    list: `${API_BASE_URL}/api/v1/debug/events`, // 実際には存在しないかも
+    list: `${API_BASE_URL}/api/v1/events`,
     create: `${API_BASE_URL}/api/v1/create/event`,
+    around: `${API_BASE_URL}/api/v1/around/event`,
     get: (id: string) => `${API_BASE_URL}/api/v1/event/${id}`,
-    update: (id: string) => `${API_BASE_URL}/api/v1/edit/event/${id}`,
+    update: (fromTimestamp: number) => `${API_BASE_URL}/api/v1/update/event/${fromTimestamp}`,
+    edit: (id: string) => `${API_BASE_URL}/api/v1/edit/event/${id}`,
     delete: (id: string) => `${API_BASE_URL}/api/v1/delete/event/${id}`,
   },
   threads: {
-    list: `${API_BASE_URL}/api/v1/debug/threads`, // 実際には存在しないかも
+    around: `${API_BASE_URL}/api/v1/around/thread`,
+    list: `${API_BASE_URL}/api/v1/threads`,
     create: `${API_BASE_URL}/api/v1/create/thread`,
     get: (id: string) => `${API_BASE_URL}/api/v1/thread/${id}`,
-    update: (id: string) => `${API_BASE_URL}/api/v1/edit/thread/${id}`,
+    update: (fromTimestamp: number) => `${API_BASE_URL}/api/v1/update/thread/${fromTimestamp}`,
+    edit: (id: string) => `${API_BASE_URL}/api/v1/edit/thread/${id}`,
     delete: (id: string) => `${API_BASE_URL}/api/v1/delete/thread/${id}`,
   },
   posts: {
-    list: `${API_BASE_URL}/api/v1/debug/posts`,
+    list: `${API_BASE_URL}/api/v1/posts`,
     create: `${API_BASE_URL}/api/v1/create/post`,
+    around: `${API_BASE_URL}/api/v1/around/post`,
     get: (id: string) => `${API_BASE_URL}/api/v1/post/${id}`,
-    update: (id: string) => `${API_BASE_URL}/api/v1/edit/post/${id}`,
+    update: (fromTimestamp: number) => `${API_BASE_URL}/api/v1/update/post/${fromTimestamp}`,
+    edit: (id: string) => `${API_BASE_URL}/api/v1/edit/post/${id}`,
     delete: (id: string) => `${API_BASE_URL}/api/v1/delete/post/${id}`,
+  },
+  comments: {
+    get: (threadId: string) => `${API_BASE_URL}/api/v1/comments/${threadId}`,
+    create: `${API_BASE_URL}/api/v1/create/comment`,
+    delete: (id: string) => `${API_BASE_URL}/api/v1/delete/comment/${id}`,
   },
   health: `${API_BASE_URL}/health`,
   // 位置情報検索エンドポイント
@@ -52,15 +63,12 @@ export const defaultFetchOptions: RequestInit = {
   headers: {
     'Content-Type': 'application/json',
   },
-  // HTTPS証明書の検証を緩和（自己署名証明書の場合）
-  // 本番環境では適切なSSL証明書を使用してください
 };
 
 // API Client with token support
 export class ApiClient {
   private getAuthHeaders(): HeadersInit {
     const token = typeof window !== 'undefined' ? localStorage.getItem('authtoken') : null;
-    console.log('🔑 Getting auth headers, token:', token ? `${token.substring(0, 10)}...` : 'null');
     return {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -132,9 +140,13 @@ export class ApiClient {
   async delete<T>(url: string): Promise<T> {
     return this.request<T>(url, { method: 'DELETE' });
   }
+
+
 }
 
 // Export singleton instance
 export const apiClient = new ApiClient();
 
 export default API_BASE_URL;
+
+

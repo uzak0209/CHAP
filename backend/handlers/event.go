@@ -12,6 +12,21 @@ import (
 	"gorm.io/gorm"
 )
 
+// GetAllEvents デバッグ用：全イベント取得
+func GetAllEvents(c *gin.Context) {
+	var events []types.Event
+	result := db.SafeDB().Find(&events)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch events"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"count":  len(events),
+		"events": events,
+	})
+}
+
 func EditEvent(c *gin.Context) {
 	id := c.Param("id")
 	var event types.Event
@@ -30,7 +45,7 @@ func EditEvent(c *gin.Context) {
 	}
 
 	// 更新日時を現在の時刻に設定
-	event.UpdatedTime = time.Now()
+	event.UpdatedAt = time.Now()
 
 	// GORMで更新
 	if err := db.SafeDB().Save(&event).Error; err != nil {
@@ -80,9 +95,9 @@ func CreateEvent(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"event": event,
-	})
+	c.JSON(http.StatusCreated,
+		event,
+	)
 }
 
 func GetAroundAllEvent(c *gin.Context) {

@@ -223,11 +223,6 @@ func GoogleLogin(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
-
-	// TODO: Google Access Tokenの検証をここで行う
-	// 実際の実装では、Googleの API を使ってトークンを検証する必要があります
-
-	// データベースでユーザーを検索（Googleログインタイプ）
 	var user types.User
 	result := db.SafeDB().Where("email = ? AND login_type = ?", req.Email, "google").First(&user)
 

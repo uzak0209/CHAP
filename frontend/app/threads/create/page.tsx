@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AppLayout } from '@/components/Layout/AppLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -47,15 +47,17 @@ export default function CreateThreadPage() {
     }
 
     const threadData: Omit<Thread, 'user_id'|'id' | 'updated_at' | 'deleted_time'> = {
+      type: 'thread',
       content: content,
       coordinate: {
         lat: location.lat,
         lng: location.lng,
       },
-      created_time: new Date().toISOString(),
+      created_at: new Date().toISOString(),
       like: 0,
       valid: true,
       tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+      category: 'community', 
     };
 
     try {

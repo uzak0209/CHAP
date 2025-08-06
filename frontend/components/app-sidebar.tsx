@@ -2,7 +2,8 @@ import { Calendar, Home, Inbox, Search, Settings, ChevronLeft, Menu } from "luci
 import React from "react"
 import { useAppDispatch, useAppSelector } from "@/store"
 import { filtersActions } from "@/store/filtersSlice"
-import type { PostCategory } from "@/types/thread"
+import type { Category } from "@/types/types"
+// import { RefreshPopupID } from "@/app/map-back/page"
  
 import {
   Sidebar,
@@ -22,18 +23,13 @@ import { Button } from "@/components/ui/button"
 const items = [
   {
     title: "ホーム",
-    url: "/posts",
+    url: "/timeline",
     icon: Home,
   },
   {
     title: "地図",
     url: "/map-back",
     icon: Search,
-  },
-  {
-    title: "投稿",
-    url: "/post",
-    icon: Inbox,
   },
   {
     title: "イベント",
@@ -52,16 +48,14 @@ export function AppSidebar() {
   const dispatch = useAppDispatch()
   const selectedCategory = useAppSelector(state => state.filters.selectedCategory)
 
-  // デバッグ用ログ
-  console.log('AppSidebar - selectedCategory:', selectedCategory);
-
-  const handleCategorySelect = (category: PostCategory) => {
+  const handleCategorySelect = (category: Category) => {
     console.log('AppSidebar - selecting category:', category);
     dispatch(filtersActions.setSelectedCategory(category))
+    // RefreshPopupID();
   }
 
   return (
-    <Sidebar className="bg-white/95 backdrop-blur-sm border-r shadow-lg">
+    <Sidebar className="bg-white/95 backdrop-blur-sm border-r shadow-md">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center justify-between px-4 py-3">
           <h2 className="text-lg font-semibold text-blue-600">CHAP</h2>

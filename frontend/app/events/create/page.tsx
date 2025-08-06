@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AppLayout } from '@/components/Layout/AppLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,8 +11,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { LoadingSpinner } from '@/components/ui/loading';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { createEvent, eventsActions } from '@/store/eventsSlice';
+import { filtersActions } from '@/store/filtersSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
-import { Event, Status } from '@/types/types';
+import { Event, Category, Status } from '@/types/types';
+import { CATEGORY_OPTIONS } from '@/constants/map';
+
+
 export default function CreateEventPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -20,10 +24,12 @@ export default function CreateEventPage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
+  const [category, setCategory] = useState<Category | ''>('');
   
   const { loading, error } = useAppSelector(state => state.events);
   const { state:locState,location,error:locError} = useAppSelector(state => state.location);
   const { isAuthenticated } = useAppSelector(state => state.auth);
+  const { selectedCategory } = useAppSelector((state) => state.filters);
   useEffect(() => {
       dispatch(getCurrentLocation()); 
     // エラーがあればクリア
@@ -32,6 +38,7 @@ export default function CreateEventPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('イベントを作成します');
 
     if (!isAuthenticated) {
       alert('イベントを作成するにはログインが必要です。');
@@ -45,20 +52,33 @@ export default function CreateEventPage() {
       return;
     }
 
+    if (!category) {
+      alert('カテゴリを選択してください。');
+      return;
+    }
+
     const eventData: Omit<Event, 'user_id'|'id' | 'updated_at' | 'deleted_time'> = {
       content: content,
+      category: category,
+      type: 'event',
       coordinate: {
         lat: location.lat,
         lng: location.lng,
       },
-      created_time: new Date().toISOString(),
+      created_at: new Date().toISOString(),
       like: 0,
       valid: true,
       tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+  
     };
 
     try {
       await dispatch(createEvent(eventData as any)).unwrap();
+      
+      // イベント作成成功後、カテゴリフィルターを作成したイベントのカテゴリに更新
+      console.log('🎯 カテゴリフィルターを更新:', category);
+      dispatch(filtersActions.setSelectedCategory(category as any));
+      
       router.push('/events');
     } catch (err) {
       // エラーはSliceで処理されるのでここでは何もしない
@@ -87,7 +107,7 @@ export default function CreateEventPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="content">イベント内容</Label>
+                <Label htmlFor="content">イベント内容 *</Label>
                 <Textarea
                   id="content"
                   value={content}
@@ -97,8 +117,16 @@ export default function CreateEventPage() {
                   className="min-h-[150px]"
                 />
               </div>
+              
+              <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                <EventCategorySection
+                  category={category}
+                  onCategoryChange={setCategory}
+                />
+              </div>
+
               <div>
-                <Label htmlFor="tags">タグ</Label>
+                <Label htmlFor="tags">タグ（任意）</Label>
                 <Input
                   id="tags"
                   value={tags}
@@ -119,7 +147,7 @@ export default function CreateEventPage() {
                 </p>
               )}
 
-              <Button type="submit" disabled={loading.create } className="w-full">
+              <Button type="submit" disabled={loading.create || !content.trim() || !category} className="w-full">
                 {loading.create ? <LoadingSpinner /> : 'イベントを作成する'}
               </Button>
             </form>
@@ -127,5 +155,46 @@ export default function CreateEventPage() {
         </Card>
       </div>
     </AppLayout>
+  );
+}
+
+function EventCategorySection({ 
+  category, 
+  onCategoryChange 
+}: { 
+  category: Category | ''; 
+  onCategoryChange: (value: Category | '') => void;
+}) {
+  const categoryOptions = CATEGORY_OPTIONS;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="category" className="text-sm font-medium text-blue-700">
+        カテゴリ * （必須選択）
+      </Label>
+      <select
+        id="category"
+        value={category}
+        onChange={(e) => onCategoryChange(e.target.value as Category | '')}
+        className="w-full px-3 py-2 border-2 border-blue-300 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        required
+      >
+        {categoryOptions.map(option => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {category && (
+        <p className="text-xs text-green-600 font-medium">
+          ✓ 選択済み: {categoryOptions.find(opt => opt.value === category)?.label}
+        </p>
+      )}
+      {!category && (
+        <p className="text-xs text-red-600">
+          ⚠ カテゴリの選択が必要です
+        </p>
+      )}
+    </div>
   );
 }

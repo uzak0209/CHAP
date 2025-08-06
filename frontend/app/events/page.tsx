@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { AppLayout } from "@/components/Layout/AppLayout";
+import { AppLayout } from "@/components/AppLayout";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +30,7 @@ import { verifyToken } from "@/store/authSlice";
 
 // イベントカードコンポーネント
 const EventCard = ({ event }: { event: Event }) => (
-  <Card className="w-full transition-all hover:shadow-lg hover:-translate-y-1">
+  <Card className="w-full transition-all hover:shadow-md hover:-translate-y-1">
     <CardHeader>
       <CardTitle className="text-xl font-bold">{event.content}</CardTitle>
       <CardDescription className="flex items-center text-sm text-gray-500 pt-2">
@@ -43,10 +43,10 @@ const EventCard = ({ event }: { event: Event }) => (
         <Calendar className="w-5 h-5 mr-3 text-gray-600" />
         <div>
           <p className="font-semibold">開催日時</p>
-          <p>{new Date(event.created_time).toLocaleString()}</p>
+          <p>{new Date(event.created_at).toLocaleString()}</p>
         </div>
       </div>
-      <div className="flex items-center">
+      {/* <div className="flex items-center">
         <MapPin className="w-5 h-5 mr-3 text-gray-600" />
         <div>
           <p className="font-semibold">場所</p>
@@ -55,7 +55,7 @@ const EventCard = ({ event }: { event: Event }) => (
             {event.coordinate.lng.toFixed(4)}
           </p>
         </div>
-      </div>
+      </div> */}
       {event.tags && event.tags.length > 0 && (
         <div className="flex items-center">
           <Tag className="w-5 h-5 mr-3 text-gray-600" />
@@ -107,8 +107,8 @@ export default function EventsPage() {
     return [...events].sort((a, b) => {
       if (sortBy === "time") {
         return (
-          new Date(b.created_time).getTime() -
-          new Date(a.created_time).getTime()
+          new Date(b.created_at).getTime() -
+          new Date(a.created_at).getTime()
         );
       }
       // TODO: 距離でのソート

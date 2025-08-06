@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { AppLayout } from '@/components/Layout/AppLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -66,11 +66,7 @@ const ThreadHeader = ({ thread, replyCount }: { thread: Thread; replyCount: numb
       </div>
       <div className="flex items-center gap-1">
         <Heart className="w-3 h-3" />
-        <span>いいね: {thread.like}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <MapPin className="w-3 h-3" />
-        <span>場所: {thread.coordinate.lat.toFixed(4)}, {thread.coordinate.lng.toFixed(4)}</span>
+        <span>{thread.like}</span>
       </div>
     </div>
   </div>
@@ -220,7 +216,7 @@ export default function ThreadDetailPage() {
                 number={1}
                 content={thread.content}
                 userId={thread.user_id}
-                createdTime={thread.created_time}
+                createdTime={thread.created_at}
                 isOP={true}
               />
               {/* レス一覧 */}
@@ -230,7 +226,7 @@ export default function ThreadDetailPage() {
                   number={index + 2} // スレッド本体が1なので2から開始
                   content={reply.content}
                   userId={reply.user_id}
-                  createdTime={reply.created_time}
+                  createdTime={reply.created_at}
                   isOP={false}
                 />
               ))}

@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { AppLayout } from '@/components/Layout/AppLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MessageCircle, MapPin, Users, Tag } from 'lucide-react';
+import { FloatingActionButton } from '@/components/ui/floating-action-button';
+import { MessageCircle, MapPin, Users, Tag, Heart } from 'lucide-react';
 
 import { fetchAroundThreads, threadsActions } from '@/store/threadsSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
@@ -19,7 +20,7 @@ const ThreadCard = ({ thread }: { thread: Thread }) => {
   const router = useRouter();
   
   return (
-    <Card className="w-full transition-all hover:shadow-lg hover:-translate-y-1">
+    <Card className="w-full transition-all hover:shadow-md hover:-translate-y-1">
       <CardHeader>
         <CardTitle className="text-xl font-bold">{thread.content}</CardTitle>
         <CardDescription className="flex items-center text-sm text-gray-500 pt-2">
@@ -32,16 +33,16 @@ const ThreadCard = ({ thread }: { thread: Thread }) => {
           <MessageCircle className="w-5 h-5 mr-3 text-gray-600" />
           <div>
             <p className="font-semibold">作成日時</p>
-            <p>{new Date(thread.created_time).toLocaleString()}</p>
+            <p>{new Date(thread.created_at).toLocaleString()}</p>
           </div>
         </div>
-        <div className="flex items-center">
+        {/* <div className="flex items-center">
           <MapPin className="w-5 h-5 mr-3 text-gray-600" />
           <div>
             <p className="font-semibold">場所</p>
             <p>緯度: {thread.coordinate.lat.toFixed(4)}, 経度: {thread.coordinate.lng.toFixed(4)}</p>
           </div>
-        </div>
+        </div> */}
         {thread.tags && thread.tags.length > 0 && (
           <div className="flex items-center">
             <Tag className="w-5 h-5 mr-3 text-gray-600" />
@@ -55,7 +56,10 @@ const ThreadCard = ({ thread }: { thread: Thread }) => {
           </div>
         )}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">❤️ {thread.like} いいね</span>
+          <div className="flex items-center gap-1">
+            <Heart className="w-3 h-3" />
+            <span className="text-sm text-gray-500">{thread.like} </span>
+          </div>
           <Button 
             variant="outline" 
             size="sm"
@@ -93,7 +97,7 @@ export default function ThreadsPage() {
   const sortedThreads = useMemo(() => {
     return [...threads].sort((a, b) => {
       if (sortBy === 'time') {
-        return new Date(b.created_time).getTime() - new Date(a.created_time).getTime();
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
       // TODO: 距離でのソート
       return 0;

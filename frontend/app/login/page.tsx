@@ -30,7 +30,7 @@ export default function LoginPage() {
   // ログイン成功時のリダイレクト処理
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/posts');
+      router.push('/timeline');
     }
   }, [isAuthenticated, router]);
 
@@ -179,7 +179,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium text-base shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium text-base shadow-md hover:shadow-xl transition-all duration-200"
                 disabled={isLoading}
               >
                 {isLoading ? (

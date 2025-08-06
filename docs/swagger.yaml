@@ -1,0 +1,615 @@
+openapi: 3.0.3
+info:
+  title: CHAP API
+  version: 1.0.0
+  description: |-
+    位置情報ベースSNS API - 投稿、スレッド、イベントを位置情報と共に管理するAPIサーバー
+  termsOfService: https://localhost/
+  contact:
+    email: kazuki175209@gmail.com
+
+servers:
+  - url: https://localhost/api/v1
+    description: Local API Server (TLS)
+
+paths:
+  # ユーザー関連
+  /user/{id}:
+    get:
+      summary: ユーザー情報を取得
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ユーザーID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ユーザー情報
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: 無効なユーザーID
+        '404':
+          description: ユーザーが見つかりません
+
+  # 投稿関連
+  /create/post:
+    post:
+      summary: 新しい投稿を作成
+      tags:
+        - Posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post'
+      responses:
+        '201':
+          description: 投稿が正常に作成されました
+        '400':
+          description: 無効なリクエスト形式
+        '500':
+          description: サーバーエラー
+
+
+  /post/{id}:
+    get:
+      summary: 投稿を取得
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 投稿ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 投稿データ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: 投稿が見つかりません
+
+  /update/post/{id}:
+    get:
+      summary: 投稿の更新内容を取得
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 投稿ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 投稿の更新内容
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: 投稿が見つかりません
+
+  /edit/post/{id}:
+    put:
+      summary: 投稿を編集
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 投稿ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post'
+      responses:
+        '200':
+          description: 投稿が正常に編集されました
+        '400':
+          description: 無効なリクエスト
+        '404':
+          description: 投稿が見つかりません
+
+  /delete/post/{id}:
+    delete:
+      summary: 投稿を削除
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 投稿ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 投稿が正常に削除されました
+        '404':
+          description: 投稿が見つかりません
+
+  # スレッド関連
+  /create/thread:
+    post:
+      summary: 新しいスレッドを作成
+      tags:
+        - Threads
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Thread'
+      responses:
+        '201':
+          description: スレッドが正常に作成されました
+        '400':
+          description: 無効なリクエスト形式
+        '500':
+          description: サーバーエラー
+
+  /thread/{id}:
+    get:
+      summary: スレッドを取得
+      tags:
+        - Threads
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: スレッドID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: スレッドデータ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+        '404':
+          description: スレッドが見つかりません
+
+  /update/thread/{id}:
+    get:
+      summary: スレッドの更新内容を取得
+      tags:
+        - Threads
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: スレッドID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: スレッドの更新内容
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+        '404':
+          description: スレッドが見つかりません
+
+  /edit/thread/{id}:
+    put:
+      summary: スレッドを編集
+      tags:
+        - Threads
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: スレッドID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Thread'
+      responses:
+        '200':
+          description: スレッドが正常に編集されました
+        '400':
+          description: 無効なリクエスト
+        '404':
+          description: スレッドが見つかりません
+
+  /delete/thread/{id}:
+    delete:
+      summary: スレッドを削除
+      tags:
+        - Threads
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: スレッドID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: スレッドが正常に削除されました
+        '404':
+          description: スレッドが見つかりません
+
+  # イベント関連
+  /create/event:
+    post:
+      summary: 新しいイベントを作成
+      tags:
+        - Events
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          description: イベントが正常に作成されました
+        '400':
+          description: 無効なリクエスト形式
+        '500':
+          description: サーバーエラー
+
+  /event/{id}:
+    get:
+      summary: イベントを取得
+      tags:
+        - Events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: イベントID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: イベントデータ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: イベントが見つかりません
+
+  /update/event/{id}:
+    get:
+      summary: イベントの更新内容を取得
+      tags:
+        - Events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: イベントID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: イベントの更新内容
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: イベントが見つかりません
+
+  /edit/event/{id}:
+    put:
+      summary: イベントを編集
+      tags:
+        - Events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: イベントID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '200':
+          description: イベントが正常に編集されました
+        '400':
+          description: 無効なリクエスト
+        '404':
+          description: イベントが見つかりません
+
+  /delete/event/{id}:
+    delete:
+      summary: イベントを削除
+      tags:
+        - Events
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: イベントID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: イベントが正常に削除されました
+        '404':
+          description: イベントが見つかりません
+
+  # 位置情報検索
+  /around/post:
+    post:
+      summary: 周辺の投稿を取得
+      tags:
+        - Location Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Coordinate'
+      responses:
+        '200':
+          description: 周辺の投稿リスト
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '400':
+          description: 無効なリクエスト
+        '500':
+          description: サーバーエラー
+
+  /around/thread:
+    post:
+      summary: 周辺のスレッドを取得
+      tags:
+        - Location Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Coordinate'
+      responses:
+        '200':
+          description: 周辺のスレッドリスト
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Thread'
+        '400':
+          description: 無効なリクエスト
+        '500':
+          description: サーバーエラー
+
+  /around/event:
+    post:
+      summary: 周辺のイベントを取得
+      tags:
+        - Location Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Coordinate'
+      responses:
+        '200':
+          description: 周辺のイベントリスト
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '400':
+          description: 無効なリクエスト
+        '500':
+          description: サーバーエラー
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ユーザーID
+        name:
+          type: string
+          description: ユーザー名
+        email:
+          type: string
+          description: メールアドレス
+        password:
+          type: string
+          description: パスワード
+        likes:
+          type: integer
+          description: いいね数
+      required:
+        - id
+        - name
+        - email
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 投稿ID
+        user_id:
+          type: integer
+          description: 投稿者のユーザーID
+        content:
+          type: string
+          description: 投稿内容
+        lat:
+          type: number
+          format: double
+          description: 緯度
+        lng:
+          type: number
+          format: double
+          description: 経度
+        created_time:
+          type: string
+          format: date-time
+          description: 作成日時
+        deleted_time:
+          type: string
+          format: date-time
+          description: 削除日時
+        valid:
+          type: boolean
+          description: 有効フラグ
+        parent:
+          type: integer
+          description: 親投稿ID（リプライの場合）
+        like:
+          type: integer
+          description: いいね数
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグリスト
+      required:
+        - content
+        - lat
+        - lng
+
+    Thread:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: スレッドID
+        user_id:
+          type: integer
+          description: 作成者のユーザーID
+        content:
+          type: string
+          description: スレッド内容
+        lat:
+          type: number
+          format: double
+          description: 緯度
+        lng:
+          type: number
+          format: double
+          description: 経度
+        created_time:
+          type: string
+          format: date-time
+          description: 作成日時
+        deleted_time:
+          type: string
+          format: date-time
+          description: 削除日時
+        valid:
+          type: boolean
+          description: 有効フラグ
+        like:
+          type: integer
+          description: いいね数
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグリスト
+      required:
+        - content
+        - lat
+        - lng
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: イベントID
+        user_id:
+          type: integer
+          description: 作成者のユーザーID
+        content:
+          type: string
+          description: イベント内容
+        lat:
+          type: number
+          format: double
+          description: 緯度
+        lng:
+          type: number
+          format: double
+          description: 経度
+        created_time:
+          type: string
+          format: date-time
+          description: 作成日時
+        deleted_time:
+          type: string
+          format: date-time
+          description: 削除日時
+        valid:
+          type: boolean
+          description: 有効フラグ
+        like:
+          type: integer
+          description: いいね数
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグリスト
+      required:
+        - content
+        - lat
+        - lng
+
+    Coordinate:
+      type: object
+      properties:
+        lat:
+          type: number
+          format: double
+          description: 緯度
+        lng:
+          type: number
+          format: double
+          description: 経度
+      required:
+        - lat
+        - lng

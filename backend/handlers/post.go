@@ -31,7 +31,7 @@ func EditPost(c *gin.Context) {
 	}
 
 	// 更新日時を現在の時刻に設定
-	post.UpdatedTime = time.Now()
+	post.UpdatedAt = time.Now()
 
 	// GORMで更新
 	if err := db.SafeDB().Save(&post).Error; err != nil {
@@ -80,7 +80,7 @@ func CreatePost(c *gin.Context) {
 	}
 
 	log.Printf("[CreatePost] Post created successfully with ID: %d", post.ID)
-	c.JSON(http.StatusCreated, gin.H{"post": post})
+	c.JSON(http.StatusCreated, post)
 }
 
 // GetPost handles GET /post/:id

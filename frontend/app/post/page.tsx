@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AppLayout } from '@/components/Layout/AppLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,25 +11,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Camera, MapPin, Hash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createPost, useAppDispatch,useAppSelector } from '@/store';
-import { LatLng ,Status,LocationState, PostCategory} from '@/types/types';
+import { LatLng ,Status,LocationState, Category} from '@/types/types';
+import { CATEGORY_OPTIONS } from '@/constants/map';
+
+const categoryOptions = CATEGORY_OPTIONS;
 
 export default function PostPage() {
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState<PostCategory | ''>('');
+  const [category, setCategory] = useState<Category | ''>('');
   const [images, setImages] = useState<File[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
   const {state, location, error } = useAppSelector((state) => state.location);
-  const router = useRouter();
-
-  const categoryOptions = [
-    { value: 'entertainment', label: 'エンターテイメント' },
-    { value: 'community', label: '地域住民コミュニケーション' },
-    { value: 'information', label: '情報共有' },
-    { value: 'disaster', label: '災害情報' }
-  ];
+  const router = useRouter();   
+  const { selectedCategory } = useAppSelector((state) => state.filters);
   
   const handleSubmit = async () => {
     if (!content.trim() || !category) return;
@@ -37,15 +34,16 @@ export default function PostPage() {
     setLoading(true);
     try {
       dispatch(createPost({
-        content,
-        category: category as PostCategory,
-        tags,
+        content: content,
+        tags: tags,
         coordinate: state===Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
         valid: true,
         like: 0,
-        updated_time: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        category: category as Category,
+        type: 'post',
       }));
-      router.push('/posts');
+      router.push('/timeline');
     } catch (error) {
       console.error('Post submission error:', error);
     } finally {
@@ -107,20 +105,14 @@ function CategorySection({
   category, 
   onCategoryChange 
 }: { 
-  category: PostCategory | ''; 
-  onCategoryChange: (value: PostCategory | '') => void;
+  category: Category | ''; 
+  onCategoryChange: (value: Category | '') => void;
 }) {
-  const categoryOptions = [
-    { value: 'entertainment', label: 'エンターテイメント' },
-    { value: 'community', label: '地域住民コミュニケーション' },
-    { value: 'information', label: '情報共有' },
-    { value: 'disaster', label: '災害情報' }
-  ];
 
   return (
     <div>
       <Label htmlFor="category">カテゴリ</Label>
-      <Select value={category} onValueChange={(value: PostCategory) => onCategoryChange(value)}>
+      <Select value={category} onValueChange={(value: Category) => onCategoryChange(value)}>
         <SelectTrigger className="mt-2">
           <SelectValue placeholder="カテゴリを選択してください" />
         </SelectTrigger>
@@ -200,6 +192,8 @@ function TagsSection({
   onAddTag: () => void;
   onRemoveTag: (tag: string) => void;
 }) {
+  
+  
   const dispatch = useAppDispatch();
   return (
     <div>
@@ -233,7 +227,7 @@ function TagsSection({
 function LocationInfo({ 
   location, locationState
 }: { 
-  location: { lat: number; lng: number }; 
+  location: LatLng; 
   locationState: Status;
 }) {
   return (

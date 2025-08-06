@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, MessageCircle } from "lucide-react";
+import { X, MessageCircle, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ThreadProps {
@@ -18,11 +18,11 @@ interface ThreadProps {
 const Thread: React.FC<ThreadProps> = ({ message, author, timestamp, className, onClose, replyCount = 0, onThreadClick, like = 0 }) => {
   return (
     <Card className={cn(
-      "relative max-w-sm bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 shadow-lg rounded-2xl overflow-hidden",
+      "relative max-w-sm bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 shadow-md rounded-2xl overflow-hidden",
       className
     )}>
       {/* 吹き出しの矢印 */}
-      <div className="absolute -bottom-2 left-5 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-50 drop-shadow-sm" />
+      <div className="absolute -bottom-2 left-5 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-50 " />
       
       {/* 閉じるボタン */}
       {onClose && (
@@ -62,7 +62,10 @@ const Thread: React.FC<ThreadProps> = ({ message, author, timestamp, className, 
           {message}
         </p>
         <div className="flex justify-between items-center text-xs">
-          <span className="text-red-500 font-medium">❤️ {like} いいね</span>
+          <div className="flex items-center gap-1">
+            <Heart className="w-3 h-3" />
+            <span className="text-red-500 font-medium">{like}</span>
+          </div>
           {author && timestamp && (
             <div className="text-blue-600">
               <span className="font-medium">{author}</span>

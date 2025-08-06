@@ -1,8 +1,5 @@
 # CHAP Application
 
-現在のデプロイ先: https://www.chap-app.jp
-まだまだ未完成です
-
 ## 技術スタック
 
 ### バックエンド
