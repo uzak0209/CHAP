@@ -5,21 +5,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
-// 型ガード関数
+// 型チェック関数を追加
 const isPost = (popup: Context): popup is Post => {
-  return true; 
+  return 'type' in popup && popup.type === 'post';
 };
 
 const isThread = (popup: Context): popup is Thread => {
-  return false; 
+  return 'type' in popup && popup.type === 'thread';
 };
 
 const isEvent = (popup: Context): popup is Event => {
-  return false; 
+  return 'type' in popup && popup.type === 'event';
 };
 
 const getPopupColors = (popup: Context) => {
   if (isPost(popup)) {
+    console.log("Post detected", popup);
     // Post: 青色
     return {
       background: 'bg-gradient-to-br from-blue-50 to-indigo-50',
@@ -29,6 +30,7 @@ const getPopupColors = (popup: Context) => {
       arrow: '#eff6ff'
     };
   } else if (isThread(popup)) {
+    console.log("Thread detected", popup);
     // Thread: 黄色
     return {
       background: 'bg-gradient-to-br from-yellow-50 to-amber-50',
@@ -38,6 +40,7 @@ const getPopupColors = (popup: Context) => {
       arrow: '#fefce8'
     };
   } else if (isEvent(popup)) {
+    console.log("Event detected", popup);
     // Event: 赤色
     return {
       background: 'bg-gradient-to-br from-red-50 to-rose-50',
@@ -45,7 +48,7 @@ const getPopupColors = (popup: Context) => {
       textColor: 'text-black-900',
       badgeColor: 'text-red-600 bg-red-100',
       arrow: '#fef2f2'
-    };
+    }
   }
   
   // デフォルト（Post扱い）

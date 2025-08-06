@@ -4,6 +4,7 @@ export type ContentType = 'thread' | 'post' | 'event';
 export interface Post {
   id: number;           // 自動インクリメントのID
   user_id: string;      // UUIDの文字列
+  type: ContentType; // 'post' | 'thread' | 'event'
   coordinate: {
     lat: number;
     lng: number;
@@ -20,6 +21,7 @@ export interface Post {
 
 export interface Thread {
   id: number;
+  type: ContentType; // 'post' | 'thread' | 'event'
   user_id: string;      // UUIDの文字列
   coordinate: {
     lat: number;
@@ -37,6 +39,7 @@ export interface Thread {
 
 export interface Event {
   id: number;
+  type: ContentType; // 'post' | 'thread' | 'event'
   user_id: string;      // UUIDの文字列
   coordinate: {
     lat: number;

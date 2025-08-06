@@ -51,7 +51,7 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
           valid: true,
           like: 0,
           created_at: new Date().toISOString(),
-
+          type: 'thread',
           }))
           break;
         case 'post':
@@ -63,6 +63,7 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
             valid: true,
             like: 0,
             created_at: new Date().toISOString(),
+            type: 'post',
           }));
           break;
         case 'event':
@@ -74,6 +75,7 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
             valid: true,
             like: 0,
             created_at: new Date().toISOString(),
+            type: 'event',
           }));
           break;
         }
