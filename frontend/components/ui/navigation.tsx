@@ -6,7 +6,7 @@ import { Home, Plus, MessageCircle, Bell, User, Map, Settings, Flag, MessageSqua
 import { cn } from '@/lib/utils';
 
 const navigation = [
-  { name: 'ホーム', href: '/posts', icon: Home },
+  { name: 'ホーム', href: '/timeline', icon: Home },
   { name: 'マップ', href: '/map-back', icon: Map },
   { name: '通知', href: '/notifications', icon: Bell },
   { name: 'イベント', href: '/events', icon: Flag },
