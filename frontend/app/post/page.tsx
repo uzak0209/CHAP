@@ -41,7 +41,7 @@ export default function PostPage() {
         like: 0,
         created_at: new Date().toISOString(),
         category: category as Category,
-
+        type: 'post',
       }));
       router.push('/timeline');
     } catch (error) {

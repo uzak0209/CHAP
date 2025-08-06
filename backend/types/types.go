@@ -13,6 +13,7 @@ const AROUND = 0.01 // 検索範囲の定数
 // メッセージ用構造体
 type Post struct {
 	ID         uint           `json:"id" gorm:"primaryKey"`
+	Type       string         `json:"type" gorm:"default:'post'"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
@@ -43,6 +44,7 @@ type Comment struct {
 
 type Thread struct {
 	ID         uint           `json:"id" gorm:"primaryKey"`
+	Type       string         `json:"type" gorm:"default:'thread'"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
@@ -57,6 +59,7 @@ type Thread struct {
 }
 type Event struct {
 	ID         uint           `json:"id" gorm:"primaryKey"`
+	Type       string         `json:"type" gorm:"default:'event'"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`

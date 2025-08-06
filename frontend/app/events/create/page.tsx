@@ -13,8 +13,8 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import { createEvent, eventsActions } from '@/store/eventsSlice';
 import { filtersActions } from '@/store/filtersSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
-import { Event, EventCategory, Status } from '@/types/types';
-import { EVENT_CATEGORY_OPTIONS } from '@/constants/map';
+import { Event, Category, Status } from '@/types/types';
+import { CATEGORY_OPTIONS } from '@/constants/map';
 
 
 export default function CreateEventPage() {
@@ -24,7 +24,7 @@ export default function CreateEventPage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
-  const [category, setCategory] = useState<EventCategory | ''>('');
+  const [category, setCategory] = useState<Category | ''>('');
   
   const { loading, error } = useAppSelector(state => state.events);
   const { state:locState,location,error:locError} = useAppSelector(state => state.location);
@@ -60,6 +60,7 @@ export default function CreateEventPage() {
     const eventData: Omit<Event, 'user_id'|'id' | 'updated_at' | 'deleted_time'> = {
       content: content,
       category: category,
+      type: 'event',
       coordinate: {
         lat: location.lat,
         lng: location.lng,
@@ -68,7 +69,7 @@ export default function CreateEventPage() {
       like: 0,
       valid: true,
       tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
-      visible: selectedCategory === category
+  
     };
 
     try {
@@ -161,10 +162,10 @@ function EventCategorySection({
   category, 
   onCategoryChange 
 }: { 
-  category: EventCategory | ''; 
-  onCategoryChange: (value: EventCategory | '') => void;
+  category: Category | ''; 
+  onCategoryChange: (value: Category | '') => void;
 }) {
-  const categoryOptions = EVENT_CATEGORY_OPTIONS;
+  const categoryOptions = CATEGORY_OPTIONS;
 
   return (
     <div className="space-y-2">
@@ -174,7 +175,7 @@ function EventCategorySection({
       <select
         id="category"
         value={category}
-        onChange={(e) => onCategoryChange(e.target.value as EventCategory | '')}
+        onChange={(e) => onCategoryChange(e.target.value as Category | '')}
         className="w-full px-3 py-2 border-2 border-blue-300 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         required
       >
