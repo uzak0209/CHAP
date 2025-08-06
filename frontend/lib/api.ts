@@ -1,5 +1,5 @@
 // API Base URL Configuration
-const API_BASE_URL =  'https://api.chap-app.com'; 
+const API_BASE_URL =  'https://api.chap-app.jp'; 
 const USE_HTTPS = process.env.NEXT_PUBLIC_USE_HTTPS === 'true';
 
 console.log('🌟 API Configuration:', { 
