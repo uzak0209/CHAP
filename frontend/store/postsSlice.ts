@@ -66,12 +66,22 @@ export const fetchPost = createAsyncThunk<Post, number>(
   }
 )
 
-export const updatePost = createAsyncThunk<Post, { id: number; data: Partial<Post> }>(
-  'posts/update',
-  async ({ id, data }) => {
-    return await apiClient.put<Post>(API_ENDPOINTS.posts.update(id.toString()), data);
+
+export const fetchUpdatedPosts = createAsyncThunk<Post[], number>(
+  'posts/fetchUpdated',
+  async (fromTimestamp: number) => {
+    return await apiClient.get<Post[]>(API_ENDPOINTS.posts.update(fromTimestamp));
   }
 )
+
+
+export const editPost = createAsyncThunk<Post, { id: number; data: Partial<Post> }>(
+  'posts/edit',
+  async ({ id, data }) => {
+    return await apiClient.put<Post>(API_ENDPOINTS.posts.edit(id.toString()), data);
+  }
+)
+
 
 export const deletePost = createAsyncThunk<number, number>(
   'posts/delete',
@@ -146,22 +156,44 @@ const postsSlice = createSlice({
         state.error.fetch = action.error.message || '投稿の取得に失敗しました'
       })
 
-      // updatePost
-      .addCase(updatePost.pending, (state) => {
+      // fetchUpdatedPosts（新規追加）
+      .addCase(fetchUpdatedPosts.pending, (state) => {
         state.loading.update = true
         state.error.update = null
       })
-      .addCase(updatePost.fulfilled, (state, action) => {
+      .addCase(fetchUpdatedPosts.fulfilled, (state, action) => {
         state.loading.update = false
-        const index = state.items.findIndex((p: Post) => p.id === action.meta.arg.id)
+        action.payload.forEach(updatedPost => {
+          const index = state.items.findIndex(p => p.id === updatedPost.id)
+          if (index !== -1) {
+            state.items[index] = updatedPost
+          } else {
+            state.items.push(updatedPost)
+          }
+        })
+      })
+      .addCase(fetchUpdatedPosts.rejected, (state, action) => {
+        state.loading.update = false
+        state.error.update = action.error.message || '更新された投稿の取得に失敗しました'
+      })
+
+      // editPost（投稿編集用）
+      .addCase(editPost.pending, (state) => {
+        state.loading.update = true
+        state.error.update = null
+      })
+      .addCase(editPost.fulfilled, (state, action) => {
+        state.loading.update = false
+        const index = state.items.findIndex((p: Post) => p.id === action.payload.id)
         if (index !== -1) {
           state.items[index] = action.payload
         }
       })
-      .addCase(updatePost.rejected, (state, action) => {
+      .addCase(editPost.rejected, (state, action) => {
         state.loading.update = false
-        state.error.update = action.error.message || '投稿の更新に失敗しました'
+        state.error.update = action.error.message || '投稿の編集に失敗しました'
       })
+
 
       // deletePost
       .addCase(deletePost.pending, (state) => {
