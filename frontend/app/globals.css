@@ -162,11 +162,9 @@
 
 /* カスタムポップアップ（透明）のスタイル */
 .custom-popup .mapboxgl-popup-content {
-  background: rgba(255, 255, 255, 0.1) !important; /* 透明な白背景 */
-  backdrop-filter: blur(10px) !important; /* ぼかし効果 */
-  border: 1px solid rgba(255, 255, 255, 0.2) !important; /* 透明な境界線 */
+  background: rgba(255, 255, 255) !important; /* 透明な白背景 */
+  border: 1px solid rgba(255, 255, 255) !important; /* 透明な境界線 */
   border-radius: 1rem !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important; /* 薄い影 */
   padding: 0 !important;
   max-width: 20rem !important;
 }
