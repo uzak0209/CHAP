@@ -134,7 +134,7 @@ const postsSlice = createSlice({
       })
       .addCase(fetchPost.fulfilled, (state, action) => {
         state.loading.fetch = false
-        const index = state.items.findIndex(p => p.id === action.payload.id)
+        const index = state.items.findIndex((p: Post) => p.id === action.payload.id)
         if (index !== -1) {
           state.items[index] = action.payload
         } else {
@@ -153,7 +153,7 @@ const postsSlice = createSlice({
       })
       .addCase(updatePost.fulfilled, (state, action) => {
         state.loading.update = false
-        const index = state.items.findIndex(p => p.id === action.meta.arg.id)
+        const index = state.items.findIndex((p: Post) => p.id === action.meta.arg.id)
         if (index !== -1) {
           state.items[index] = action.payload
         }
@@ -170,7 +170,7 @@ const postsSlice = createSlice({
       })
       .addCase(deletePost.fulfilled, (state, action) => {
         state.loading.delete = false
-        state.items = state.items.filter(p => p.id !== action.payload)
+        state.items = state.items.filter((p: Post) => p.id !== action.payload)
       })
       .addCase(deletePost.rejected, (state, action) => {
         state.loading.delete = false

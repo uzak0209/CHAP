@@ -21,7 +21,7 @@ const createMarkerWithPopup = (content: Content, selectedCategory: string = 'all
   // Mapbox GLのポップアップを作成
   const mapboxPopup = new mapboxgl.Popup({
     offset: 25,
-    closeButton: true,
+    closeButton: false,
     closeOnClick: false,
     className: 'custom-popup'
   }).setDOMContent(popupContainer);
