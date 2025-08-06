@@ -46,7 +46,7 @@ export default function MapBackPage() {
     if (locationState === Status.IDLE || locationState === Status.ERROR) {
       dispatch(getCurrentLocation());
     }
-  }, [dispatch, locationState]);
+  }, [dispatch]);
 
   useEffect(() => {
     clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
