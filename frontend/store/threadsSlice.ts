@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import { Thread } from '../types/types'
-import { apiClient, API_ENDPOINTS } from '../lib/api'
+import { Thread } from '@/types/types'
+import { apiClient, API_ENDPOINTS } from '@/lib/api'
 
 export interface ThreadsState {
   items: Thread[];

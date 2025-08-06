@@ -8,15 +8,6 @@ export interface MarkerRefs {
   currentLocationMarkerRef: React.MutableRefObject<mapboxgl.Marker | null>;
 }
 
-// ポップアップ復元関数の型
-export type RestorePopupsFunction = (event?: any) => void;
-
-// ライクハンドラーのパラメータ型
-export interface LikeHandlerParams {
-  post?: Post;
-  thread?: Thread;
-}
-
 // マーカー追加関数の型
 export interface MarkerFunctions {
   addPostMarkers: () => void;

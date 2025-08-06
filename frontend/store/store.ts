@@ -9,7 +9,7 @@ import eventsReducer, { EventsState } from './eventsSlice'
 import filtersReducer, { FiltersState } from './filtersSlice'
 import uiReducer, { UIState } from './uiSlice'
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux'
-import { LocationState } from '../types/types'
+import { LocationState } from '@/types/types'
 // Re-export actions
 export { authActions } from './authSlice'
 export { locationActions, getCurrentLocation } from './locationSlice'
@@ -20,7 +20,7 @@ export { filtersActions } from './filtersSlice'
 export { uiActions } from './uiSlice'
 
 // Re-export types
-export * from '../types/types'
+export * from '@/types/types'
 
 // Store Configuration
 export const store = configureStore({

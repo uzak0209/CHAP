@@ -15,7 +15,7 @@ interface PostProps {
 const Post: React.FC<PostProps> = ({ message, author, timestamp, className, onClose }) => {
   return (
     <Card className={cn(
-      "relative max-w-sm bg-white border border-gray-200 shadow-lg rounded-2xl",
+      "relative max-w-sm bg-white border border-gray-200 shadow-md rounded-2xl",
       className
     )}>
       {/* 吹き出しの矢印 */}

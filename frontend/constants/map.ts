@@ -1,0 +1,32 @@
+import { Category } from '@/types/types';
+
+// Base category options used across the application
+export const CATEGORY_OPTIONS = [
+  { value: 'entertainment' as const, label: 'エンターテイメント' },
+  { value: 'community' as const, label: '地域住民コミュニケーション' },
+  { value: 'disaster' as const, label: '災害情報' }
+];
+
+
+
+export const MAPBOX_CONFIG = {
+  CENTER: [136.918320, 35.157171] as [number, number],
+  ZOOM: 15.27,
+  PITCH: 42,
+  BEARING: -50,
+  STYLE: 'mapbox://styles/mapbox/standard',
+  MIN_ZOOM: 5,
+  MAX_ZOOM: 50,
+  LANGUAGE: 'ja',
+  LIGHT_PRESET: 'dusk'
+} as const;
+
+export const POPUP_CONFIG = {
+  ANCHOR: 'center' as const,
+  OFFSET: [0, 0] as [number, number],
+  CLOSE_BUTTON: false,
+  CLOSE_ON_CLICK: false,
+  CLASS_NAME: 'custom-popup'
+} as const;
+
+

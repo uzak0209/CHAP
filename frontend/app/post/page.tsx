@@ -12,7 +12,7 @@ import { Camera, MapPin, Hash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createPost, useAppDispatch,useAppSelector } from '@/store';
 import { LatLng ,Status,LocationState, PostCategory} from '@/types/types';
-import { POST_CATEGORY_OPTIONS } from '@/constants/categories';
+import { POST_CATEGORY_OPTIONS } from '@/constants/map';
 
 const categoryOptions = POST_CATEGORY_OPTIONS;
 

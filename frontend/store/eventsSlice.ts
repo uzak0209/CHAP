@@ -1,8 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import { Event } from '../types/types'
-import { Status, LocationState } from '../types/types';
-import { apiClient, API_ENDPOINTS } from '../lib/api';
-import { getAuthToken } from './authSlice';
+import { Event  ,Status, LocationState} from '@/types/types'
+import { apiClient, API_ENDPOINTS } from '@/lib/api';
 
 export interface EventsState {
   items: Event[];
@@ -56,7 +54,7 @@ export const fetchEvent = createAsyncThunk<Event, string>(
     return await apiClient.get<Event>(API_ENDPOINTS.events.get(id));
   }
 )
-export const createEvent = createAsyncThunk<Event, Omit<Event, 'id' | 'created_time'>>(
+export const createEvent = createAsyncThunk<Event, Omit<Event, 'id' | 'user_id' | 'created_time' | 'updated_at'>>(
   'events/create',
   async (eventData) => {
     return await apiClient.post<Event>(API_ENDPOINTS.events.create, eventData);

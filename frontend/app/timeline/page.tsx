@@ -3,11 +3,10 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/AppLayout';
 import { PostCard } from '@/components/PostCard';
-import { PostFilters } from '@/components/PostFilters';
+import { PostFilters } from '@/components/PostFileter';
 import { LoadingSpinner } from '@/components/ui/loading';
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { Post, Status } from '@/types/types';
-import { normalizePostsData, logDataTransformation } from '@/utils/dataTransform';
 
 import { fetchAroundPosts, postsActions } from '@/store/postsSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
@@ -145,17 +144,10 @@ export default function PostPage() {
 }
 
 function PostList({ posts }: { posts: Post[] }) {
-  console.log("Rendering PostList with posts:", posts); 
-  
-  // 投稿データを一括正規化
-  const normalizedPosts = normalizePostsData(posts);
   
   return (
     <div className="space-y-4 pb-4">
-      {normalizedPosts.map((post, index) => {
-        // デバッグ用：元データと正規化後データを比較
-        logDataTransformation(posts[index], post, 'タイムライン投稿');
-        
+      {posts.map((post) => {
         return <PostCard key={post.id} post={post} />;
       })}
     </div>

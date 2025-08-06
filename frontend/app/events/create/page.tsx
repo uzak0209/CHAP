@@ -14,7 +14,7 @@ import { createEvent, eventsActions } from '@/store/eventsSlice';
 import { filtersActions } from '@/store/filtersSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
 import { Event, EventCategory, Status } from '@/types/types';
-import { EVENT_CATEGORY_OPTIONS } from '@/constants/categories';
+import { EVENT_CATEGORY_OPTIONS } from '@/constants/map';
 
 
 export default function CreateEventPage() {

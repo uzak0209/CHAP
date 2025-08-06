@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+// Update the import path to the correct location of your Post type
 import { Post } from '../types/types'
-import { apiClient, API_ENDPOINTS } from '../lib/api'
+
+import { apiClient, API_ENDPOINTS } from '@/lib/api'
 
 export interface PostsState {
   items: Post[];
