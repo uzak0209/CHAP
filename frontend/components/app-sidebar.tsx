@@ -3,6 +3,7 @@ import React from "react"
 import { useAppDispatch, useAppSelector } from "@/store"
 import { filtersActions } from "@/store/filtersSlice"
 import type { Category } from "@/types/types"
+// import { RefreshPopupID } from "@/app/map-back/page"
  
 import {
   Sidebar,
@@ -50,6 +51,7 @@ export function AppSidebar() {
   const handleCategorySelect = (category: Category) => {
     console.log('AppSidebar - selecting category:', category);
     dispatch(filtersActions.setSelectedCategory(category))
+    // RefreshPopupID();
   }
 
   return (
