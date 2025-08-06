@@ -46,15 +46,16 @@ export default function MapBackPage() {
 
   }, [dispatch, locationState, location]);
   setInterval(() => {
+
     if (locationState === Status.LOADED) {
-      clearAllMarkers(currentMarksRef,currentLocationMarkerRef);
-    posts.forEach(post => {
+    clearAllMarkers(currentMarksRef,currentLocationMarkerRef);
+    posts.filter((post)=>post!==undefined&&post!==null).forEach(post => {
       addContentMarker(post, mapRef,currentMarksRef, selectedCategory);
     });
-    threads.forEach(thread => {
+    threads.filter((thread) =>  thread!==undefined&&thread!==null ).forEach(thread => {
       addContentMarker(thread, mapRef,currentMarksRef, selectedCategory);
     });
-    events.forEach(event => {
+    events.filter((event) =>  event!==undefined&&event!==null ).forEach(event => {
       addContentMarker(event, mapRef,currentMarksRef, selectedCategory);
     });
     addCurrentLocationMarker(location.lat, location.lng, mapRef, currentLocationMarkerRef);

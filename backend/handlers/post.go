@@ -80,7 +80,7 @@ func CreatePost(c *gin.Context) {
 	}
 
 	log.Printf("[CreatePost] Post created successfully with ID: %d", post.ID)
-	c.JSON(http.StatusCreated, gin.H{"post": post})
+	c.JSON(http.StatusCreated, post)
 }
 
 // GetPost handles GET /post/:id
