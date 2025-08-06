@@ -36,6 +36,7 @@ export default function PostPage() {
         lat: location.lat,
         lng: location.lng
       }));
+      console.log("Posts:", posts);
     } 
   }, [dispatch, state]);
   
