@@ -65,10 +65,9 @@ export default function MapBackPage() {
   }, [dispatch, locationState, location]);
 
   useEffect(() => {
-    setInterval(() => {
-      if (locationState === Status.LOADED) {
+    
+
         clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
-        console.log("Updating markers on map");
         posts.forEach((post) => {
           addContentMarker(post, mapRef, currentMarksRef, selectedCategory);
         });
@@ -84,9 +83,8 @@ export default function MapBackPage() {
           mapRef,
           currentLocationMarkerRef
         );
-      }
-    }, 3000); // 3秒
-  }, []);
+      
+  }, [posts, threads, events, mapRef, selectedCategory, locationState]);
 
   return (
     <div className="h-full w-full relative">
