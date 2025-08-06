@@ -102,6 +102,7 @@ const eventsSlice = createSlice({
       })
       .addCase(fetchAroundEvents.fulfilled, (state, action) => {
         state.loading.fetch = false
+
         state.items = action.payload
       })
       .addCase(fetchAroundEvents.rejected, (state, action) => {

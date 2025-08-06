@@ -45,11 +45,10 @@ export default function MapBackPage() {
     if (locationState === Status.IDLE || locationState === Status.ERROR) {
       dispatch(getCurrentLocation());
     }
-  }, [dispatch, locationState]);
+  }, [dispatch]);
 
   useEffect(() => {
     clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
-    if (locationState === Status.LOADED) {
       // 現在位置を中心とした周辺の投稿を取得
       dispatch(fetchAroundPosts({ lat: location.lat, lng: location.lng }));
       // 現在位置を中心とした周辺のスレッドを取得
@@ -62,12 +61,12 @@ export default function MapBackPage() {
         mapRef,
         currentLocationMarkerRef
       );
-    }
+    
   }, [dispatch, locationState, location]);
   useEffect(() => {
     setInterval(() => {
-      if (locationState === Status.LOADED) {
-        clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
+      console.log(posts, threads, events);
+
         posts.forEach((post) => {
           addContentMarker(post, mapRef, currentMarksRef, selectedCategory);
         });
@@ -83,7 +82,6 @@ export default function MapBackPage() {
           mapRef,
           currentLocationMarkerRef
         );
-      }
     }, 3000); // 3秒
   }, []);
   return (
