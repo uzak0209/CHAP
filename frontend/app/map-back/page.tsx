@@ -42,13 +42,13 @@ export default function MapBackPage() {
       // 現在位置を中心とした周辺のイベントを取得
       dispatch(fetchAroundEvents({ lat: location.lat, lng: location.lng }));
     }
-    console.log(posts, threads, events);
 
 
   }, [dispatch, locationState, location]);
   setInterval(() => {
     if (locationState === Status.LOADED) {
-          posts.forEach(post => {
+      clearAllMarkers(currentMarksRef,currentLocationMarkerRef);
+    posts.forEach(post => {
       addContentMarker(post, mapRef,currentMarksRef, selectedCategory);
     });
     threads.forEach(thread => {
@@ -59,7 +59,7 @@ export default function MapBackPage() {
     });
     addCurrentLocationMarker(location.lat, location.lng, mapRef, currentLocationMarkerRef);
     }
-  }, 5000); // 5秒
+  }, 3000); // 20秒
   return (
     <div className="h-full w-full relative">
       <div 

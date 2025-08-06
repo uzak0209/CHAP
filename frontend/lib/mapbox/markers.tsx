@@ -6,8 +6,7 @@ import { Popup } from '@/components/Popup';
 
 // Popupコンポーネント付きマーカーを作成する関数
 const createMarkerWithPopup = (content: Content, selectedCategory: string = 'all'): mapboxgl.Marker => {
-  // 座標データの存在確認
-  console.log('Creating marker for content:', content);
+
   if (!content.coordinate || typeof content.coordinate.lng !== 'number' || typeof content.coordinate.lat !== 'number') {
     console.error('Invalid coordinate data:', content);
     throw new Error('Valid coordinate data is required for marker creation');

@@ -99,6 +99,7 @@ const eventsSlice = createSlice({
       })
       .addCase(fetchAroundEvents.fulfilled, (state, action) => {
         state.loading.fetch = false
+        console.log("位置情報周辺のイベントを取得しました", action.payload);
         state.items = action.payload
       })
       .addCase(fetchAroundEvents.rejected, (state, action) => {
