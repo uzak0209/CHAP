@@ -1,61 +1,54 @@
-'use client';
+"use client";
 
-import React, { useEffect } from 'react';
-import { useMapbox } from '@/hooks/useMapbox';
+import React, { useEffect, useCallback, useRef } from "react";
+import { useMapbox } from "@/hooks/useMapbox";
 // import { useThreads } from '@/hooks/useThreads'; // 不要 - useMapboxで管理
-import { useAppSelector, useAppDispatch } from '@/store';
-import { fetchAroundPosts } from '@/store/postsSlice';
-import { fetchAroundThreads } from '@/store/threadsSlice';
-import { fetchAroundEvents } from '@/store/eventsSlice';
-import { getCurrentLocation } from '@/store/locationSlice';
-import { Status } from '@/types/types';
-import MapControls from '@/components/MapControls';
-import { MultiModalFAB } from '@/components/ui/multi-modal-fab';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { useAppSelector, useAppDispatch } from "@/store";
+import { fetchAroundPosts, fetchUpdatedPosts } from "@/store/postsSlice";
+import { fetchAroundThreads, fetchUpdatedThreads } from "@/store/threadsSlice";
+import { fetchAroundEvents, fetchUpdatedEvents } from "@/store/eventsSlice";
+import { getCurrentLocation } from "@/store/locationSlice";
+import { Status } from "@/types/types";
+import MapControls from "@/components/MapControl";
+import { MultiModalFAB } from "@/components/multi-modal-fab";
+import "mapbox-gl/dist/mapbox-gl.css";
+import {
+  addContentMarker,
+  addCurrentLocationMarker,
+  clearAllMarkers,
+} from "@/lib/mapbox/markers";
 
-/**
- * MapBackPage - デバッグ機能付きの地図表示ページ
- * 
- * 主な機能:
- * - Mapboxを使用した地図表示
- * - 3D表示の切り替え
- * - 現在位置周辺の投稿とスレッドの表示
- * - デバッグ用の診断パネル（ポップアップ状態確認、強制表示など）
- */
+
 export default function MapBackPage() {
-  // === カスタムフックからの値取得 ===
-  // 地図関連のロジック（地図コンテナ、3D切り替え、視点変更）
-  const { mapContainerRef, mapRef, is3D, toggle3D, changeMapView } = useMapbox();
-  
-  // スレッド表示関連のロジック（useMapboxで管理されるため不要）
-  // const { displayThreads } = useThreads(mapRef);
-  
-  // === Redux状態管理 ===
+  const {
+    mapContainerRef,
+    mapRef,
+    is3D,
+    currentLocationMarkerRef,
+    currentMarksRef,
+    toggle3D,
+    changeMapView,
+  } = useMapbox();
   const dispatch = useAppDispatch();
-  
-  // 投稿データの状態（アイテム、ローディング状態、エラー状態）
-  const { items: posts, loading: postsLoading, error: postsError } = useAppSelector(state => state.posts);
-  
-  // スレッドデータの状態
-  const { items: threads, loading: threadsLoading, error: threadsError } = useAppSelector(state => state.threads);
-  
-  // イベントデータの状態
-  const { items: events, loading: eventsLoading, error: eventsError } = useAppSelector(state => state.events);
-  
   // 位置情報の状態
-  const { location, state: locationState } = useAppSelector(state => state.location);
-
-  // === 初期化処理：ページ読み込み時に位置情報を取得 ===
+  const { location, state: locationState } = useAppSelector(
+    (state) => state.location
+  );
+  const posts = useAppSelector((state) => state.posts.items);
+  const threads = useAppSelector((state) => state.threads.items);
+  const events = useAppSelector((state) => state.events.items);
+  const selectedCategory = useAppSelector(
+    (state) => state.filters.selectedCategory
+  );
   useEffect(() => {
-    
     // 位置情報がまだ取得されていない、またはエラー状態の場合に位置情報を取得
     if (locationState === Status.IDLE || locationState === Status.ERROR) {
       dispatch(getCurrentLocation());
     }
-  }, [dispatch, locationState]);
+  }, [dispatch]);
 
-  // === データ取得処理：位置情報が取得できたら周辺データを取得 ===
   useEffect(() => {
+    clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
     if (locationState === Status.LOADED) {
       // 現在位置を中心とした周辺の投稿を取得
       dispatch(fetchAroundPosts({ lat: location.lat, lng: location.lng }));
@@ -63,20 +56,41 @@ export default function MapBackPage() {
       dispatch(fetchAroundThreads({ lat: location.lat, lng: location.lng }));
       // 現在位置を中心とした周辺のイベントを取得
       dispatch(fetchAroundEvents({ lat: location.lat, lng: location.lng }));
+      addCurrentLocationMarker(
+        location.lat,
+        location.lng,
+        mapRef,
+        currentLocationMarkerRef
+      );
     }
   }, [dispatch, locationState, location]);
+  useEffect(() => {
+    setInterval(() => {
+      if (locationState === Status.LOADED) {
+        clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
+        console.log("Updating markers on map");
+        posts.forEach((post) => {
+          addContentMarker(post, mapRef, currentMarksRef, selectedCategory);
+        });
+        threads.forEach((thread) => {
+          addContentMarker(thread, mapRef, currentMarksRef, selectedCategory);
+        });
+        events.forEach((event) => {
+          addContentMarker(event, mapRef, currentMarksRef, selectedCategory);
+        });
+        addCurrentLocationMarker(
+          location.lat,
+          location.lng,
+          mapRef,
+          currentLocationMarkerRef
+        );
+      }
+    }, 3000); // 3秒
+  }, []);
 
   return (
     <div className="h-full w-full relative">
-      {/* === メイン地図表示エリア === */}
-      <div 
-        id="map" 
-        className="h-full w-full" 
-        ref={mapContainerRef} 
-      />
-      
-      {/* === 地図コントロールパネル === */}
-      {/* 3D切り替えボタンと視点変更ボタンを含む */}
+      <div id="map" className="h-full w-full" ref={mapContainerRef} />
       <MapControls
         is3D={is3D}
         onToggle3D={toggle3D}
@@ -86,3 +100,4 @@ export default function MapBackPage() {
     </div>
   );
 }
+

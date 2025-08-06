@@ -1,6 +1,6 @@
 import { Heart, MessageCircle, Tag } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { formatDistance, formatTime } from '@/lib/format';
+import { formatDistance, formatTime } from '@/lib/timeformat';
 import { Post } from '@/types/types';
 
 interface PostCardProps {
@@ -9,11 +9,8 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
   console.log("PostCard rendered with post:", post);
-  console.log("PostCard content value:", post.content);
-  console.log("PostCard content type:", typeof post.content);
-  
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="bg-white">
       <CardContent className="p-4">
         <PostHeader userId={String(post.user_id)} />
         <PostContent content={post.content} />
@@ -36,13 +33,9 @@ function PostHeader({ userId }: { userId: string }) {
 }
 
 function PostContent({ content, images }: { content: string; images?: string[] }) {
-  console.log("PostContent rendering with content:", content);
-  console.log("Content exists:", !!content);
-  console.log("Content length:", content?.length);
-  
   return (
     <>
-      <p className="mb-3">{content || "コンテンツがありません"}</p>
+      <p className="mb-3">{content}</p>
       {images?.[0] && (
         <img 
           src={images[0]} 

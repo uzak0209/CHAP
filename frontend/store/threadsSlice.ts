@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Thread } from '../types/types'
-import { apiClient, API_ENDPOINTS } from '../lib/api'
+import { apiClient, API_ENDPOINTS } from '@/lib/api'
 
 export interface ThreadsState {
   items: Thread[];
@@ -35,47 +35,48 @@ const initialState: ThreadsState = {
 }
 
 // Async Thunks
-export const fetchThreads = createAsyncThunk<Thread[], void>(
-  'threads/fetchThreads',
-  async () => {
-    return await apiClient.get<Thread[]>(API_ENDPOINTS.threads.list);
-  }
-)
-
 export const fetchAroundThreads = createAsyncThunk<Thread[], { lat: number; lng: number }>(
   'threads/fetchAround',
   async (params: { lat: number; lng: number }) => {
-    // 位置情報検索用の既存エンドポイント
     return await apiClient.post<Thread[]>(API_ENDPOINTS.threads.around, params);
   }
 )
 
-export const createThread = createAsyncThunk<Thread, Omit<Thread, 'id' | 'user_id' | 'created_time' | 'updated_at'>>(
+export const createThread = createAsyncThunk<Thread, Omit<Thread, 'id' | 'user_id' | 'Created_at' | 'Updated_at'>>(
   'threads/create',
   async (threadData) => {
     return await apiClient.post<Thread>(API_ENDPOINTS.threads.create, threadData);
   }
 )
 
-export const fetchThread = createAsyncThunk<Thread, string>(
+export const fetchThread = createAsyncThunk<Thread, number>(
   'threads/fetch',
-  async (id: string) => {
-    return await apiClient.get<Thread>(API_ENDPOINTS.threads.get(id));
+  async (id: number) => {
+    return await apiClient.get<Thread>(API_ENDPOINTS.threads.get(id.toString()));
   }
 )
 
-export const updateThread = createAsyncThunk<Thread, { id: string; data: Partial<Thread> }>(
-  'threads/update',
+// 修正: 指定したタイムスタンプ以降に更新されたスレッドを取得
+export const fetchUpdatedThreads = createAsyncThunk<Thread[], number>(
+  'threads/fetchUpdated',
+  async (fromTimestamp: number) => {
+    return await apiClient.get<Thread[]>(API_ENDPOINTS.threads.update(fromTimestamp));
+  }
+)
+
+// 修正: スレッド編集用の関数
+export const editThread = createAsyncThunk<Thread, { id: number; data: Partial<Thread> }>(
+  'threads/edit',
   async ({ id, data }) => {
-    return await apiClient.put<Thread>(API_ENDPOINTS.threads.update(id), data);
+    return await apiClient.put<Thread>(API_ENDPOINTS.threads.edit(id.toString()), data);
   }
 )
 
-export const deleteThread = createAsyncThunk<string, string>(
+export const deleteThread = createAsyncThunk<string, number>(
   'threads/delete',
-  async (id: string) => {
-    await apiClient.delete(API_ENDPOINTS.threads.delete(id));
-    return id;
+  async (id: number) => {
+    await apiClient.delete(API_ENDPOINTS.threads.delete(id.toString()));
+    return id.toString();
   }
 )
 
@@ -124,7 +125,7 @@ const threadsSlice = createSlice({
         state.error.create = action.error.message || 'スレッドの作成に失敗しました'
       })
 
-      // fetchThreadById
+      // fetchThread
       .addCase(fetchThread.pending, (state) => {
         state.loading.fetch = true
         state.error.fetch = null
@@ -143,14 +144,43 @@ const threadsSlice = createSlice({
         state.error.fetch = action.error.message || 'スレッドの取得に失敗しました'
       })
 
-      // updateThread
-      .addCase(updateThread.pending, (state) => {
-        state.loading.fetch = true
-        state.error.fetch = null
+      // fetchUpdatedThreads（新規追加）
+      .addCase(fetchUpdatedThreads.pending, (state) => {
+        state.loading.update = true
+        state.error.update = null
       })
-      .addCase(updateThread.fulfilled, (state, action) => {
-        state.loading.fetch = false
-        // 更新用データは既存アイテムには反映しない
+      .addCase(fetchUpdatedThreads.fulfilled, (state, action) => {
+        state.loading.update = false
+        // 更新されたスレッドをマージ
+        action.payload.forEach(updatedThread => {
+          const index = state.items.findIndex(t => t.id === updatedThread.id)
+          if (index !== -1) {
+            state.items[index] = updatedThread
+          } else {
+            state.items.push(updatedThread)
+          }
+        })
+      })
+      .addCase(fetchUpdatedThreads.rejected, (state, action) => {
+        state.loading.update = false
+        state.error.update = action.error.message || '更新されたスレッドの取得に失敗しました'
+      })
+
+      // editThread
+      .addCase(editThread.pending, (state) => {
+        state.loading.update = true
+        state.error.update = null
+      })
+      .addCase(editThread.fulfilled, (state, action) => {
+        state.loading.update = false
+        const index = state.items.findIndex(t => t.id === action.payload.id)
+        if (index !== -1) {
+          state.items[index] = action.payload
+        }
+      })
+      .addCase(editThread.rejected, (state, action) => {
+        state.loading.update = false
+        state.error.update = action.error.message || 'スレッドの編集に失敗しました'
       })
 
       // deleteThread

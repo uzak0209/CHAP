@@ -35,8 +35,8 @@ export function FloatingActionButton({
         fixed bottom-6 right-6 z-50
         h-14 w-14 rounded-full
         bg-blue-600 hover:bg-blue-700
-        text-white shadow-lg hover:shadow-xl
-        transition-all duration-200 ease-in-out
+        text-white shadow-md hover:shadow-xl
+        transition-all duration-200
         transform hover:scale-105
         ${className}
       `}

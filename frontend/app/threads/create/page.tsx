@@ -47,6 +47,7 @@ export default function CreateThreadPage() {
     }
 
     const threadData: Omit<Thread, 'user_id'|'id' | 'updated_at' | 'deleted_time'> = {
+      type: 'thread',
       content: content,
       coordinate: {
         lat: location.lat,
@@ -56,7 +57,7 @@ export default function CreateThreadPage() {
       like: 0,
       valid: true,
       tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
-      category: '', 
+      category: 'community', 
     };
 
     try {

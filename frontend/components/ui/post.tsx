@@ -15,11 +15,11 @@ interface PostProps {
 const Post: React.FC<PostProps> = ({ message, author, timestamp, className, onClose }) => {
   return (
     <Card className={cn(
-      "relative max-w-sm bg-white border border-gray-200 shadow-lg rounded-2xl",
+      "relative max-w-sm bg-white border border-gray-200  rounded-2xl",
       className
     )}>
       {/* 吹き出しの矢印 */}
-      <div className="absolute -bottom-2 left-5 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white drop-shadow-sm" />
+      <div className="absolute -bottom-2 left-5 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
       
       {/* 閉じるボタン */}
       {onClose && (

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { PostCategory } from '@/types/thread'
+import { Category } from '@/types/types'
 
 export interface FiltersState {
   contentType: 'MESSAGE' | 'THREAD' | 'EVENT' | 'ALL';
@@ -9,7 +9,7 @@ export interface FiltersState {
     to: Date | null;
   };
   tags: string[];
-  selectedCategory: PostCategory;
+  selectedCategory: Category;
   showValid: boolean;
 }
 
@@ -49,7 +49,7 @@ const filtersSlice = createSlice({
     clearTags: (state) => {
       state.tags = []
     },
-    setSelectedCategory: (state, action: PayloadAction<PostCategory>) => {
+    setSelectedCategory: (state, action: PayloadAction<Category>) => {
       console.log('Redux: Setting category to', action.payload);
       state.selectedCategory = action.payload
     },

@@ -11,14 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Camera, MapPin, Hash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createPost, useAppDispatch,useAppSelector } from '@/store';
-import { LatLng ,Status,LocationState, PostCategory} from '@/types/types';
-import { POST_CATEGORY_OPTIONS } from '@/constants/categories';
+import { LatLng ,Status,LocationState, Category} from '@/types/types';
+import { CATEGORY_OPTIONS } from '@/constants/map';
 
-const categoryOptions = POST_CATEGORY_OPTIONS;
+const categoryOptions = CATEGORY_OPTIONS;
 
 export default function PostPage() {
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState<PostCategory | ''>('');
+  const [category, setCategory] = useState<Category | ''>('');
   const [images, setImages] = useState<File[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
@@ -40,8 +40,8 @@ export default function PostPage() {
         valid: true,
         like: 0,
         created_at: new Date().toISOString(),
-        category: category as PostCategory,
-        visible: selectedCategory === category
+        category: category as Category,
+        type: 'post',
       }));
       router.push('/timeline');
     } catch (error) {
@@ -105,14 +105,14 @@ function CategorySection({
   category, 
   onCategoryChange 
 }: { 
-  category: PostCategory | ''; 
-  onCategoryChange: (value: PostCategory | '') => void;
+  category: Category | ''; 
+  onCategoryChange: (value: Category | '') => void;
 }) {
 
   return (
     <div>
       <Label htmlFor="category">カテゴリ</Label>
-      <Select value={category} onValueChange={(value: PostCategory) => onCategoryChange(value)}>
+      <Select value={category} onValueChange={(value: Category) => onCategoryChange(value)}>
         <SelectTrigger className="mt-2">
           <SelectValue placeholder="カテゴリを選択してください" />
         </SelectTrigger>

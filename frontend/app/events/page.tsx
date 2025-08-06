@@ -30,7 +30,7 @@ import { verifyToken } from "@/store/authSlice";
 
 // イベントカードコンポーネント
 const EventCard = ({ event }: { event: Event }) => (
-  <Card className="w-full transition-all hover:shadow-lg hover:-translate-y-1">
+  <Card className="w-full transition-all hover:shadow-md hover:-translate-y-1">
     <CardHeader>
       <CardTitle className="text-xl font-bold">{event.content}</CardTitle>
       <CardDescription className="flex items-center text-sm text-gray-500 pt-2">

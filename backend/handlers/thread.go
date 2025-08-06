@@ -89,7 +89,7 @@ func CreateThread(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"thread": thread})
+	c.JSON(http.StatusCreated, thread)
 }
 func GetAroundAllThread(c *gin.Context) {
 	var req types.Coordinate

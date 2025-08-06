@@ -18,11 +18,11 @@ interface ThreadProps {
 const Thread: React.FC<ThreadProps> = ({ message, author, timestamp, className, onClose, replyCount = 0, onThreadClick, like = 0 }) => {
   return (
     <Card className={cn(
-      "relative max-w-sm bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 shadow-lg rounded-2xl overflow-hidden",
+      "relative max-w-sm bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 shadow-md rounded-2xl overflow-hidden",
       className
     )}>
       {/* 吹き出しの矢印 */}
-      <div className="absolute -bottom-2 left-5 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-50 drop-shadow-sm" />
+      <div className="absolute -bottom-2 left-5 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-50 " />
       
       {/* 閉じるボタン */}
       {onClose && (

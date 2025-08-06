@@ -1,8 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { Event } from '../types/types'
-import { Status, LocationState } from '../types/types';
-import { apiClient, API_ENDPOINTS } from '../lib/api';
-import { getAuthToken } from './authSlice';
+import { apiClient, API_ENDPOINTS } from '@/lib/api'
 
 export interface EventsState {
   items: Event[];
@@ -36,45 +34,49 @@ const initialState: EventsState = {
   },
 }
 
-export const fetchEvents = createAsyncThunk<Event[], void>(
-  'events/fetchEvents',
-  async () => {
-    return await apiClient.get<Event[]>(API_ENDPOINTS.events.list);
-  }
-)
-
+// Async Thunks
 export const fetchAroundEvents = createAsyncThunk<Event[], { lat: number; lng: number }>(
   'events/fetchAround',
-  async (params) => {
-    // 位置情報検索用の別エンドポイント
+  async (params: { lat: number; lng: number }) => {
     return await apiClient.post<Event[]>(API_ENDPOINTS.events.around, params);
   }
 )
-export const fetchEvent = createAsyncThunk<Event, string>(
-  'events/fetch',
-  async (id) => {
-    return await apiClient.get<Event>(API_ENDPOINTS.events.get(id));
-  }
-)
-export const createEvent = createAsyncThunk<Event, Omit<Event, 'id' | 'created_time'>>(
+
+export const createEvent = createAsyncThunk<Event, Omit<Event, 'id' | 'user_id' | 'Created_at' | 'Updated_at'>>(
   'events/create',
   async (eventData) => {
     return await apiClient.post<Event>(API_ENDPOINTS.events.create, eventData);
   }
 )
 
-export const updateEvent = createAsyncThunk<Event, { id: string; data: Partial<Event> }>(
-  'events/update',
-  async ({ id, data }) => {
-    return await apiClient.put<Event>(API_ENDPOINTS.events.update(id), data);
+export const fetchEvent = createAsyncThunk<Event, number>(
+  'events/fetch',
+  async (id: number) => {
+    return await apiClient.get<Event>(API_ENDPOINTS.events.get(id.toString()));
   }
 )
 
-export const deleteEvent = createAsyncThunk<string, string>(
+// 修正: 指定したタイムスタンプ以降に更新されたイベントを取得
+export const fetchUpdatedEvents = createAsyncThunk<Event[], number>(
+  'events/fetchUpdated',
+  async (fromTimestamp: number) => {
+    return await apiClient.get<Event[]>(API_ENDPOINTS.events.update(fromTimestamp));
+  }
+)
+
+// 修正: イベント編集用の関数
+export const editEvent = createAsyncThunk<Event, { id: number; data: Partial<Event> }>(
+  'events/edit',
+  async ({ id, data }) => {
+    return await apiClient.put<Event>(API_ENDPOINTS.events.edit(id.toString()), data);
+  }
+)
+
+export const deleteEvent = createAsyncThunk<string, number>(
   'events/delete',
-  async (id: string) => {
-    await apiClient.delete(API_ENDPOINTS.events.delete(id));
-    return id;
+  async (id: number) => {
+    await apiClient.delete(API_ENDPOINTS.events.delete(id.toString()));
+    return id.toString();
   }
 )
 
@@ -93,7 +95,6 @@ const eventsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
       // fetchAroundEvents
       .addCase(fetchAroundEvents.pending, (state) => {
         state.loading.fetch = true
@@ -101,6 +102,7 @@ const eventsSlice = createSlice({
       })
       .addCase(fetchAroundEvents.fulfilled, (state, action) => {
         state.loading.fetch = false
+
         state.items = action.payload
       })
       .addCase(fetchAroundEvents.rejected, (state, action) => {
@@ -108,6 +110,7 @@ const eventsSlice = createSlice({
         state.error.fetch = action.error.message || 'イベントの取得に失敗しました'
       })
 
+      // createEvent
       .addCase(createEvent.pending, (state) => {
         state.loading.create = true
         state.error.create = null
@@ -123,29 +126,72 @@ const eventsSlice = createSlice({
         state.error.create = action.error.message || 'イベントの作成に失敗しました'
       })
 
-      .addCase(updateEvent.pending, (state) => {
+      // fetchEvent
+      .addCase(fetchEvent.pending, (state) => {
+        state.loading.fetch = true
+        state.error.fetch = null
+      })
+      .addCase(fetchEvent.fulfilled, (state, action) => {
+        state.loading.fetch = false
+        const index = state.items.findIndex(e => e.id === action.payload.id)
+        if (index !== -1) {
+          state.items[index] = action.payload
+        } else {
+          state.items.push(action.payload)
+        }
+      })
+      .addCase(fetchEvent.rejected, (state, action) => {
+        state.loading.fetch = false
+        state.error.fetch = action.error.message || 'イベントの取得に失敗しました'
+      })
+
+      // fetchUpdatedEvents（新規追加）
+      .addCase(fetchUpdatedEvents.pending, (state) => {
         state.loading.update = true
         state.error.update = null
       })
-      .addCase(updateEvent.fulfilled, (state, action) => {
+      .addCase(fetchUpdatedEvents.fulfilled, (state, action) => {
         state.loading.update = false
-        const index = state.items.findIndex(e => String(e.id )=== action.meta.arg.id)
+        // 更新されたイベントをマージ
+        action.payload.forEach(updatedEvent => {
+          const index = state.items.findIndex(e => e.id === updatedEvent.id)
+          if (index !== -1) {
+            state.items[index] = updatedEvent
+          } else {
+            state.items.push(updatedEvent)
+          }
+        })
+      })
+      .addCase(fetchUpdatedEvents.rejected, (state, action) => {
+        state.loading.update = false
+        state.error.update = action.error.message || '更新されたイベントの取得に失敗しました'
+      })
+
+      // editEvent
+      .addCase(editEvent.pending, (state) => {
+        state.loading.update = true
+        state.error.update = null
+      })
+      .addCase(editEvent.fulfilled, (state, action) => {
+        state.loading.update = false
+        const index = state.items.findIndex(e => e.id === action.payload.id)
         if (index !== -1) {
           state.items[index] = action.payload
         }
       })
-      .addCase(updateEvent.rejected, (state, action) => {
+      .addCase(editEvent.rejected, (state, action) => {
         state.loading.update = false
-        state.error.update = action.error.message || 'イベントの更新に失敗しました'
+        state.error.update = action.error.message || 'イベントの編集に失敗しました'
       })
 
+      // deleteEvent
       .addCase(deleteEvent.pending, (state) => {
         state.loading.delete = true
         state.error.delete = null
       })
       .addCase(deleteEvent.fulfilled, (state, action) => {
         state.loading.delete = false
-        state.items = state.items.filter(e => String(e.id) !== action.meta.arg)
+        state.items = state.items.filter(e => String(e.id) !== action.payload)
       })
       .addCase(deleteEvent.rejected, (state, action) => {
         state.loading.delete = false

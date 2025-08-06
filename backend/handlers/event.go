@@ -95,9 +95,9 @@ func CreateEvent(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"event": event,
-	})
+	c.JSON(http.StatusCreated,
+		event,
+	)
 }
 
 func GetAroundAllEvent(c *gin.Context) {
