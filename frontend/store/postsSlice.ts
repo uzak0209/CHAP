@@ -182,14 +182,14 @@ const postsSlice = createSlice({
         state.loading.update = true
         state.error.update = null
       })
-      .addCase(updatePost.fulfilled, (state, action) => {
+      .addCase(editPost.fulfilled, (state, action) => {
         state.loading.update = false
         const index = state.items.findIndex((p: Post) => p.id === action.payload.id)
         if (index !== -1) {
           state.items[index] = action.payload
         }
       })
-      .addCase(updatePost.rejected, (state, action) => {
+      .addCase(editPost.rejected, (state, action) => {
         state.loading.update = false
         state.error.update = action.error.message || '投稿の更新に失敗しました'
       })
