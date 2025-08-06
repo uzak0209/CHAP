@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { BottomNavigation, TopNavigation } from '@/components/ui/navigation';
+import  NetworkVisualization  from '@/components/ui/timeline_background';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -22,13 +23,17 @@ export function AppLayout({
   const noNavPages = ['/login', '/onboarding', '/admin'];
   const shouldShowNav = showNavigation && !noNavPages.some(page => pathname.startsWith(page));
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen relative">
+      <div className="fixed inset-0 -z-10">
+        <NetworkVisualization />
+      </div>
       {showTopBar && <TopNavigation title={title} />}
       
       <main className={`
         ${showTopBar ? 'pt-2' : ''}
         ${shouldShowNav ? 'pb-20' : ''}
         min-h-screen
+        relative z-10
       `}>
         {children}
       </main>
