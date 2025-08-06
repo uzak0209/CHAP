@@ -35,7 +35,7 @@ const NetworkVisualization: React.FC = () => {
     rendererRef.current = renderer;
 
     // ノードの生成
-    const nodeCount = 80;
+    const nodeCount = 100;
     const nodes: Node[] = [];
     
     for (let i = 0; i < nodeCount; i++) {
@@ -131,7 +131,7 @@ const NetworkVisualization: React.FC = () => {
 
     // アニメーションループ
     const animate = () => {
-      requestAnimationFrame(animate);
+    
 
       const time = Date.now() * 0.001;
 
