@@ -46,6 +46,10 @@ export default function MapBackPage() {
 
   // 取得したデータのIDを差分更新し、新しいマーカーのみ描画するuseEffect
   useEffect(() => {
+   
+  }, [posts, threads, events, PopupID, locationState, mapRef, currentMarksRef, currentLocationMarkerRef, selectedCategory]);
+
+  setInterval(() => {
     const currentAllIds: number[] = [];
     const newContent: (typeof posts[0] | typeof threads[0] | typeof events[0])[] = [];
     
@@ -90,32 +94,33 @@ export default function MapBackPage() {
       console.log('Updated PopupID - Added:', newContent.map(c => c.id), 'Current total:', currentAllIds);
       
       if (locationState === Status.LOADED) {
-        if (hasRemovedContent) {
-          // 削除されたコンテンツがある場合は全マーカーを再描画
-          clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
-          
-          posts.filter(post => post !== undefined && post !== null).forEach(post => {
-            addContentMarker(post, mapRef, currentMarksRef, selectedCategory);
-          });
-          
-          threads.filter(thread => thread !== undefined && thread !== null).forEach(thread => {
-            addContentMarker(thread, mapRef, currentMarksRef, selectedCategory);
-          });
-          
-          events.filter(event => event !== undefined && event !== null).forEach(event => {
-            addContentMarker(event, mapRef, currentMarksRef, selectedCategory);
-          });
-          
-          addCurrentLocationMarker(location.lat, location.lng, mapRef, currentLocationMarkerRef);
-        } else {
-          // 新しいコンテンツのみマーカーを追加
-          newContent.forEach(content => {
-            addContentMarker(content, mapRef, currentMarksRef, selectedCategory);
-          });
-        }
+       
+        console.log('hasRemovedContent', hasRemovedContent);
+        // 削除されたコンテンツがある場合は全マーカーを再描画
+        clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
+        
+        posts.filter(post => post !== undefined && post !== null && post.category === selectedCategory).forEach(post => {
+          addContentMarker(post, mapRef, currentMarksRef, selectedCategory);
+        });
+        
+        threads.filter(thread => thread !== undefined && thread !== null && thread.category === selectedCategory).forEach(thread => {
+          addContentMarker(thread, mapRef, currentMarksRef, selectedCategory);
+        });
+        
+        events.filter(event => event !== undefined && event !== null && event.category === selectedCategory).forEach(event => {
+          addContentMarker(event, mapRef, currentMarksRef, selectedCategory);
+        });
+        
+        addCurrentLocationMarker(location.lat, location.lng, mapRef, currentLocationMarkerRef);
+      } else {
+        // 新しいコンテンツのみマーカーを追加
+        newContent.forEach(content => {
+          addContentMarker(content, mapRef, currentMarksRef, selectedCategory);
+        });
       }
     }
-  }, [posts, threads, events, PopupID, locationState, mapRef, currentMarksRef, currentLocationMarkerRef, selectedCategory]);
+  }, 3000);
+
   return (
     <div className="h-full w-full relative">
       <div 

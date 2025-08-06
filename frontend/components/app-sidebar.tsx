@@ -47,9 +47,6 @@ export function AppSidebar() {
   const dispatch = useAppDispatch()
   const selectedCategory = useAppSelector(state => state.filters.selectedCategory)
 
-  // デバッグ用ログ
-  console.log('AppSidebar - selectedCategory:', selectedCategory);
-
   const handleCategorySelect = (category: Category) => {
     console.log('AppSidebar - selecting category:', category);
     dispatch(filtersActions.setSelectedCategory(category))
