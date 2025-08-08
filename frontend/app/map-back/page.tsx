@@ -93,13 +93,13 @@ export default function MapBackPage() {
   }, [selectedCategory, posts, threads, events, locationState, location, isMapReady]);
 
   // 定期的な更新（3秒間隔）
-  useEffect(() => {
-    const interval = setInterval(() => {
-      updateMarkers();
-    }, 3000);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     updateMarkers();
+  //   }, 3000);
 
-    return () => clearInterval(interval); // クリーンアップ
-  }, [selectedCategory, posts, threads, events, locationState, location, isMapReady]);
+  //   return () => clearInterval(interval); // クリーンアップ
+  // }, [selectedCategory, posts, threads, events, locationState, location, isMapReady]);
   return (
     <div className="h-full w-full relative">
       <div id="map" className="h-full w-full" ref={mapContainerRef} />
