@@ -94,12 +94,12 @@ export const Popup: React.FC<{ popup: Context; selectedCategory?: string }> = ({
         }}
       />
       
-      <CardContent className="p-4 pt-8">
-        <p className={`text-sm ${colors.textColor} leading-relaxed mb-3`}>
+      <CardContent className="p-2">
+        <p className={`text-sm ${colors.textColor} leading-relaxed mb-1`}>
           {popup.content}
         </p>
         {isThread(popup) && (
-          <p className="text-xs text-gray-500 mb-3 italic">
+          <p className="text-xs text-gray-500  italic">
              タップしてスレッドを開く
           </p>
         )}
