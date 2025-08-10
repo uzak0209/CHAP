@@ -24,7 +24,7 @@ func GetCommentsByThreadID(c *gin.Context) {
 	}
 	commentIDs := threadTable.CommentIDs
 	if len(commentIDs) == 0 {
-		c.JSON(404, gin.H{"error": "No comments found for this thread"})
+		c.JSON(200, gin.H{"comments": []types.Comment{}})
 		return
 	}
 	var comments []types.Comment
@@ -32,6 +32,7 @@ func GetCommentsByThreadID(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "Failed to retrieve comments"})
 		return
 	}
+	c.JSON(200, gin.H{"comments": comments})
 }
 
 func CreateComment(c *gin.Context) {
@@ -39,6 +40,12 @@ func CreateComment(c *gin.Context) {
 	if err := c.ShouldBindJSON(&comment); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid JSON format"})
 		return
+	}
+	// If thread id from path exists, assign it
+	if threadIDStr := c.Param("id"); threadIDStr != "" {
+		if threadID, err := strconv.ParseUint(threadIDStr, 10, 64); err == nil {
+			comment.ThreadID = uint(threadID)
+		}
 	}
 	userID := c.GetString("user_id") // ユーザーIDを取得（認証済みであることを前提とする）
 	uid, err := uuid.Parse(userID)

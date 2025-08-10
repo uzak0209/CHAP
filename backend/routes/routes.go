@@ -38,6 +38,7 @@ func SetupRoutes(r *gin.Engine) {
 		// 個別取得（認証不要）
 		v1.GET("/post/:id", handlers.GetPost)
 		v1.GET("/thread/:id", handlers.GetThread)
+		v1.GET("/thread/:id/details", handlers.GetThreadDetails)
 		v1.GET("/event/:id", handlers.GetEvent)
 
 		// デバッグ用（認証不要）- 開発時のみ使用
@@ -74,6 +75,8 @@ func SetupRoutes(r *gin.Engine) {
 
 			// コメント関連
 			auth.POST("/create/comment", handlers.CreateComment)
+			// Replies for thread
+			auth.POST("/thread/:id/reply", handlers.CreateComment)
 			auth.DELETE("/delete/comment/:id", handlers.DeleteComment)
 		}
 	}

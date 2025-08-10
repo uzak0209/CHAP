@@ -91,6 +91,36 @@ func CreateThread(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, thread)
 }
+
+// GetThreadDetails returns a thread with its replies (comments)
+// GET /thread/:id/details
+func GetThreadDetails(c *gin.Context) {
+	id := c.Param("id")
+
+	// Fetch thread
+	var thread types.Thread
+	if err := db.SafeDB().Where("id = ?", id).First(&thread).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
+		return
+	}
+
+	// Fetch replies (comments) by foreign key
+	var replies []types.Comment
+	// If conversion to uint is needed for safety
+	if _, err := strconv.ParseUint(id, 10, 64); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid thread id"})
+		return
+	}
+	if err := db.SafeDB().Where("thread_id = ?", id).Order("created_at ASC").Find(&replies).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load replies"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"thread":  thread,
+		"replies": replies,
+	})
+}
 func GetAroundAllThread(c *gin.Context) {
 	var req types.Coordinate
 	if err := c.ShouldBindJSON(&req); err != nil {
