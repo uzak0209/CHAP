@@ -18,7 +18,7 @@ func init() {
 		log.Println("No .env file found, using system environment variables")
 	}
 
-	dsn := "host=terraform-20250725215706850000000002.cta6geu24oet.ap-northeast-3.rds.amazonaws.com user=uzak password=Skakki0209 dbname=appdb port=5432 sslmode=require"
+	dsn := ""
 	fmt.Println("Using DSN:", dsn)
 
 	// DBに接続（タイムアウト設定追加）
