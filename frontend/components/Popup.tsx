@@ -105,7 +105,8 @@ export const Popup: React.FC<{ popup: Context; selectedCategory?: string }> = ({
         )}
         <div className="flex justify-between items-center text-xs">
           <Button
-            className="flex items-center gap-1 p-0 h-auto"
+            variant="ghost"
+            className="flex items-center gap-1 p-0 h-auto bg-transparent hover:bg-transparent shadow-none focus-visible:ring-0"
           >
             <Heart 
               id={`heart-post-${popID}`}
