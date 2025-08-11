@@ -6,7 +6,7 @@ import { useMapbox } from "@/hooks/useMapbox";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { fetchAroundPosts, fetchUpdatedPosts } from "@/store/postsSlice";
 import { fetchAroundThreads, fetchUpdatedThreads } from "@/store/threadsSlice";
-import { fetchAroundEvents, fetchUpdatedEvents } from "@/store/eventsSlice";
+import { fetchAroundEvents, fetchUpdatedEvents, editEvent } from "@/store/eventsSlice";
 import { getCurrentLocation } from "@/store/locationSlice";
 import { Status } from "@/types/types";
 import MapControls from "@/components/MapControl";
@@ -31,6 +31,7 @@ export default function MapBackPage() {
     changeMapView,
   } = useMapbox();
   const dispatch = useAppDispatch();
+  const auth = useAppSelector((state) => state.auth);
   // 位置情報の状態
   const { location, state: locationState } = useAppSelector(
     (state) => state.location
@@ -69,14 +70,25 @@ export default function MapBackPage() {
   const updateMarkers = () => {
     if (locationState === Status.LOADED && isMapReady) {
       clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
+      const currentUserId = auth.user?.id ?? null;
+      const handleEventMoved = ({ id, lat, lng }: { id: number; lat: number; lng: number }) => {
+        // 位置更新のAPI呼び出し（events/edit）を発行
+        dispatch(
+          editEvent({
+            id,
+            data: { coordinate: { lat, lng } },
+          })
+        );
+      };
+
       posts.forEach((post) => {
-        addContentMarker(post, mapRef, currentMarksRef, selectedCategory);
+        addContentMarker(post, mapRef, currentMarksRef, selectedCategory, currentUserId);
       });
       threads.forEach((thread) => {
-        addContentMarker(thread, mapRef, currentMarksRef, selectedCategory);
+        addContentMarker(thread, mapRef, currentMarksRef, selectedCategory, currentUserId);
       });
       events.forEach((event) => {
-        addContentMarker(event, mapRef, currentMarksRef, selectedCategory);
+        addContentMarker(event, mapRef, currentMarksRef, selectedCategory, currentUserId, handleEventMoved);
       });
       addCurrentLocationMarker(
         location.lat,
@@ -90,7 +102,7 @@ export default function MapBackPage() {
   // フィルタ変更時にマーカーを更新
   useEffect(() => {
     updateMarkers();
-  }, [selectedCategory, posts, threads, events, locationState, location, isMapReady]);
+  }, [selectedCategory, posts, threads, events, locationState, location, isMapReady, auth.user?.id]);
 
   // 定期的な更新（3秒間隔）
   // useEffect(() => {
