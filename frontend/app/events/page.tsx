@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar, MapPin, Users, Tag } from "lucide-react";
 
-import { fetchAroundEvents, eventsActions } from "@/store/eventsSlice";
+import { fetchEvents, eventsActions } from "@/store/eventsSlice";
 import { getCurrentLocation } from "@/store/locationSlice";
 import { store, useAppDispatch, useAppSelector } from "@/store";
 import { Event, Status } from "@/types/types";
@@ -100,7 +100,7 @@ export default function EventsPage() {
   useEffect(() => {
     locState === Status.LOADING || locState === Status.IDLE ? (
       null
-    ) : dispatch(fetchAroundEvents({ lat: location.lat, lng: location.lng }));
+    ) : dispatch(fetchEvents({ lat: location.lat, lng: location.lng }));
   }, [location]);
 
   const sortedEvents = useMemo(() => {
@@ -161,7 +161,7 @@ export default function EventsPage() {
               dispatch(eventsActions.clearEventErrors());
               locState === Status.LOADED ? (
                 null
-              ) : dispatch(fetchAroundEvents({ lat: location.lat, lng: location.lng }));
+              ) : dispatch(fetchEvents({ lat: location.lat, lng: location.lng }));
             }}
           >
             再試行

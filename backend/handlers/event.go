@@ -12,19 +12,33 @@ import (
 	"gorm.io/gorm"
 )
 
-// GetAllEvents デバッグ用：全イベント取得
 func GetAllEvents(c *gin.Context) {
 	var events []types.Event
-	result := db.SafeDB().Find(&events)
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch events"})
-		return
-	}
+	var userCoordinate types.Coordinate
+	dbConn := db.SafeDB()
 
-	c.JSON(http.StatusOK, gin.H{
-		"count":  len(events),
-		"events": events,
-	})
+	if err := c.ShouldBindJSON(&userCoordinate); err != nil {
+		// coordinateが提供されない場合、entertainment/disasterのみをDBから取得
+		if err := dbConn.Where("category IN (?)", []string{"entertainment", "disaster"}).Find(&events).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch events"})
+			return
+		}
+	} else {
+		// データベース側でカテゴリ別フィルタリング処理
+		if err := dbConn.Where(`
+            category IN ('entertainment', 'disaster') OR 
+            (category = 'communication' AND 
+             lat BETWEEN ? AND ? AND 
+             lng BETWEEN ? AND ?)
+        `,
+			userCoordinate.Lat-types.AROUND, userCoordinate.Lat+types.AROUND,
+			userCoordinate.Lng-types.AROUND, userCoordinate.Lng+types.AROUND,
+		).Find(&events).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch events"})
+			return
+		}
+	}
+	c.JSON(http.StatusOK, events)
 }
 
 func EditEvent(c *gin.Context) {
@@ -85,7 +99,6 @@ func CreateEvent(c *gin.Context) {
 		return
 	}
 
-	// PostのIDは自動インクリメントなので設定しない
 	// UserIDのみ設定（他のフィールドはリクエストから取得）
 	event.UserID = uid
 

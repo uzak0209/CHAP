@@ -6,9 +6,8 @@ import { Home, Plus, MessageCircle, Bell, User, Map, Settings, Flag, MessageSqua
 import { cn } from '@/lib/utils';
 
 const navigation = [
-  { name: 'ホーム', href: '/', icon: Home },
+  { name: 'ホーム', href: '/timeline', icon: Home },
   { name: 'マップ', href: '/map-back', icon: Map },
-  { name: '通知', href: '/notifications', icon: Bell },
   { name: 'イベント', href: '/events', icon: Flag },
   { name: 'スレッド', href: '/threads', icon: MessageSquare }
 ];
@@ -18,7 +17,7 @@ export function BottomNavigation() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-pb z-50">
-      <div className="grid grid-cols-5 w-full justify-between ">
+      <div className="grid grid-cols-4 w-full justify-between ">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;

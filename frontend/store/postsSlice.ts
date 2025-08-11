@@ -37,18 +37,10 @@ const initialState: PostsState = {
 }
 
 // Async Thunks
-export const fetchPosts = createAsyncThunk<Post[], void>(
+export const fetchPosts = createAsyncThunk<Post[],  { lat: number; lng: number } >(
   'posts/fetchPosts',
-  async () => {
-    return await apiClient.get<Post[]>(API_ENDPOINTS.posts.list);
-  }
-)
-
-export const fetchAroundPosts = createAsyncThunk<Post[], { lat: number; lng: number }>(
-  'posts/fetchAround',
-  async (params: { lat: number; lng: number }) => {
-    // 位置情報検索用の既存エンドポイント
-    return await apiClient.post<Post[]>(API_ENDPOINTS.posts.around, params);
+  async (params:{ lat:number, lng:number }) => {
+    return await apiClient.post<Post[]>(API_ENDPOINTS.posts.list,  params );
   }
 )
 
@@ -107,20 +99,6 @@ const postsSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      // fetchAroundPosts
-      .addCase(fetchAroundPosts.pending, (state) => {
-        state.loading.fetch = true
-        state.error.fetch = null
-      })
-      .addCase(fetchAroundPosts.fulfilled, (state, action) => {
-        state.loading.fetch = false
-        state.items = action.payload
-      })
-      .addCase(fetchAroundPosts.rejected, (state, action) => {
-        state.loading.fetch = false
-        state.error.fetch = action.error.message || '投稿の取得に失敗しました'
-      })
-
       // createPost
       .addCase(createPost.pending, (state) => {
         state.loading.create = true
@@ -137,24 +115,21 @@ const postsSlice = createSlice({
         state.error.create = action.error.message || '投稿の作成に失敗しました'
       })
 
-      // fetchPost
-      .addCase(fetchPost.pending, (state) => {
+      // fetchAroundEvents
+      .addCase(fetchPosts.pending, (state) => {
         state.loading.fetch = true
         state.error.fetch = null
       })
-      .addCase(fetchPost.fulfilled, (state, action) => {
+      .addCase(fetchPosts.fulfilled, (state, action) => {
         state.loading.fetch = false
-        const index = state.items.findIndex((p: Post) => p.id === action.payload.id)
-        if (index !== -1) {
-          state.items[index] = action.payload
-        } else {
-          state.items.push(action.payload)
-        }
+
+        state.items = action.payload
       })
-      .addCase(fetchPost.rejected, (state, action) => {
+      .addCase(fetchPosts.rejected, (state, action) => {
         state.loading.fetch = false
-        state.error.fetch = action.error.message || '投稿の取得に失敗しました'
+        state.error.fetch = action.error.message || 'イベントの取得に失敗しました'
       })
+
 
       // fetchUpdatedPosts（新規追加）
       .addCase(fetchUpdatedPosts.pending, (state) => {

@@ -9,7 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 func EditThread(c *gin.Context) {
@@ -121,28 +120,33 @@ func GetThreadDetails(c *gin.Context) {
 		"replies": replies,
 	})
 }
-func GetAroundAllThread(c *gin.Context) {
-	var req types.Coordinate
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
-		return
-	}
+func GetAllThreads(c *gin.Context) {
 	var threads []types.Thread
+	var userCoordinate types.Coordinate
 	dbConn := db.SafeDB()
-	if err := dbConn.Where("lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?",
-		req.Lat-types.AROUND, req.Lat+types.AROUND,
-		req.Lng-types.AROUND, req.Lng+types.AROUND,
-	).Find(&threads).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "no threads found"})
+	if err := c.ShouldBindJSON(&userCoordinate); err != nil {
+		// coordinateが提供されない場合、entertainment/disasterのみをDBから取得
+		if err := dbConn.Where("category IN (?)", []string{"entertainment", "disaster"}).Find(&threads).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch threads"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch threads"})
-		return
+	} else {
+		// データベース側でカテゴリ別フィルタリング処理
+		if err := dbConn.Where(`
+            category IN ('entertainment', 'disaster') OR 
+            (category = 'communication' AND 
+             lat BETWEEN ? AND ? AND 
+             lng BETWEEN ? AND ?)
+        `,
+			userCoordinate.Lat-types.AROUND, userCoordinate.Lat+types.AROUND,
+			userCoordinate.Lng-types.AROUND, userCoordinate.Lng+types.AROUND,
+		).Find(&threads).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch posts"})
+			return
+		}
 	}
 	c.JSON(http.StatusOK, threads)
 }
-
 func GetUpdateThread(c *gin.Context) {
 	from := c.Param("from")
 	var threads []types.Thread
