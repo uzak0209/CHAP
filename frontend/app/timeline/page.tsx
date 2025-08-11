@@ -8,7 +8,7 @@ import { LoadingSpinner } from '@/components/ui/loading';
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { Post, Status } from '@/types/types';
 
-import { fetchAroundPosts, postsActions } from '@/store/postsSlice';
+import { fetchPosts, postsActions } from '@/store/postsSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
 import { useAppDispatch, useAppSelector } from '@/store';
 
@@ -32,7 +32,7 @@ export default function PostPage() {
 
   useEffect(() => {
     if (state ===Status.LOADED) {
-      dispatch(fetchAroundPosts({
+      dispatch(fetchPosts({
         lat: location.lat,
         lng: location.lng
       }));
@@ -125,7 +125,7 @@ export default function PostPage() {
           <button
             onClick={() => {
               if (loading.fetch) return;
-              dispatch(fetchAroundPosts({
+              dispatch(fetchPosts({
                 lat: location.lat,
                 lng: location.lng
               }));

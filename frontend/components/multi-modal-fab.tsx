@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { Plus, MessageSquareText, Image, X, Calendar } from 'lucide-react';
 import { CreateModal } from '@/components/CreateModal';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { fetchAroundEvents } from '@/store/eventsSlice';
+import { fetchEvents } from '@/store/eventsSlice';
 import { Status } from '@/types/types';
 
 interface MultiModalFABProps {
@@ -28,7 +28,7 @@ export function MultiModalFAB({ className = '' }: MultiModalFABProps) {
     // イベント作成が成功した場合、イベントデータを再取得
     if (locationState === Status.LOADED) {
       console.log('🔄 イベント作成後、周辺イベントを再取得します');
-      dispatch(fetchAroundEvents({ lat: location.lat, lng: location.lng }));
+      dispatch(fetchEvents({ lat: location.lat, lng: location.lng }));
     }
   };
 

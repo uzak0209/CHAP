@@ -7,6 +7,9 @@ import { useAppSelector, useAppDispatch } from "@/store";
 import { fetchAroundPosts, fetchUpdatedPosts } from "@/store/postsSlice";
 import { fetchAroundThreads, fetchUpdatedThreads } from "@/store/threadsSlice";
 import { fetchAroundEvents, fetchUpdatedEvents, editEvent } from "@/store/eventsSlice";
+import { fetchPosts, fetchUpdatedPosts } from "@/store/postsSlice";
+import { fetchThreads, fetchUpdatedThreads } from "@/store/threadsSlice";
+import { fetchEvents, fetchUpdatedEvents } from "@/store/eventsSlice";
 import { getCurrentLocation } from "@/store/locationSlice";
 import { Status } from "@/types/types";
 import MapControls from "@/components/MapControl";
@@ -53,11 +56,11 @@ export default function MapBackPage() {
     clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
     if (locationState === Status.LOADED) {
       // 現在位置を中心とした周辺の投稿を取得
-      dispatch(fetchAroundPosts({ lat: location.lat, lng: location.lng }));
+      dispatch(fetchPosts({ lat: location.lat, lng: location.lng }));
       // 現在位置を中心とした周辺のスレッドを取得
-      dispatch(fetchAroundThreads({ lat: location.lat, lng: location.lng }));
+      dispatch(fetchThreads({ lat: location.lat, lng: location.lng }));
       // 現在位置を中心とした周辺のイベントを取得
-      dispatch(fetchAroundEvents({ lat: location.lat, lng: location.lng }));
+      dispatch(fetchEvents({ lat: location.lat, lng: location.lng }));
       addCurrentLocationMarker(
         location.lat,
         location.lng,

@@ -13,9 +13,9 @@ import { LocationState } from '@/types/types'
 // Re-export actions
 export { authActions } from './authSlice'
 export { locationActions, getCurrentLocation } from './locationSlice'
-export { postsActions, fetchAroundPosts, createPost, fetchPost, fetchUpdatedPosts, deletePost } from './postsSlice'
-export { threadsActions, fetchAroundThreads, createThread, fetchThread, fetchUpdatedThreads, deleteThread } from './threadsSlice'
-export { eventsActions, fetchAroundEvents, createEvent, fetchEvent, fetchUpdatedEvents, deleteEvent } from './eventsSlice'
+export { postsActions, fetchPosts, createPost, fetchPost, fetchUpdatedPosts, deletePost } from './postsSlice'
+export { threadsActions, fetchThreads, createThread, fetchThread, fetchUpdatedThreads, deleteThread } from './threadsSlice'
+export { eventsActions, fetchEvents, createEvent,  fetchUpdatedEvents, deleteEvent } from './eventsSlice'
 export { filtersActions } from './filtersSlice'
 export { uiActions } from './uiSlice'
 
