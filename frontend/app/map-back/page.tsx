@@ -4,12 +4,9 @@ import React, { useEffect, useCallback, useRef } from "react";
 import { useMapbox } from "@/hooks/useMapbox";
 // import { useThreads } from '@/hooks/useThreads'; // 不要 - useMapboxで管理
 import { useAppSelector, useAppDispatch } from "@/store";
-import { fetchAroundPosts, fetchUpdatedPosts } from "@/store/postsSlice";
-import { fetchAroundThreads, fetchUpdatedThreads } from "@/store/threadsSlice";
-import { fetchAroundEvents, fetchUpdatedEvents, editEvent } from "@/store/eventsSlice";
 import { fetchPosts, fetchUpdatedPosts } from "@/store/postsSlice";
 import { fetchThreads, fetchUpdatedThreads } from "@/store/threadsSlice";
-import { fetchEvents, fetchUpdatedEvents } from "@/store/eventsSlice";
+import { fetchEvents, fetchUpdatedEvents, editEvent } from "@/store/eventsSlice";
 import { getCurrentLocation } from "@/store/locationSlice";
 import { Status } from "@/types/types";
 import MapControls from "@/components/MapControl";
