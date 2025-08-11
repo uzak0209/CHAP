@@ -81,6 +81,14 @@ func CreateThread(c *gin.Context) {
 	if thread.UpdatedAt.IsZero() {
 		thread.UpdatedAt = time.Now()
 	}
+	// UsersテーブルからユーザーIDに該当するusernameを取得
+	var user types.User
+	if err := db.SafeDB().Where("id = ?", uid).Select("name").First(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user info"})
+		return
+	}
+	thread.Username = user.Name
+
 	// GORMでSupabaseのPostgreSQLに保存
 	result := db.SafeDB().Create(&thread)
 	if result.Error != nil {

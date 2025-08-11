@@ -42,7 +42,7 @@ export const fetchEvents = createAsyncThunk<Event[], { lat: number; lng: number 
   }
 )
 
-export const createEvent = createAsyncThunk<Event, Omit<Event, 'id' | 'user_id' | 'Created_at' | 'Updated_at'>>(
+export const createEvent = createAsyncThunk<Event, Omit<Event, 'id' | 'user_id' | 'Created_at' | 'Updated_at' | 'username'>>(
   'events/create',
   async (eventData) => {
     return await apiClient.post<Event>(API_ENDPOINTS.events.create, eventData);

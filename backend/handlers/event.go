@@ -98,10 +98,15 @@ func CreateEvent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
 		return
 	}
+	var user types.User
+	if err := db.SafeDB().Where("id = ?", uid).Select("name").First(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user info"})
+		return
+	}
+	event.Username = user.Name
 
-	// UserIDのみ設定（他のフィールドはリクエストから取得）
 	event.UserID = uid
-
+	db.SafeDB().Where("id = ?", uid).Select("username").Find(&event.Username)
 	result := db.SafeDB().Create(&event)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create event"})

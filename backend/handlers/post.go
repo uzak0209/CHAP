@@ -63,9 +63,13 @@ func CreatePost(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
 		return
 	}
+	var user types.User
+	if err := db.SafeDB().Where("id = ?", uid).Select("name").First(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user info"})
+		return
+	}
+	post.Username = user.Name
 
-	// PostのIDは自動インクリメントなので設定しない
-	// UserIDのみ設定（他のフィールドはリクエストから取得）
 	post.UserID = uid
 	post.ID = 0 // 自動インクリメント用に0に設定
 	log.Printf("[CreatePost] Final post data before save: %+v", post)

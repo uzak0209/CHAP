@@ -17,6 +17,7 @@ export interface Post {
   valid: boolean;
   like: number;         // int
   tags: string[];
+  username: string;   
 }
 
 export interface Thread {
@@ -35,6 +36,7 @@ export interface Thread {
   valid: boolean;
   like: number;         // int
   tags: string[];
+  username: string;
 }
 
 export interface Event {
@@ -53,6 +55,7 @@ export interface Event {
   valid: boolean;
   like: number;         // int
   tags: string[];
+  username: string;
 }
 export interface Comment{
   id: number;
@@ -62,6 +65,7 @@ export interface Comment{
   updated_at?: string;
   deleted_at?: string;
   thread_id: number;
+  username: string;
 
 }
 export interface User {

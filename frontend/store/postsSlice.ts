@@ -44,7 +44,7 @@ export const fetchPosts = createAsyncThunk<Post[],  { lat: number; lng: number }
   }
 )
 
-export const createPost = createAsyncThunk<Post, Omit<Post, 'id' | 'user_id' | 'created_time' | 'updated_at'>>(
+export const createPost = createAsyncThunk<Post, Omit<Post, 'id' | 'user_id' | 'created_time' | 'updated_at' | 'username'>>(
   'posts/create',
   async (postData) => {
     return await apiClient.post<Post>(API_ENDPOINTS.posts.create, postData);
