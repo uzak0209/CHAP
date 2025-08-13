@@ -27,7 +27,7 @@ func GetAllEvents(c *gin.Context) {
 		// データベース側でカテゴリ別フィルタリング処理
 		if err := dbConn.Where(`
             category IN ('entertainment', 'disaster') OR 
-            (category = 'communication' AND 
+            (category = 'community' AND 
              lat BETWEEN ? AND ? AND 
              lng BETWEEN ? AND ?)
         `,
