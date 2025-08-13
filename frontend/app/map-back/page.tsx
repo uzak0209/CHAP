@@ -8,6 +8,7 @@ import { fetchPosts, fetchUpdatedPosts } from "@/store/postsSlice";
 import { fetchThreads, fetchUpdatedThreads } from "@/store/threadsSlice";
 import { fetchEvents, fetchUpdatedEvents, editEvent } from "@/store/eventsSlice";
 import { getCurrentLocation } from "@/store/locationSlice";
+import { verifyToken } from "@/store/authSlice";
 import { Status } from "@/types/types";
 import MapControls from "@/components/MapControl";
 import { MultiModalFAB } from "@/components/multi-modal-fab";
@@ -47,6 +48,8 @@ export default function MapBackPage() {
     if (locationState === Status.IDLE || locationState === Status.ERROR) {
       dispatch(getCurrentLocation());
     }
+    // 認証トークン検証（ユーザー情報の復元）
+    dispatch(verifyToken());
   }, [dispatch]);
 
   useEffect(() => {
@@ -71,6 +74,7 @@ export default function MapBackPage() {
     if (locationState === Status.LOADED && isMapReady) {
       clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
       const currentUserId = auth.user?.id ?? null;
+      console.log('[map] currentUserId', currentUserId);
       const handleEventMoved = ({ id, lat, lng }: { id: number; lat: number; lng: number }) => {
         // 位置更新のAPI呼び出し（events/edit）を発行
         dispatch(
