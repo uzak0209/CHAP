@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { MAPBOX_CONFIG } from "@/constants/map";
 import { useAppSelector } from "@/store";
-import { Status } from "@/types/types";
+import { HeatMapData, Status } from "@/types/types";
 import { createMapInstance } from "@/lib/mapbox/setup";
 import { addCurrentLocationMarker } from "@/lib/mapbox/markers";
+import { API_ENDPOINTS, apiClient } from "@/lib/api";
 
 export const useMapbox = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -107,7 +108,7 @@ export const useMapbox = () => {
       mapRef.current.easeTo({
         pitch: MAPBOX_CONFIG.PITCH,
         bearing: MAPBOX_CONFIG.BEARING,
-        zoom:12,
+        zoom: 12,
         duration: 1000,
         center: [location.lng, location.lat],
       });
@@ -116,7 +117,7 @@ export const useMapbox = () => {
     } else if (view === 3) {
       if (!mapRef.current) return;
       try {
-        mapRef.current.once("style.load", () => {
+        mapRef.current.once("style.load", async () => {
           mapRef.current!.setProjection("globe");
           mapRef.current!.easeTo({
             pitch: 0,
@@ -125,13 +126,60 @@ export const useMapbox = () => {
             duration: 1000,
             center: [location.lng, location.lat],
           });
+
+          // ヒートマップデータ取得
+          const data = await apiClient.get<HeatMapData>(
+            API_ENDPOINTS.social.heatmap
+          );
+
+          // 既存のsource/layerがあれば削除
+          if (mapRef.current!.getLayer("heatmap-layer")) {
+            mapRef.current!.removeLayer("heatmap-layer");
+          }
+          if (mapRef.current!.getSource("heatmap")) {
+            mapRef.current!.removeSource("heatmap");
+          }
+
+          // GeoJSONをsourceとして追加
+          mapRef.current!.addSource("heatmap", {
+            type: "geojson",
+            data: data.geojson,
+          });
+
+          // Heatmap Layer追加
+          mapRef.current!.addLayer({
+            id: "heatmap-layer",
+            type: "heatmap",
+            source: "heatmap",
+            paint: {
+              "heatmap-weight": ["get", "mag"],
+              "heatmap-intensity": 1,
+              "heatmap-radius": 20,
+              "heatmap-opacity": 0.7,
+              "heatmap-color": [
+                "interpolate",
+                ["linear"],
+                ["heatmap-density"],
+                0,
+                "rgba(33,102,172,0)",
+                0.2,
+                "rgb(103,169,207)",
+                0.4,
+                "rgb(209,229,240)",
+                0.6,
+                "rgb(253,219,199)",
+                0.8,
+                "rgb(239,138,98)",
+                1,
+                "rgb(178,24,43)",
+              ],
+            },
+          });
         });
         mapRef.current.setStyle("mapbox://styles/mapbox/satellite-v9");
         setIs3D(false);
-      } catch (e) {
-        console.warn(
-          "Globe projection is not supported on this style/environment."
-        );
+      } catch (error) {
+        console.error("Error changing to globe view:", error);
       }
     }
   };

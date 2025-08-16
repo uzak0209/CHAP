@@ -137,3 +137,23 @@ export interface MapControlFunctions {
   toggle3D: () => void;
   changeMapView: (view: number) => void;
 }
+export interface HeatMapFeature {
+  type: "Feature";
+  geometry: {
+    type: "Point";
+    coordinates: [number, number]; // [lng, lat]
+  };
+  properties: {
+    mag: number;
+  };
+}
+
+export interface HeatMapGeoJSON {
+  type: "FeatureCollection";
+  features: HeatMapFeature[];
+}
+
+export interface HeatMapData {
+  geojson: HeatMapGeoJSON;
+  summary: string;
+}

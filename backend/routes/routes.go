@@ -29,10 +29,11 @@ func SetupRoutes(r *gin.Engine) {
 
 		// ユーザー関連（認証不要）
 		v1.GET("/user/:id", handlers.GetUserByID)
-
 		v1.POST("/getall/post", handlers.GetAllPosts)
 		v1.POST("/getall/event", handlers.GetAllEvents)
 		v1.POST("/getall/thread", handlers.GetAllThreads)
+		v1.GET("/social-sensing/heatmap", handlers.GetSocialSensingHeatmap)
+
 		// 認証が必要なエンドポイント
 		auth := v1.Group("")
 		auth.Use(middleware.AuthMiddleware())

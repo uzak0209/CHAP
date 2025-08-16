@@ -40,6 +40,9 @@ export const API_ENDPOINTS = {
     create: `${API_BASE_URL}/api/v1/create/comment`,
     delete: (id: string) => `${API_BASE_URL}/api/v1/delete/comment/${id}`,
   },
+  social: {
+    heatmap: `${API_BASE_URL}/api/v1/social-sensing/heatmap`,
+  },
   health: `${API_BASE_URL}/health`,
 };
 

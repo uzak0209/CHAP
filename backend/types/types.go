@@ -130,3 +130,9 @@ type ThreadTable struct {
 	Thread     Thread `gorm:"foreignKey:ThreadID;constraint:OnUpdate:CASCADE;"`
 	CommentIDs []uint `json:"comment_ids" gorm:"type:integer[]"`
 }
+
+type HeatmapPoint struct {
+	Lat   float64 `json:"lat"`
+	Lng   float64 `json:"lng"`
+	Value int     `json:"value"`
+}
