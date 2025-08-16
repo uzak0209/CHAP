@@ -1,5 +1,4 @@
 import React from 'react';
-import CircleButton from "@/components/ui/circle-button";
 
 interface MapControlsProps {
   is3D: boolean;
@@ -10,78 +9,41 @@ interface MapControlsProps {
 const MapControls: React.FC<MapControlsProps> = ({ is3D, onToggle3D, onChangeMapView }) => {
   return (
     <>
-      {/* 円形ボタン */}
-      <CircleButton
-        position={{ top: '80px', right: '20px' }}
-        onClick={() => onChangeMapView(1)}
-        size="md"
-        variant="default"
-      >
-        1
-      </CircleButton>
-
-      <CircleButton
-        position={{ top: '160px', right: '20px' }}
-        onClick={() => onChangeMapView(2)}
-        size="md"
-        variant="default"
-      >
-        2
-      </CircleButton>
-
-      <CircleButton
-        position={{ top: '240px', right: '20px' }}
-        onClick={() => onChangeMapView(3)}
-        size="md"
-        variant="default"
-      >
-        3
-      </CircleButton>
-
-      {/* 3D/2D切り替えボタン */}
+      {/* 2Dボタン */}
       <button
+        className="absolute top-20 right-5 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-blue-600 text-lg font-bold hover:bg-blue-50 transition"
+        onClick={() => onChangeMapView(1)}
+      >
+        2D
+      </button>
+      {/* 3Dボタン */}
+      <button
+        className="absolute top-40 right-5 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-blue-600 text-lg font-bold hover:bg-blue-50 transition"
+        onClick={() => onChangeMapView(2)}
+      >
+        3D
+      </button>
+      {/* Globeボタン（無効化中の場合は非表示やdisabledにしてもOK） */}
+      <button
+        className="absolute top-60 right-5 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-blue-600 text-lg font-bold hover:bg-blue-50 transition"
+        onClick={() => onChangeMapView(3)}
+      >
+        🌐
+      </button>
+      {/* 3D/2D切り替えトグル */}
+      <button
+        className={`absolute top-5 right-24 px-4 py-2 rounded-lg font-bold transition shadow-md ${
+          is3D
+            ? 'bg-blue-600 text-white hover:bg-blue-700'
+            : 'bg-gray-200 text-blue-700 hover:bg-blue-100'
+        }`}
         onClick={onToggle3D}
-        style={{
-          position: 'absolute',
-          top: '20px',
-          right: '80px',
-          padding: '10px 20px',
-          backgroundColor: is3D ? '#007cbf' : '#4a90e2',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          // boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-          transition: 'all 0.3s ease',
-          zIndex: 1000
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.05)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-        }}
       >
         {is3D ? '2D表示' : '3D表示'}
       </button>
-      
       {/* 現在のモード表示 */}
       <div
-        style={{
-          position: 'absolute',
-          bottom: '20px',
-          left: '70px',
-          padding: '8px 16px',
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          color: 'white',
-          borderRadius: '20px',
-          fontSize: '12px',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          zIndex: 1000
-        }}
+        className="absolute bottom-5 left-20 px-4 py-2 bg-black/70 text-white rounded-full text-xs font-medium z-50"
       >
         現在のモード: {is3D ? '3D' : '2D'}
       </div>

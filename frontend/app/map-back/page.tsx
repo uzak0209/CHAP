@@ -2,11 +2,10 @@
 
 import React, { useEffect, useCallback, useRef } from "react";
 import { useMapbox } from "@/hooks/useMapbox";
-// import { useThreads } from '@/hooks/useThreads'; // 不要 - useMapboxで管理
 import { useAppSelector, useAppDispatch } from "@/store";
-import { fetchPosts, fetchUpdatedPosts } from "@/store/postsSlice";
-import { fetchThreads, fetchUpdatedThreads } from "@/store/threadsSlice";
-import { fetchEvents, fetchUpdatedEvents, editEvent } from "@/store/eventsSlice";
+import { fetchPosts } from "@/store/postsSlice";
+import { fetchThreads } from "@/store/threadsSlice";
+import { fetchEvents, editEvent } from "@/store/eventsSlice";
 import { getCurrentLocation } from "@/store/locationSlice";
 import { verifyToken } from "@/store/authSlice";
 import { Status } from "@/types/types";
@@ -33,7 +32,6 @@ export default function MapBackPage() {
   } = useMapbox();
   const dispatch = useAppDispatch();
   const auth = useAppSelector((state) => state.auth);
-  // 位置情報の状態
   const { location, state: locationState } = useAppSelector(
     (state) => state.location
   );
@@ -44,11 +42,9 @@ export default function MapBackPage() {
     (state) => state.filters.selectedCategory
   );
   useEffect(() => {
-    // 位置情報がまだ取得されていない、またはエラー状態の場合に位置情報を取得
     if (locationState === Status.IDLE || locationState === Status.ERROR) {
       dispatch(getCurrentLocation());
     }
-    // 認証トークン検証（ユーザー情報の復元）
     dispatch(verifyToken());
   }, [dispatch]);
 
@@ -69,14 +65,12 @@ export default function MapBackPage() {
       );
     }
   }, [dispatch, locationState, location]);
-  // マーカーを更新する関数
   const updateMarkers = () => {
     if (locationState === Status.LOADED && isMapReady) {
       clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
       const currentUserId = auth.user?.id ?? null;
       console.log('[map] currentUserId', currentUserId);
       const handleEventMoved = ({ id, lat, lng }: { id: number; lat: number; lng: number }) => {
-        // 位置更新のAPI呼び出し（events/edit）を発行
         dispatch(
           editEvent({
             id,
@@ -107,15 +101,6 @@ export default function MapBackPage() {
   useEffect(() => {
     updateMarkers();
   }, [selectedCategory, posts, threads, events, locationState, location, isMapReady, auth.user?.id]);
-
-  // 定期的な更新（3秒間隔）
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     updateMarkers();
-  //   }, 3000);
-
-  //   return () => clearInterval(interval); // クリーンアップ
-  // }, [selectedCategory, posts, threads, events, locationState, location, isMapReady]);
   return (
     <div className="h-full w-full relative">
       <div id="map" className="h-full w-full" ref={mapContainerRef} />

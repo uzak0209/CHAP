@@ -14,7 +14,7 @@ export const MAPBOX_CONFIG = {
   ZOOM: 15.27,
   PITCH: 42,
   BEARING: -50,
-  STYLE: 'mapbox://styles/mapbox/standard',
+  STYLE: 'mapbox://styles/mapbox/outdoors-v12',
   MIN_ZOOM: 5,
   MAX_ZOOM: 50,
   LANGUAGE: 'ja',
