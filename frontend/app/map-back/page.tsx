@@ -18,6 +18,7 @@ import {
   clearAllMarkers,
 } from "@/lib/mapbox/markers";
 
+
 export default function MapBackPage() {
   const {
     mapContainerRef,
@@ -64,7 +65,6 @@ export default function MapBackPage() {
       );
     }
   }, [dispatch, locationState, location]);
-
   const updateMarkers = () => {
     if (locationState === Status.LOADED && isMapReady) {
       clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
@@ -96,7 +96,6 @@ export default function MapBackPage() {
       );
     }
   };
-
 
   // フィルタ変更時にマーカーを更新
   useEffect(() => {

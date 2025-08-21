@@ -12,7 +12,7 @@ func AutoMigrate() error {
 	db.Exec("DROP TABLE IF EXISTS thread_likes CASCADE;")
 	db.Exec("DROP TABLE IF EXISTS event_likes CASCADE;")
 
-	err := db.Migrator().AutoMigrate(
+	err := db.Migrator().DropTable(
 		&types.Post{},
 		&types.Thread{},
 		&types.Event{},
