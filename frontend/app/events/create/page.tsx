@@ -57,7 +57,7 @@ export default function CreateEventPage() {
       return;
     }
 
-    const eventData: Omit<Event, 'user_id'|'id' | 'updated_at' | 'deleted_time'> = {
+    const eventData: Omit<Event, 'user_id'|'id' | 'updated_at' | 'deleted_time'|"username"> = {
       content: content,
       category: category,
       type: 'event',

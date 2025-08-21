@@ -46,7 +46,7 @@ export default function CreateThreadPage() {
       return;
     }
 
-    const threadData: Omit<Thread, 'user_id'|'id' | 'updated_at' | 'deleted_time'> = {
+    const threadData: Omit<Thread, 'user_id'|'id' | 'updated_at' | 'deleted_time'| 'username'> = {
       type: 'thread',
       content: content,
       coordinate: {
