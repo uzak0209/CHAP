@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -18,7 +19,14 @@ func init() {
 		log.Println("No .env file found, using system environment variables")
 	}
 
-	dsn := ""
+	host := os.Getenv("DB_HOST")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+	port := os.Getenv("DB_PORT")
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require",
+		host, user, password, dbname, port)
 	fmt.Println("Using DSN:", dsn)
 
 	// DBに接続（タイムアウト設定追加）
