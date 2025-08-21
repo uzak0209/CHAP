@@ -35,24 +35,17 @@ const initialState: EventsState = {
 }
 
 // Async Thunks
-export const fetchAroundEvents = createAsyncThunk<Event[], { lat: number; lng: number }>(
-  'events/fetchAround',
+export const fetchEvents = createAsyncThunk<Event[], { lat: number; lng: number }>(
+  'events/fetchEvents',
   async (params: { lat: number; lng: number }) => {
-    return await apiClient.post<Event[]>(API_ENDPOINTS.events.around, params);
+    return await apiClient.post<Event[]>(API_ENDPOINTS.events.list, params);
   }
 )
 
-export const createEvent = createAsyncThunk<Event, Omit<Event, 'id' | 'user_id' | 'Created_at' | 'Updated_at'>>(
+export const createEvent = createAsyncThunk<Event, Omit<Event, 'id' | 'user_id' | 'Created_at' | 'Updated_at' | 'username'>>(
   'events/create',
   async (eventData) => {
     return await apiClient.post<Event>(API_ENDPOINTS.events.create, eventData);
-  }
-)
-
-export const fetchEvent = createAsyncThunk<Event, number>(
-  'events/fetch',
-  async (id: number) => {
-    return await apiClient.get<Event>(API_ENDPOINTS.events.get(id.toString()));
   }
 )
 
@@ -96,16 +89,16 @@ const eventsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // fetchAroundEvents
-      .addCase(fetchAroundEvents.pending, (state) => {
+      .addCase(fetchEvents.pending, (state) => {
         state.loading.fetch = true
         state.error.fetch = null
       })
-      .addCase(fetchAroundEvents.fulfilled, (state, action) => {
+      .addCase(fetchEvents.fulfilled, (state, action) => {
         state.loading.fetch = false
 
         state.items = action.payload
       })
-      .addCase(fetchAroundEvents.rejected, (state, action) => {
+      .addCase(fetchEvents.rejected, (state, action) => {
         state.loading.fetch = false
         state.error.fetch = action.error.message || 'イベントの取得に失敗しました'
       })
@@ -126,24 +119,6 @@ const eventsSlice = createSlice({
         state.error.create = action.error.message || 'イベントの作成に失敗しました'
       })
 
-      // fetchEvent
-      .addCase(fetchEvent.pending, (state) => {
-        state.loading.fetch = true
-        state.error.fetch = null
-      })
-      .addCase(fetchEvent.fulfilled, (state, action) => {
-        state.loading.fetch = false
-        const index = state.items.findIndex(e => e.id === action.payload.id)
-        if (index !== -1) {
-          state.items[index] = action.payload
-        } else {
-          state.items.push(action.payload)
-        }
-      })
-      .addCase(fetchEvent.rejected, (state, action) => {
-        state.loading.fetch = false
-        state.error.fetch = action.error.message || 'イベントの取得に失敗しました'
-      })
 
       // fetchUpdatedEvents（新規追加）
       .addCase(fetchUpdatedEvents.pending, (state) => {

@@ -3,6 +3,7 @@ package handlers
 import (
 	"api/db"
 	"api/types"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,7 @@ func GetCommentsByThreadID(c *gin.Context) {
 	}
 	commentIDs := threadTable.CommentIDs
 	if len(commentIDs) == 0 {
-		c.JSON(404, gin.H{"error": "No comments found for this thread"})
+		c.JSON(200, gin.H{"comments": []types.Comment{}})
 		return
 	}
 	var comments []types.Comment
@@ -32,6 +33,7 @@ func GetCommentsByThreadID(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "Failed to retrieve comments"})
 		return
 	}
+	c.JSON(200, gin.H{"comments": comments})
 }
 
 func CreateComment(c *gin.Context) {
@@ -40,15 +42,27 @@ func CreateComment(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid JSON format"})
 		return
 	}
+	// If thread id from path exists, assign it
+	if threadIDStr := c.Param("id"); threadIDStr != "" {
+		if threadID, err := strconv.ParseUint(threadIDStr, 10, 64); err == nil {
+			comment.ThreadID = uint(threadID)
+		}
+	}
 	userID := c.GetString("user_id") // ユーザーIDを取得（認証済みであることを前提とする）
 	uid, err := uuid.Parse(userID)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "invalid user ID"})
 		return
 	}
+	var user types.User
+	if err := db.SafeDB().Where("id = ?", uid).Select("name").First(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user info"})
+		return
+	}
+	comment.Username = user.Name
+
 	comment.UserID = uid
-	comment.ID = 0       // 自動インクリメント用に0に設定
-	comment.Valid = true // デフォルトで有効に設定
+	comment.Valid = true
 	dbConn := db.SafeDB()
 	if err := dbConn.Create(&comment).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Failed to create comment"})

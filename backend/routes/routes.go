@@ -21,28 +21,18 @@ func SetupRoutes(r *gin.Engine) {
 	// API v1グループ
 	v1 := r.Group("/api/v1")
 	{
+		v1.GET("/thread/:id/details", handlers.GetThreadDetails)
 		v1.GET("/comments/:thread_id", handlers.GetCommentsByThreadID)
-		// 認証関連（認証不要）
 		v1.POST("/auth/login", handlers.Login)
 		v1.POST("/auth/register", handlers.Register)
-		v1.POST("/auth/google", handlers.GoogleLogin) // Googleログインエンドポイント追加
+		v1.POST("/auth/google", handlers.GoogleLogin)
 
 		// ユーザー関連（認証不要）
 		v1.GET("/user/:id", handlers.GetUserByID)
-
-		// 位置情報検索（認証不要）
-		v1.POST("/around/post", handlers.GetAroundAllPost)
-		v1.POST("/around/thread", handlers.GetAroundAllThread)
-		v1.POST("/around/event", handlers.GetAroundAllEvent)
-
-		// 個別取得（認証不要）
-		v1.GET("/post/:id", handlers.GetPost)
-		v1.GET("/thread/:id", handlers.GetThread)
-		v1.GET("/event/:id", handlers.GetEvent)
-
-		// デバッグ用（認証不要）- 開発時のみ使用
-		v1.GET("/debug/posts", handlers.GetAllPosts)
-		v1.GET("/debug/events", handlers.GetAllEvents)
+		v1.POST("/getall/post", handlers.GetAllPosts)
+		v1.POST("/getall/event", handlers.GetAllEvents)
+		v1.POST("/getall/thread", handlers.GetAllThreads)
+		v1.GET("/social-sensing/heatmap", handlers.GetSocialSensingHeatmap)
 
 		// 認証が必要なエンドポイント
 		auth := v1.Group("")
@@ -74,6 +64,8 @@ func SetupRoutes(r *gin.Engine) {
 
 			// コメント関連
 			auth.POST("/create/comment", handlers.CreateComment)
+			// Replies for thread
+			auth.POST("/thread/:id/reply", handlers.CreateComment)
 			auth.DELETE("/delete/comment/:id", handlers.DeleteComment)
 		}
 	}

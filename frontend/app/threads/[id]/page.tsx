@@ -273,7 +273,7 @@ export default function ThreadDetailPage() {
                   className="flex items-center gap-2"
                 >
                   <Send className="w-4 h-4" />
-                  {posting ? '投稿中...' : 'レスする'}
+                  {posting ? '投稿中...' : '投稿する'}
                 </Button>
                 <Button 
                   variant="outline"

@@ -68,23 +68,6 @@ const locationSlice = createSlice({
           action.error.message ??
           "位置情報の取得に失敗しました";
       })
-      // .addCase(refreshLocation.pending, (state) => {
-      //   state.state = Status.LOADING;
-      //   state.error = undefined;
-      // })
-      // .addCase(refreshLocation.fulfilled, (state, action) => {
-      //   state.state = Status.LOADED;
-      //   state.location = action.payload;
-      //   state.error = undefined;
-      //   console.log("位置情報をリフレッシュしました", state.location);
-      // })
-      // .addCase(refreshLocation.rejected, (state, action) => {
-      //   state.state = Status.ERROR;
-      //   state.error =
-      //     action.payload ??
-      //     action.error.message ??
-      //     "位置情報のリフレッシュに失敗しました";
-      // });
   },
 })
 

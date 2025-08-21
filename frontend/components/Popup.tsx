@@ -70,12 +70,21 @@ export const Popup: React.FC<{ popup: Context; selectedCategory?: string }> = ({
   const showPopup = selectedCategory === 'all' || selectedCategory === category;
   const colors = getPopupColors(popup);
 
+  // スレッドかどうかチェックして、スレッドの場合はクリックハンドラーを設定
+  const handlePopupClick = () => {
+    if (isThread(popup)) {
+      // Next.jsアプリ内での遷移
+      window.location.href = `/threads/${popup.id}`;
+    }
+  };
+
   return (
     showPopup && (
     <Card 
-      className={`relative max-w-sm ${colors.background} ${colors.border}`}
+      className={`relative max-w-sm ${colors.background} ${colors.border} ${isThread(popup) ? 'cursor-pointer hover:shadow-lg transition-shadow duration-200' : ''}`}
       key={popID}
       style={{ maxWidth: '20rem' }}
+      onClick={handlePopupClick}
     >
       <div 
         className="absolute -bottom-2 left-5 w-0 h-0" 
@@ -86,13 +95,19 @@ export const Popup: React.FC<{ popup: Context; selectedCategory?: string }> = ({
         }}
       />
       
-      <CardContent className="p-4 pt-8">
-        <p className={`text-sm ${colors.textColor} leading-relaxed mb-3`}>
+      <CardContent className="p-2">
+        <p className={`text-sm ${colors.textColor} leading-relaxed mb-1`}>
           {popup.content}
         </p>
+        {isThread(popup) && (
+          <p className="text-xs text-gray-500  italic">
+             タップしてスレッドを開く
+          </p>
+        )}
         <div className="flex justify-between items-center text-xs">
           <Button
-            className="flex items-center gap-1 p-0 h-auto"
+            variant="ghost"
+            className="flex items-center gap-1 p-0 h-auto bg-transparent hover:bg-transparent shadow-none focus-visible:ring-0"
           >
             <Heart 
               id={`heart-post-${popID}`}

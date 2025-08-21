@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 func EditPost(c *gin.Context) {
@@ -64,9 +63,13 @@ func CreatePost(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id format"})
 		return
 	}
+	var user types.User
+	if err := db.SafeDB().Where("id = ?", uid).Select("name").First(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user info"})
+		return
+	}
+	post.Username = user.Name
 
-	// PostのIDは自動インクリメントなので設定しない
-	// UserIDのみ設定（他のフィールドはリクエストから取得）
 	post.UserID = uid
 	post.ID = 0 // 自動インクリメント用に0に設定
 	log.Printf("[CreatePost] Final post data before save: %+v", post)
@@ -97,27 +100,6 @@ func GetPost(c *gin.Context) {
 	c.JSON(http.StatusOK, post)
 }
 
-func GetAroundAllPost(c *gin.Context) {
-	var req types.Coordinate
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
-		return
-	}
-	var posts []types.Post
-	dbConn := db.SafeDB()
-	if err := dbConn.Where("lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?",
-		req.Lat-types.AROUND, req.Lat+types.AROUND,
-		req.Lng-types.AROUND, req.Lng+types.AROUND,
-	).Find(&posts).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "no posts found"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch posts"})
-		return
-	}
-	c.JSON(http.StatusOK, posts)
-}
 func GetUpdatePost(c *gin.Context) {
 	from := c.Param("from")
 	var posts []types.Post
@@ -158,38 +140,31 @@ func DeletePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "post deleted"})
 }
 
-func GetAround(c *gin.Context) {
-	var req types.Coordinate
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
-		return
-	}
-
-	var posts []types.Post
-
-	// GORMで位置情報検索
-	db.GetDB().Where(
-		"coordinate_lat BETWEEN ? AND ? AND coordinate_lng BETWEEN ? AND ?",
-		req.Lat-types.AROUND,
-		req.Lat+types.AROUND,
-		req.Lng-types.AROUND,
-		req.Lng+types.AROUND,
-	).Find(&posts)
-
-	c.JSON(http.StatusOK, posts)
-}
-
-// GetAllPosts - デバッグ用：全ての投稿を取得
 func GetAllPosts(c *gin.Context) {
 	var posts []types.Post
-	log.Printf("[GetAllPosts] Fetching all posts from database")
+	var userCoordinate types.Coordinate
+	dbConn := db.SafeDB()
 
-	if err := db.SafeDB().Find(&posts).Error; err != nil {
-		log.Printf("[GetAllPosts] Database error: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch posts"})
-		return
+	if err := c.ShouldBindJSON(&userCoordinate); err != nil {
+		// coordinateが提供されない場合、entertainment/disasterのみをDBから取得
+		if err := dbConn.Where("category IN (?)", []string{"entertainment", "disaster"}).Find(&posts).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch posts"})
+			return
+		}
+	} else {
+		// データベース側でカテゴリ別フィルタリング処理
+		if err := dbConn.Where(`
+            category IN ('entertainment', 'disaster') OR 
+            (category = 'community' AND 
+             lat BETWEEN ? AND ? AND 
+             lng BETWEEN ? AND ?)
+        `,
+			userCoordinate.Lat-types.AROUND, userCoordinate.Lat+types.AROUND,
+			userCoordinate.Lng-types.AROUND, userCoordinate.Lng+types.AROUND,
+		).Find(&posts).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch posts"})
+			return
+		}
 	}
-
-	log.Printf("[GetAllPosts] Found %d posts", len(posts))
-	c.JSON(http.StatusOK, gin.H{"posts": posts, "count": len(posts)})
+	c.JSON(http.StatusOK, posts)
 }

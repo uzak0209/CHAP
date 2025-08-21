@@ -12,7 +12,7 @@ export function PostCard({ post }: PostCardProps) {
   return (
     <Card className="bg-white">
       <CardContent className="p-4">
-        <PostHeader userId={String(post.user_id)} />
+        <PostHeader username={post.username} />
         <PostContent content={post.content} />
         {post.category && <PostCategoryDisplay category={post.category} />}
         {post.tags && <PostTags tags={post.tags} />}
@@ -24,10 +24,10 @@ export function PostCard({ post }: PostCardProps) {
   );
 }
 
-function PostHeader({ userId }: { userId: string }) {
+function PostHeader({ username }: { username: string }) {
   return (
     <div className="flex justify-between items-start mb-2">
-      <span className="text-sm text-muted-foreground">{userId}</span>
+      <span className="text-sm text-muted-foreground">{username}</span>
     </div>
   );
 }

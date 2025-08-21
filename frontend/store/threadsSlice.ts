@@ -35,14 +35,14 @@ const initialState: ThreadsState = {
 }
 
 // Async Thunks
-export const fetchAroundThreads = createAsyncThunk<Thread[], { lat: number; lng: number }>(
-  'threads/fetchAround',
+export const fetchThreads = createAsyncThunk<Thread[], { lat: number; lng: number }>(
+  'threads/fetchThreads',
   async (params: { lat: number; lng: number }) => {
-    return await apiClient.post<Thread[]>(API_ENDPOINTS.threads.around, params);
+    return await apiClient.post<Thread[]>(API_ENDPOINTS.threads.list, params);
   }
 )
 
-export const createThread = createAsyncThunk<Thread, Omit<Thread, 'id' | 'user_id' | 'Created_at' | 'Updated_at'>>(
+export const createThread = createAsyncThunk<Thread, Omit<Thread, 'id' | 'user_id' | 'Created_at' | 'Updated_at' | 'username'>>(
   'threads/create',
   async (threadData) => {
     return await apiClient.post<Thread>(API_ENDPOINTS.threads.create, threadData);
@@ -96,15 +96,15 @@ const threadsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // fetchAroundThreads
-      .addCase(fetchAroundThreads.pending, (state) => {
+      .addCase(fetchThreads.pending, (state) => {
         state.loading.fetch = true
         state.error.fetch = null
       })
-      .addCase(fetchAroundThreads.fulfilled, (state, action) => {
+      .addCase(fetchThreads.fulfilled, (state, action) => {
         state.loading.fetch = false
         state.items = action.payload
       })
-      .addCase(fetchAroundThreads.rejected, (state, action) => {
+      .addCase(fetchThreads.rejected, (state, action) => {
         state.loading.fetch = false
         state.error.fetch = action.error.message || 'スレッドの取得に失敗しました'
       })

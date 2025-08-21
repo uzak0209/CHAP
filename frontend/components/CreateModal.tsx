@@ -9,9 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X,  Hash } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { createThread, fetchAroundThreads } from '@/store/threadsSlice';
-import { createPost,fetchAroundPosts } from '@/store/postsSlice';
-import { createEvent,fetchAroundEvents } from '@/store/eventsSlice';
+import { createThread, fetchThreads } from '@/store/threadsSlice';
+import { createPost,fetchPosts } from '@/store/postsSlice';
+import { createEvent,fetchEvents } from '@/store/eventsSlice';
 import { Category ,ContentType,Status} from '@/types/types';
 import { CATEGORY_OPTIONS } from '@/constants/map';
 
@@ -83,9 +83,9 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
       
       // POST成功後に周辺のスレッドを再取得（地図上に即座に反映）
       if (state === Status.LOADED) {
-        await dispatch(fetchAroundThreads({ lat: location.lat, lng: location.lng }));
-        await dispatch(fetchAroundEvents({ lat: location.lat, lng: location.lng }));
-        await dispatch(fetchAroundPosts({ lat: location.lat, lng: location.lng }));
+        await dispatch(fetchThreads({ lat: location.lat, lng: location.lng }));
+        await dispatch(fetchEvents({ lat: location.lat, lng: location.lng }));
+        await dispatch(fetchPosts({ lat: location.lat, lng: location.lng }));
       }
       onClose();
     } catch (error) {

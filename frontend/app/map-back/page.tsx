@@ -2,12 +2,12 @@
 
 import React, { useEffect, useCallback, useRef } from "react";
 import { useMapbox } from "@/hooks/useMapbox";
-// import { useThreads } from '@/hooks/useThreads'; // 不要 - useMapboxで管理
 import { useAppSelector, useAppDispatch } from "@/store";
-import { fetchAroundPosts, fetchUpdatedPosts } from "@/store/postsSlice";
-import { fetchAroundThreads, fetchUpdatedThreads } from "@/store/threadsSlice";
-import { fetchAroundEvents, fetchUpdatedEvents } from "@/store/eventsSlice";
+import { fetchPosts } from "@/store/postsSlice";
+import { fetchThreads } from "@/store/threadsSlice";
+import { fetchEvents, editEvent } from "@/store/eventsSlice";
 import { getCurrentLocation } from "@/store/locationSlice";
+import { verifyToken } from "@/store/authSlice";
 import { Status } from "@/types/types";
 import MapControls from "@/components/MapControl";
 import { MultiModalFAB } from "@/components/multi-modal-fab";
@@ -23,13 +23,14 @@ export default function MapBackPage() {
     mapContainerRef,
     mapRef,
     is3D,
+    isMapReady,
     currentLocationMarkerRef,
     currentMarksRef,
     toggle3D,
     changeMapView,
   } = useMapbox();
   const dispatch = useAppDispatch();
-  // 位置情報の状態
+  const auth = useAppSelector((state) => state.auth);
   const { location, state: locationState } = useAppSelector(
     (state) => state.location
   );
@@ -40,21 +41,21 @@ export default function MapBackPage() {
     (state) => state.filters.selectedCategory
   );
   useEffect(() => {
-    // 位置情報がまだ取得されていない、またはエラー状態の場合に位置情報を取得
     if (locationState === Status.IDLE || locationState === Status.ERROR) {
       dispatch(getCurrentLocation());
     }
+    dispatch(verifyToken());
   }, [dispatch]);
 
   useEffect(() => {
     clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
     if (locationState === Status.LOADED) {
       // 現在位置を中心とした周辺の投稿を取得
-      dispatch(fetchAroundPosts({ lat: location.lat, lng: location.lng }));
+      dispatch(fetchPosts({ lat: location.lat, lng: location.lng }));
       // 現在位置を中心とした周辺のスレッドを取得
-      dispatch(fetchAroundThreads({ lat: location.lat, lng: location.lng }));
+      dispatch(fetchThreads({ lat: location.lat, lng: location.lng }));
       // 現在位置を中心とした周辺のイベントを取得
-      dispatch(fetchAroundEvents({ lat: location.lat, lng: location.lng }));
+      dispatch(fetchEvents({ lat: location.lat, lng: location.lng }));
       addCurrentLocationMarker(
         location.lat,
         location.lng,
@@ -64,28 +65,43 @@ export default function MapBackPage() {
     }
   }, [dispatch, locationState, location]);
 
-  useEffect(() => {
-    
-
-        clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
-        posts.forEach((post) => {
-          addContentMarker(post, mapRef, currentMarksRef, selectedCategory);
-        });
-        threads.forEach((thread) => {
-          addContentMarker(thread, mapRef, currentMarksRef, selectedCategory);
-        });
-        events.forEach((event) => {
-          addContentMarker(event, mapRef, currentMarksRef, selectedCategory);
-        });
-        addCurrentLocationMarker(
-          location.lat,
-          location.lng,
-          mapRef,
-          currentLocationMarkerRef
+  const updateMarkers = () => {
+    if (locationState === Status.LOADED && isMapReady) {
+      clearAllMarkers(currentMarksRef, currentLocationMarkerRef);
+      const currentUserId = auth.user?.id ?? null;
+      console.log('[map] currentUserId', currentUserId);
+      const handleEventMoved = ({ id, lat, lng }: { id: number; lat: number; lng: number }) => {
+        dispatch(
+          editEvent({
+            id,
+            data: { coordinate: { lat, lng } },
+          })
         );
-      
-  }, [posts, threads, events, mapRef, selectedCategory, locationState]);
+      };
 
+      posts.forEach((post) => {
+        addContentMarker(post, mapRef, currentMarksRef, selectedCategory, currentUserId);
+      });
+      threads.forEach((thread) => {
+        addContentMarker(thread, mapRef, currentMarksRef, selectedCategory, currentUserId);
+      });
+      events.forEach((event) => {
+        addContentMarker(event, mapRef, currentMarksRef, selectedCategory, currentUserId, handleEventMoved);
+      });
+      addCurrentLocationMarker(
+        location.lat,
+        location.lng,
+        mapRef,
+        currentLocationMarkerRef
+      );
+    }
+  };
+
+
+  // フィルタ変更時にマーカーを更新
+  useEffect(() => {
+    updateMarkers();
+  }, [selectedCategory, posts, threads, events, locationState, location, isMapReady, auth.user?.id]);
   return (
     <div className="h-full w-full relative">
       <div id="map" className="h-full w-full" ref={mapContainerRef} />

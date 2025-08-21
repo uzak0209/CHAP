@@ -18,6 +18,7 @@ type Post struct {
 	UpdatedAt  time.Time      `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	UserID     uuid.UUID      `json:"user_id"`
+	Username   string         `json:"username" gorm:"not null"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
 	Coordinate Coordinate     `json:"coordinate" gorm:"embedded"`
 	Content    string         `json:"content"`
@@ -32,6 +33,7 @@ type Comment struct {
 	UpdatedAt  time.Time      `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 	UserID     uuid.UUID      `json:"user_id"`
+	Username   string         `json:"username" gorm:"not null"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
 	Coordinate Coordinate     `json:"coordinate" gorm:"embedded"`
 	Content    string         `json:"content"`
@@ -48,6 +50,7 @@ type Thread struct {
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	Username   string         `json:"username" gorm:"not null"`
 	UserID     uuid.UUID      `json:"user_id"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
 	Coordinate Coordinate     `json:"coordinate" gorm:"embedded"`
@@ -63,6 +66,7 @@ type Event struct {
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	Username   string         `json:"username" gorm:"not null"`
 	UserID     uuid.UUID      `json:"user_id"`
 	User       User           `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE;"`
 	Coordinate Coordinate     `json:"coordinate" gorm:"embedded"`
@@ -125,4 +129,10 @@ type ThreadTable struct {
 	ThreadID   uint   `json:"thread_id" gorm:"primaryKey"`
 	Thread     Thread `gorm:"foreignKey:ThreadID;constraint:OnUpdate:CASCADE;"`
 	CommentIDs []uint `json:"comment_ids" gorm:"type:integer[]"`
+}
+
+type HeatmapPoint struct {
+	Lat   float64 `json:"lat"`
+	Lng   float64 `json:"lng"`
+	Value int     `json:"value"`
 }

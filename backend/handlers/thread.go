@@ -9,7 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 func EditThread(c *gin.Context) {
@@ -82,6 +81,14 @@ func CreateThread(c *gin.Context) {
 	if thread.UpdatedAt.IsZero() {
 		thread.UpdatedAt = time.Now()
 	}
+	// UsersテーブルからユーザーIDに該当するusernameを取得
+	var user types.User
+	if err := db.SafeDB().Where("id = ?", uid).Select("name").First(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user info"})
+		return
+	}
+	thread.Username = user.Name
+
 	// GORMでSupabaseのPostgreSQLに保存
 	result := db.SafeDB().Create(&thread)
 	if result.Error != nil {
@@ -91,28 +98,63 @@ func CreateThread(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, thread)
 }
-func GetAroundAllThread(c *gin.Context) {
-	var req types.Coordinate
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+
+// GetThreadDetails returns a thread with its replies (comments)
+// GET /thread/:id/details
+func GetThreadDetails(c *gin.Context) {
+	id := c.Param("id")
+
+	// Fetch thread
+	var thread types.Thread
+	if err := db.SafeDB().Where("id = ?", id).First(&thread).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "thread not found"})
 		return
 	}
+
+	// Fetch replies (comments) by foreign key
+	var replies []types.Comment
+	// If conversion to uint is needed for safety
+	if _, err := strconv.ParseUint(id, 10, 64); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid thread id"})
+		return
+	}
+	if err := db.SafeDB().Where("thread_id = ?", id).Order("created_at ASC").Find(&replies).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load replies"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"thread":  thread,
+		"replies": replies,
+	})
+}
+func GetAllThreads(c *gin.Context) {
 	var threads []types.Thread
+	var userCoordinate types.Coordinate
 	dbConn := db.SafeDB()
-	if err := dbConn.Where("lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?",
-		req.Lat-types.AROUND, req.Lat+types.AROUND,
-		req.Lng-types.AROUND, req.Lng+types.AROUND,
-	).Find(&threads).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "no threads found"})
+	if err := c.ShouldBindJSON(&userCoordinate); err != nil {
+		// coordinateが提供されない場合、entertainment/disasterのみをDBから取得
+		if err := dbConn.Where("category IN (?)", []string{"entertainment", "disaster"}).Find(&threads).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch threads"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch threads"})
-		return
+	} else {
+		// データベース側でカテゴリ別フィルタリング処理
+		if err := dbConn.Where(`
+            category IN ('entertainment', 'disaster') OR 
+            (category = 'community' AND 
+             lat BETWEEN ? AND ? AND 
+             lng BETWEEN ? AND ?)
+        `,
+			userCoordinate.Lat-types.AROUND, userCoordinate.Lat+types.AROUND,
+			userCoordinate.Lng-types.AROUND, userCoordinate.Lng+types.AROUND,
+		).Find(&threads).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch posts"})
+			return
+		}
 	}
 	c.JSON(http.StatusOK, threads)
 }
-
 func GetUpdateThread(c *gin.Context) {
 	from := c.Param("from")
 	var threads []types.Thread

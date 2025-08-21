@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { MessageCircle, MapPin, Users, Tag, Heart } from 'lucide-react';
 
-import { fetchAroundThreads, threadsActions } from '@/store/threadsSlice';
+import { fetchThreads, threadsActions } from '@/store/threadsSlice';
 import { getCurrentLocation } from '@/store/locationSlice';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { Thread, Status } from '@/types/types';
@@ -90,7 +90,7 @@ export default function ThreadsPage() {
 
   useEffect(() => {
     if ( locState === Status.LOADED) {
-      dispatch(fetchAroundThreads({ lat: location.lat, lng: location.lng }));
+      dispatch(fetchThreads({ lat: location.lat, lng: location.lng }));
     }
   }, [dispatch, location, locState]);
 
@@ -139,7 +139,7 @@ export default function ThreadsPage() {
           <Button onClick={() => {
             dispatch(threadsActions.clearThreadErrors());
             if (location) {
-              dispatch(fetchAroundThreads({ lat: location.lat, lng: location.lng }));
+              dispatch(fetchThreads({ lat: location.lat, lng: location.lng }));
             }
           }}>再試行</Button>
         </div>
