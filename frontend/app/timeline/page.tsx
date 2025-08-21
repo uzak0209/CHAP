@@ -5,7 +5,6 @@ import { AppLayout } from '@/components/AppLayout';
 import { PostCard } from '@/components/PostCard';
 import { PostFilters } from '@/components/PostFileter';
 import { LoadingSpinner } from '@/components/ui/loading';
-import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { Post, Status } from '@/types/types';
 
 import { fetchPosts, postsActions } from '@/store/postsSlice';

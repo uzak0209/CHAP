@@ -19,8 +19,9 @@ const isEvent = (popup: Context): popup is Event => {
 };
 
 const getPopupColors = (popup: Context) => {
+
   if (isPost(popup)) {
-    console.log("Post detected", popup);
+
     // Post: 青色
     return {
       background: 'bg-gradient-to-br from-blue-50 to-indigo-50',
@@ -30,7 +31,7 @@ const getPopupColors = (popup: Context) => {
       arrow: '#eff6ff'
     };
   } else if (isThread(popup)) {
-    console.log("Thread detected", popup);
+   
     // Thread: 黄色
     return {
       background: 'bg-gradient-to-br from-yellow-50 to-amber-50',
@@ -40,7 +41,7 @@ const getPopupColors = (popup: Context) => {
       arrow: '#fefce8'
     };
   } else if (isEvent(popup)) {
-    console.log("Event detected", popup);
+
     // Event: 赤色
     return {
       background: 'bg-gradient-to-br from-red-50 to-rose-50',

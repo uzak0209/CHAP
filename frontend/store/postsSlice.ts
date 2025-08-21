@@ -166,7 +166,7 @@ const postsSlice = createSlice({
       })
       .addCase(editPost.rejected, (state, action) => {
         state.loading.update = false
-        state.error.update = action.error.message || '投稿の編集に失敗しました'
+        state.error.update = action.error.message || '投稿の更新に失敗しました'
       })
 
 

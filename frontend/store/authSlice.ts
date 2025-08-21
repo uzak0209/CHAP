@@ -88,7 +88,7 @@ export const verifyToken = createAsyncThunk<VerifyResponse, void>(
       throw new Error('No token found');
     }
 
-    return await apiClient.get<VerifyResponse>(API_ENDPOINTS.auth.verify);
+    return await apiClient.get<VerifyResponse>(API_ENDPOINTS.auth.login);
   }
 )
 

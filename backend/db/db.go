@@ -3,7 +3,6 @@ package db
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -19,15 +18,7 @@ func init() {
 		log.Println("No .env file found, using system environment variables")
 	}
 
-	// Supabaseの接続文字列を環境変数から取得
-	host := getEnvOrDefault("DB_HOST", "aws-0-ap-northeast-1.pooler.supabase.com")
-	user := getEnvOrDefault("DB_USER", "postgres.kisaobjgaayqlbbawpig")
-	password := getEnvOrDefault("DB_PASSWORD", "Skakki0209")
-	dbname := getEnvOrDefault("DB_NAME", "postgres")
-	port := getEnvOrDefault("DB_PORT", "6543")
-
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require",
-		host, user, password, dbname, port)
+	dsn := ""
 	fmt.Println("Using DSN:", dsn)
 
 	// DBに接続（タイムアウト設定追加）
@@ -120,12 +111,4 @@ func SafeTransaction(fn func(*gorm.DB) error) error {
 	}
 
 	return tx.Commit().Error
-}
-
-// getEnvOrDefault は環境変数を取得し、存在しない場合はデフォルト値を返す
-func getEnvOrDefault(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
 }

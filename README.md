@@ -10,7 +10,7 @@
 - **認証:** JWT (JSON Web Tokens)
 
 ### フロントエンド
-- **フレームワーク:** Next.js 13+ (App Router)
+- **フレームワーク:** Next.js (App Router)
 - **言語:** TypeScript
 - **状態管理:** Redux Toolkit
 - **スタイリング:** Tailwind CSS
@@ -19,5 +19,4 @@
 ### インフラストラクチャ
 - **クラウド:** AWS
 - **プロビジョニング:** Terraform
-- **コンテナ:** Docker (開発環境)
-- **プロキシ:** Nginx, Cloudflare
+- **プロキシ:**　Cloudflare

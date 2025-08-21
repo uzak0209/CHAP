@@ -186,9 +186,6 @@ export default function ThreadsPage() {
           {renderContent()}
         </main>
       </div>
-      
-      {/* フローティングスレッド作成ボタン */}
-      <FloatingActionButton href="/threads/create" />
     </AppLayout>
   );
 }
