@@ -108,17 +108,17 @@ export const Popup: React.FC<{ popup: Context; selectedCategory?: string }> = ({
             variant="ghost"
             className="flex items-center gap-1 p-0 h-auto bg-transparent hover:bg-transparent shadow-none focus-visible:ring-0"
           >
-            <Heart 
+            {/* <Heart 
               id={`heart-post-${popID}`}
               className="w-3 h-3 text-white hover:scale-110 transition-transform"
               fill="white"
-            />
-            <span 
+            /> */}
+            {/* <span 
               id={`like-count-post-${popID}`}
               className="text-white font-medium"
             >
                 {popup.like || 0} 
-            </span>
+            </span> */}
           </Button>
           <Badge className={colors.badgeColor}>
             {new Date(updatedAt || '').toLocaleDateString()}

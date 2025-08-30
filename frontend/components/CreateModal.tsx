@@ -34,30 +34,32 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
   const categoryOptions = CATEGORY_OPTIONS;
 
   const handleSubmit = async () => {
-    if (!content.trim() || !category) return;
+    if (!content.trim()) return; // カテゴリは任意
     
     setLoading(true);
     try {
-      // カテゴリをタグに追加
-      const allTags = category ? [category, ...tags] : tags;
+      // カテゴリ未選択なら 'entertainment' を自動適用
+      const effectiveCategory: Category = (category as Category) || 'entertainment';
+      // カテゴリをタグに追加（重複防止）
+      const allTags = [effectiveCategory, ...tags.filter(t => t !== effectiveCategory)];
 
       switch (contentType) {
         case 'thread':
           await dispatch(createThread({
-          content,
-          category: category as Category,
-          tags: allTags,
-          coordinate: state === Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
-          valid: true,
-          like: 0,
-          created_at: new Date().toISOString(),
-          type: 'thread',
+            content,
+            category: effectiveCategory,
+            tags: allTags,
+            coordinate: state === Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
+            valid: true,
+            like: 0,
+            created_at: new Date().toISOString(),
+            type: 'thread',
           }))
           break;
         case 'post':
           await dispatch(createPost({
             content,
-            category: category as Category,
+            category: effectiveCategory,
             tags: allTags,
             coordinate: state === Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
             valid: true,
@@ -69,7 +71,7 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
         case 'event':
           await dispatch(createEvent({
             content,
-            category: category as Category,
+            category: effectiveCategory,
             tags: allTags,
             coordinate: state === Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
             valid: true,
@@ -139,18 +141,24 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
 
           {/* カテゴリ選択 */}
           <div>
-            <Label htmlFor="category">カテゴリ</Label>
+      <Label htmlFor="category">カテゴリ（任意）</Label>
             <Select value={category} onValueChange={(value: Category) => setCategory(value)}>
               <SelectTrigger>
-                <SelectValue placeholder="カテゴリを選択してください" />
+        <SelectValue placeholder="なし" />
               </SelectTrigger>
-              <SelectContent>
-                {categoryOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+                <SelectContent className="bg-white text-gray-900 border border-gray-200 shadow-lg shadow-black/10 backdrop-blur-none">
+                  {categoryOptions
+                    .filter(option => option.value !== 'entertainment')
+                    .map(option => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value}
+                        className="focus:bg-blue-600 focus:text-white hover:bg-blue-50 aria-selected:bg-blue-600 aria-selected:text-white"
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
             </Select>
           </div>
 
@@ -201,7 +209,7 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!content.trim() || !category || loading || state !== Status.LOADED}
+              disabled={!content.trim() || loading || state !== Status.LOADED}
               className="flex-1"
             >
               {loading ? '作成中...' : `${contentType}作成`}

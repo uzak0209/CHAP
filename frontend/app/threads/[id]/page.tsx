@@ -64,10 +64,10 @@ const ThreadHeader = ({ thread, replyCount }: { thread: Thread; replyCount: numb
         <MessageCircle className="w-3 h-3" />
         <span>レス数: {replyCount}</span>
       </div>
-      <div className="flex items-center gap-1">
+      {/* <div className="flex items-center gap-1">
         <Heart className="w-3 h-3" />
         <span>{thread.like}</span>
-      </div>
+      </div> */}
     </div>
   </div>
 );
