@@ -5,13 +5,14 @@ import { Content, Category } from '@/types/types';
 import { Popup } from '@/components/Popup';
 
 // Popupコンポーネント付きマーカーを作成する関数
+
 const createMarkerWithPopup = (content: Content, selectedCategories: Category[] = []): mapboxgl.Marker => {
 
   if (!content.coordinate || typeof content.coordinate.lng !== 'number' || typeof content.coordinate.lat !== 'number') {
     console.error('Invalid coordinate data:', content);
     throw new Error('Valid coordinate data is required for marker creation');
   }
-
+  
   // DOM要素を作成してReactコンポーネントをマウント
   const popupContainer = document.createElement('div');
   const root = createRoot(popupContainer);
@@ -100,6 +101,7 @@ export const addContentMarker = (
   currentUserId?: string | null,
   onEventMoved?: (args: { id: number; lat: number; lng: number }) => void,
 ) => {
+
   if (!mapRef.current || !markersRef.current) {
     console.warn('[markers] early return: missing refs', { hasMap: !!mapRef.current, hasMarkersRef: !!markersRef.current });
     return;
@@ -121,6 +123,7 @@ export const addContentMarker = (
     });
     return;
   }
+
 
   try {
     console.log('[markers] addContentMarker called', {

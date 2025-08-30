@@ -11,3 +11,4 @@ nginx/ssl
 /CHAP.pem
 frontend/.env.local
 /files
+/terraform

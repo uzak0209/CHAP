@@ -27,17 +27,17 @@ export function BottomNavigation() {
               key={item.name}
               href={item.href}
               className={cn(
-                'flex flex-col items-center py-2 px-1 text-xs',
+                'flex flex-col items-center py-3 px-3 text-xs transition-colors duration-200',
                 isActive
                   ? 'text-primary font-medium'
                   : 'text-gray-500 hover:text-gray-700'
               )}
             >
               <Icon className={cn(
-                'w-5 h-5 mb-1',
-                item.name === '投稿' && 'w-6 h-6' // 投稿ボタンは少し大きく
+                'w-6 h-6 mb-1',
+                item.name === '投稿' && 'w-7 h-7' // 投稿ボタンは少し大きく
               )} />
-              <span className="text-[10px]">{item.name}</span>
+              <span className="text-[11px] font-medium">{item.name}</span>
             </Link>
           );
         })}

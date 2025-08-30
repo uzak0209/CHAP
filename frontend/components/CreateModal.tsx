@@ -146,6 +146,7 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
               <SelectTrigger>
         <SelectValue placeholder="なし" />
               </SelectTrigger>
+
                 <SelectContent className="bg-white text-gray-900 border border-gray-200 shadow-lg shadow-black/10 backdrop-blur-none">
                   {categoryOptions
                     .filter(option => option.value !== 'entertainment')
@@ -159,6 +160,7 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
                       </SelectItem>
                     ))}
                 </SelectContent>
+
             </Select>
           </div>
 

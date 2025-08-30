@@ -128,8 +128,8 @@ const authSlice = createSlice({
         state.user = action.payload.user
         state.token = action.payload.token
         state.isAuthenticated = true
-        // トークンをlocal storageに保存
         if (typeof window !== 'undefined' && action.payload.token) {
+          
           localStorage.setItem('authtoken', action.payload.token)
         }
       })
@@ -148,6 +148,7 @@ const authSlice = createSlice({
         state.token = action.payload.token
         state.isAuthenticated = true
         // トークンをlocal storageに保存
+        console.log('User registered successfully:', action.payload.token);
         if (typeof window !== 'undefined' && action.payload.token) {
           localStorage.setItem('authtoken', action.payload.token)
         }

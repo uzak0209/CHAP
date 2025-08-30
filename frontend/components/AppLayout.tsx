@@ -20,7 +20,7 @@ export function AppLayout({
   const pathname = usePathname();
 
   // Special pages that don't need navigation
-  const noNavPages = ['/login', '/onboarding', '/admin'];
+  const noNavPages = ['/login', '/onboarding', '/admin','/notifications','/chat'];
   const shouldShowNav = showNavigation && !noNavPages.some(page => pathname.startsWith(page));
   return (
     <div className="min-h-screen relative">

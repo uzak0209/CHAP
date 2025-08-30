@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, Send, ChevronRight, Heart, MessageCircle, MapPin } from 'lucide-react';
 
 import { useAppDispatch, useAppSelector } from '@/store';
-import { getAuthToken } from '@/store/authSlice';
 import { Thread, Post, Status } from '@/types/types';
+import { apiClient, API_ENDPOINTS } from '@/lib/api';
 
 // 2ちゃんねる風のレス表示コンポーネント
 const ThreadResponse = ({ 
@@ -91,16 +91,9 @@ export default function ThreadDetailPage() {
     const fetchThreadDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:8080/api/v1/thread/${threadId}/details`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch thread details');
-        }
-        
-        const data = await response.json();
+        const data = await apiClient.get<{ thread: Thread; replies: Post[] }>(`${API_ENDPOINTS.threads.get(threadId)}/details`);
         setThread(data.thread);
         setReplies(data.replies || []);
-        
         console.log('Thread details loaded:', data);
       } catch (error) {
         console.error('Failed to fetch thread details:', error);
@@ -108,7 +101,6 @@ export default function ThreadDetailPage() {
         setLoading(false);
       }
     };
-
     if (threadId) {
       fetchThreadDetails();
     }
@@ -116,41 +108,19 @@ export default function ThreadDetailPage() {
 
   const handlePostResponse = async () => {
     if (!newResponse.trim()) return;
-    
     setPosting(true);
     try {
-      const token = getAuthToken();
-      const response = await fetch(`http://localhost:8080/api/v1/thread/${threadId}/reply`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify({ 
-          content: newResponse,
-          valid: true,
-          like: 0,
-          tags: []
-        })
+      await apiClient.post(`${API_ENDPOINTS.threads.get(threadId)}/reply`, {
+        content: newResponse,
+        valid: true,
+        like: 0,
+        tags: []
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to post reply');
-      }
-      
-      const result = await response.json();
-      console.log('Reply posted:', result);
-      
       // レスが投稿されたら一覧を再取得
-      const refreshResponse = await fetch(`http://localhost:8080/api/v1/thread/${threadId}/details`);
-      if (refreshResponse.ok) {
-        const refreshData = await refreshResponse.json();
-        setReplies(refreshData.replies || []);
-      }
-      
+      const refreshData = await apiClient.get<{ thread: Thread; replies: Post[] }>(`${API_ENDPOINTS.threads.get(threadId)}/details`);
+      setReplies(refreshData.replies || []);
       setNewResponse('');
       setName('');
-      
     } catch (error) {
       console.error('Failed to post response:', error);
       alert('レスの投稿に失敗しました: ' + error);

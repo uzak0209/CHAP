@@ -26,7 +26,7 @@ func main() {
 
 	// CORS設定（厳格に制限）
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "https://chap-app.jp"}, // Next.jsの開発サーバーのみ許可
+		AllowOrigins:     []string{"http://localhost:3000", "https://chap-app.jp", "https://www.chap-app.jp"}, // Next.jsの開発サーバーのみ許可
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

@@ -1,6 +1,12 @@
 // API Base URL Configuration
-const API_BASE_URL =  'http://localhost:8080';
+const API_BASE_URL =  'https://api.chap-app.jp'; 
 const USE_HTTPS = process.env.NEXT_PUBLIC_USE_HTTPS === 'true';
+
+console.log('🌟 API Configuration:', { 
+  API_BASE_URL, 
+  USE_HTTPS,
+  env: process.env.NEXT_PUBLIC_API_BASE_URL 
+});
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -44,6 +50,12 @@ export const API_ENDPOINTS = {
     heatmap: `${API_BASE_URL}/api/v1/social-sensing/heatmap`,
   },
   health: `${API_BASE_URL}/health`,
+  // 位置情報検索エンドポイント
+  around: {
+    posts: `${API_BASE_URL}/api/v1/around/post`,
+    threads: `${API_BASE_URL}/api/v1/around/thread`,
+    events: `${API_BASE_URL}/api/v1/around/event`,
+  },
 };
 
 // Default fetch options for HTTPS
@@ -73,17 +85,32 @@ export class ApiClient {
       },
     };
 
+    console.log('🌐 API Request:', {
+      url,
+      method: config.method || 'GET',
+      headers: config.headers,
+      body: config.body ? JSON.parse(config.body as string) : null,
+    });
+
     try {
       const response = await fetch(url, config);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+        console.error('❌ API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+          url,
+        });
         throw new Error(errorData.message || `HTTP ${response.status}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('✅ API Success:', { url, status: response.status });
+      return data;
     } catch (error) {
-      console.error('API Request failed:', error);
+      console.error('💥 API Request failed:', error);
       throw error;
     }
   }

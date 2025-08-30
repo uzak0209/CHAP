@@ -1,0 +1,45 @@
+@startuml CHAP_Network_Architecture
+
+!define CLOUDFLARE_COLOR #FF6600
+!define VERCEL_COLOR #000000  
+!define AWS_COLOR #FF9900
+!define TUNNEL_COLOR #00BFFF
+
+title CHAP Application Network Architecture
+
+cloud "Internet" as internet {
+}
+
+package "Vercel\n(Frontend)" as vercel #VERCEL_COLOR {
+  [Next.js App] as nextjs
+  note right : Frontend Domain:\n- www.chap-app.jp\n- chap-app.jp\n\nAPI Base URL:\nhttps://api.chap-app.jp
+}
+
+package "Cloudflare" as cloudflare #CLOUDFLARE_COLOR {
+  [CDN / DNS] as cdn
+  note right : CNAME: api.chap-app.jp\nTarget: 12d4f33a-d5b4-...cfargotunnel.com\nProxy: Enabled
+}
+
+package "Tunnel\n(ID: 12d4f33a-...dc7)" as tunnel #TUNNEL_COLOR {
+}
+
+package "AWS VPC" as aws #AWS_COLOR {
+  [EC2: api_server\n(56.155.98.63)\nPort: 8080] as ec2
+  database "RDS\n(PostgreSQL)" as rds
+  
+  ec2 -> rds : PostgreSQL Query
+}
+
+actor User
+
+User -> nextjs : HTTPS Req\nwww.chap-app.jp
+nextjs -> cdn : API Call\nhttps://api.chap-app.jp
+cdn --> User : HTTPS Resp
+
+cdn -> tunnel : Forward Req
+tunnel -> ec2 : Tunnel Req
+ec2 -> tunnel : Tunnel Resp
+tunnel -> cdn : Resp
+cdn -> nextjs : Forward Req\nStatic (Next.js)
+
+@enduml
