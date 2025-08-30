@@ -56,7 +56,7 @@ const EventCard = ({ event }: { event: Event }) => (
           </p>
         </div>
       </div> */}
-      {event.tags && event.tags.length > 0 && (
+      {event.tags && event.tags.length > 0 && !event.tags.includes('entertainment') && (
         <div className="flex items-center">
           <Tag className="w-5 h-5 mr-3 text-gray-600" />
           <div className="flex flex-wrap gap-2">
