@@ -9,7 +9,7 @@ export interface FiltersState {
     to: Date | null;
   };
   tags: string[];
-  selectedCategory: Category;
+  selectedCategories: Category[]; // 複数選択対応（空配列=全表示）
   showValid: boolean;
 }
 
@@ -21,7 +21,7 @@ const initialState: FiltersState = {
     to: null,
   },
   tags: [],
-  selectedCategory: 'entertainment', // デフォルトは娯楽目的
+  selectedCategories: [], // 何も選択されていなければ全カテゴリ表示
   showValid: true,
 }
 
@@ -49,15 +49,22 @@ const filtersSlice = createSlice({
     clearTags: (state) => {
       state.tags = []
     },
-    setSelectedCategory: (state, action: PayloadAction<Category>) => {
-      console.log('Redux: Setting category to', action.payload);
-      state.selectedCategory = action.payload
+    setSelectedCategories: (state, action: PayloadAction<Category[]>) => {
+      state.selectedCategories = action.payload
+    },
+    toggleCategory: (state, action: PayloadAction<Category>) => {
+      const c = action.payload
+      if (state.selectedCategories.includes(c)) {
+        state.selectedCategories = state.selectedCategories.filter(x => x !== c)
+      } else {
+        state.selectedCategories.push(c)
+      }
     },
     setShowValid: (state, action: PayloadAction<boolean>) => {
       state.showValid = action.payload
     },
     resetFilters: (state) => {
-      return initialState
+  return initialState
     },
   },
 })

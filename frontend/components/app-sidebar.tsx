@@ -1,4 +1,4 @@
-import { Calendar, Home, Inbox, Search, Settings, ChevronLeft, Menu } from "lucide-react"
+import { Calendar, Home, Search, Settings, ChevronLeft } from "lucide-react"
 import React from "react"
 import { useAppDispatch, useAppSelector } from "@/store"
 import { filtersActions } from "@/store/filtersSlice"
@@ -46,13 +46,9 @@ const items = [
 export function AppSidebar() {
   const { toggleSidebar } = useSidebar()
   const dispatch = useAppDispatch()
-  const selectedCategory = useAppSelector(state => state.filters.selectedCategory)
-
-  const handleCategorySelect = (category: Category) => {
-    console.log('AppSidebar - selecting category:', category);
-    dispatch(filtersActions.setSelectedCategory(category))
-    // RefreshPopupID();
-  }
+  const selectedCategories = useAppSelector(state => state.filters.selectedCategories)
+  const isChecked = (c: Category) => selectedCategories.includes(c)
+  const toggle = (c: Category) => dispatch(filtersActions.toggleCategory(c))
 
   return (
     <Sidebar className="bg-white/95 backdrop-blur-sm border-r shadow-md">
@@ -94,29 +90,27 @@ export function AppSidebar() {
           <SidebarGroupLabel>投稿カテゴリ</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="space-y-2 px-2">
-              <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
+              {/* <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
                 <input
-                  type="radio"
-                  name="category"
-                  checked={selectedCategory === 'entertainment'}
-                  onChange={() => handleCategorySelect('entertainment')}
+                  type="checkbox"
+                  checked={isChecked('entertainment')}
+                  onChange={() => toggle('entertainment')}
                   className="border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
                 />
-                <div className="flex items-center space-x-2 flex-1">
+                <div className="flex items-center space-x-2 flex-1 select-none">
                   <span className="text-sm">💬</span>
                   <span className="text-sm font-medium text-gray-900">娯楽目的</span>
                 </div>
-              </label>
+              </label> */}
               
               <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
                 <input
-                  type="radio"
-                  name="category"
-                  checked={selectedCategory === 'community'}
-                  onChange={() => handleCategorySelect('community')}
+                  type="checkbox"
+                  checked={isChecked('community')}
+                  onChange={() => toggle('community')}
                   className="border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
                 />
-                <div className="flex items-center space-x-2 flex-1">
+                <div className="flex items-center space-x-2 flex-1 select-none">
                   <span className="text-sm">🏘️</span>
                   <span className="text-sm font-medium text-gray-900">地域住民コミュニケーション</span>
                 </div>
@@ -124,13 +118,12 @@ export function AppSidebar() {
               
               <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
                 <input
-                  type="radio"
-                  name="category"
-                  checked={selectedCategory === 'disaster'}
-                  onChange={() => handleCategorySelect('disaster')}
+                  type="checkbox"
+                  checked={isChecked('disaster')}
+                  onChange={() => toggle('disaster')}
                   className="border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
                 />
-                <div className="flex items-center space-x-2 flex-1">
+                <div className="flex items-center space-x-2 flex-1 select-none">
                   <span className="text-sm">🚨</span>
                   <span className="text-sm font-medium text-gray-900">災害用</span>
                 </div>
