@@ -43,7 +43,7 @@ const ThreadCard = ({ thread }: { thread: Thread }) => {
             <p>緯度: {thread.coordinate.lat.toFixed(4)}, 経度: {thread.coordinate.lng.toFixed(4)}</p>
           </div>
         </div> */}
-        {thread.tags && thread.tags.length > 0 && (
+        {thread.tags && thread.tags.length > 0 && !thread.tags.includes('entertainment') && (
           <div className="flex items-center">
             <Tag className="w-5 h-5 mr-3 text-gray-600" />
             <div className="flex flex-wrap gap-2">
@@ -56,10 +56,10 @@ const ThreadCard = ({ thread }: { thread: Thread }) => {
           </div>
         )}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
+          {/* <div className="flex items-center gap-1">
             <Heart className="w-3 h-3" />
             <span className="text-sm text-gray-500">{thread.like} </span>
-          </div>
+          </div> */}
           <Button 
             variant="outline" 
             size="sm"

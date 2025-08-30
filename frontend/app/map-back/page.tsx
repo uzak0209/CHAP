@@ -38,8 +38,8 @@ export default function MapBackPage() {
   const posts = useAppSelector((state) => state.posts.items);
   const threads = useAppSelector((state) => state.threads.items);
   const events = useAppSelector((state) => state.events.items);
-  const selectedCategory = useAppSelector(
-    (state) => state.filters.selectedCategory
+  const selectedCategories = useAppSelector(
+    (state) => state.filters.selectedCategories
   );
   useEffect(() => {
     if (locationState === Status.IDLE || locationState === Status.ERROR) {
@@ -80,13 +80,13 @@ export default function MapBackPage() {
       };
 
       posts.forEach((post) => {
-        addContentMarker(post, mapRef, currentMarksRef, selectedCategory, currentUserId);
+        addContentMarker(post, mapRef, currentMarksRef, selectedCategories, currentUserId);
       });
       threads.forEach((thread) => {
-        addContentMarker(thread, mapRef, currentMarksRef, selectedCategory, currentUserId);
+        addContentMarker(thread, mapRef, currentMarksRef, selectedCategories, currentUserId);
       });
       events.forEach((event) => {
-        addContentMarker(event, mapRef, currentMarksRef, selectedCategory, currentUserId, handleEventMoved);
+        addContentMarker(event, mapRef, currentMarksRef, selectedCategories, currentUserId, handleEventMoved);
       });
       addCurrentLocationMarker(
         location.lat,
@@ -100,7 +100,7 @@ export default function MapBackPage() {
   // フィルタ変更時にマーカーを更新
   useEffect(() => {
     updateMarkers();
-  }, [selectedCategory, posts, threads, events, locationState, location, isMapReady, auth.user?.id]);
+  }, [selectedCategories, posts, threads, events, locationState, location, isMapReady, auth.user?.id]);
   return (
     <div className="h-full w-full relative">
       <div id="map" className="h-full w-full" ref={mapContainerRef} />

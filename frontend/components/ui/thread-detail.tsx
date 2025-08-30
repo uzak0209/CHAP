@@ -58,10 +58,10 @@ const ThreadDetail: React.FC<ThreadDetailProps> = ({
         <div className="space-y-2">
           <p className="text-sm text-gray-900 leading-relaxed">{message}</p>
           <div className="flex justify-between items-center text-xs">
-            <div className="flex items-center gap-1">
+            {/* <div className="flex items-center gap-1">
               <Heart className="w-3 h-3" />
               <span className="text-red-500 font-medium">{like}</span>
-            </div>
+            </div> */}
             <div className="text-gray-500">
               <span className="font-medium">{author}</span>
               <span className="ml-2">{timestamp}</span>

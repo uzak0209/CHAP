@@ -14,8 +14,9 @@ export function PostCard({ post }: PostCardProps) {
       <CardContent className="p-4">
         <PostHeader username={post.username} />
         <PostContent content={post.content} />
-        {post.category && <PostCategoryDisplay category={post.category} />}
-        {post.tags && <PostTags tags={post.tags} />}
+        {/*娯楽はデフォルト要素なので非表示*/}
+        {post.category && post.category !== 'entertainment'&& <PostCategoryDisplay category={post.category} />}
+        {/* {post.tags && <PostTags tags={post.tags} />} */}
         <PostFooter
           createdAt={post.created_at}
         />
@@ -52,7 +53,6 @@ function PostCategoryDisplay({ category }: { category: string }) {
     switch (category) {
       case 'entertainment': return 'エンターテイメント';
       case 'community': return '地域住民コミュニケーション';
-      case 'information': return '情報共有';
       case 'disaster': return '災害情報';
       default: return category;
     }
@@ -62,7 +62,6 @@ function PostCategoryDisplay({ category }: { category: string }) {
     switch (category) {
       case 'entertainment': return 'bg-pink-100 text-pink-800';
       case 'community': return 'bg-blue-100 text-blue-800';
-      case 'information': return 'bg-green-100 text-green-800';
       case 'disaster': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }

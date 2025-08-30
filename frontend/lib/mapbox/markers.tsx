@@ -1,12 +1,13 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import mapboxgl from 'mapbox-gl';
-import { Content } from '@/types/types';
+import { Content, Category } from '@/types/types';
 import { Popup } from '@/components/Popup';
 
 // Popupコンポーネント付きマーカーを作成する関数
-const createMarkerWithPopup = (content: Content, selectedCategory: string = 'all'): mapboxgl.Marker => {
-  
+
+const createMarkerWithPopup = (content: Content, selectedCategories: Category[] = []): mapboxgl.Marker => {
+
   if (!content.coordinate || typeof content.coordinate.lng !== 'number' || typeof content.coordinate.lat !== 'number') {
     console.error('Invalid coordinate data:', content);
     throw new Error('Valid coordinate data is required for marker creation');
@@ -15,8 +16,8 @@ const createMarkerWithPopup = (content: Content, selectedCategory: string = 'all
   // DOM要素を作成してReactコンポーネントをマウント
   const popupContainer = document.createElement('div');
   const root = createRoot(popupContainer);
-  root.render(<Popup popup={content} selectedCategory={selectedCategory} />);
-  
+  root.render(<Popup popup={content} selectedCategory={selectedCategories[0] || 'entertainment'} />);
+
   // Mapbox GLのポップアップを作成
   const mapboxPopup = new mapboxgl.Popup({
     offset: 25,
@@ -96,7 +97,7 @@ export const addContentMarker = (
   content: Content,
   mapRef: React.RefObject<mapboxgl.Map | null>,
   markersRef: React.RefObject<mapboxgl.Marker[]>,
-  selectedCategory: string = 'all',
+  selectedCategories: Category[] = [],
   currentUserId?: string | null,
   onEventMoved?: (args: { id: number; lat: number; lng: number }) => void,
 ) => {
@@ -113,12 +114,12 @@ export const addContentMarker = (
   }
 
   // フィルタリング: 選択されたカテゴリに一致しない場合はマーカーを作成しない
-  if (selectedCategory !== 'all' && content.category !== selectedCategory) {
+  if (selectedCategories.length > 0 && !selectedCategories.includes(content.category as Category)) {
     console.log('[markers] skip addContentMarker by category filter', {
       id: (content as any).id,
       type: (content as any).type,
       contentCategory: content.category,
-      selectedCategory,
+      selectedCategories,
     });
     return;
   }
@@ -132,7 +133,7 @@ export const addContentMarker = (
       currentUserId: currentUserId ?? null,
       coordinate: content.coordinate,
     });
-    const marker = createMarkerWithPopup(content, selectedCategory);
+  const marker = createMarkerWithPopup(content, selectedCategories);
     console.log('[markers] marker created');
 
     // イベントで、かつ投稿者本人の場合のみドラッグ可能にする
