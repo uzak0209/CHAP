@@ -104,7 +104,7 @@ export function AppSidebar() {
                 />
                 <div className="flex items-center space-x-2 flex-1">
                   <span className="text-sm">💬</span>
-                  <span className="text-sm font-medium text-gray-900">娯楽目的</span>
+                  <span className="text-sm font-medium text-gray-900">雑談</span>
                 </div>
               </label>
               

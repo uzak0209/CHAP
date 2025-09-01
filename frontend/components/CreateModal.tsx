@@ -1,19 +1,25 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X,  Hash } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { createThread, fetchThreads } from '@/store/threadsSlice';
-import { createPost,fetchPosts } from '@/store/postsSlice';
-import { createEvent,fetchEvents } from '@/store/eventsSlice';
-import { Category ,ContentType,Status} from '@/types/types';
-import { CATEGORY_OPTIONS } from '@/constants/map';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { X, Hash } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { createThread, fetchThreads } from "@/store/threadsSlice";
+import { createPost, fetchPosts } from "@/store/postsSlice";
+import { createEvent, fetchEvents } from "@/store/eventsSlice";
+import { Category, ContentType, Status } from "@/types/types";
+import { CATEGORY_OPTIONS } from "@/constants/map";
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -21,66 +27,93 @@ interface CreateModalProps {
   contentType: ContentType;
 }
 
-export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) {
-  const [content, setContent] = useState('');
-  const [category, setCategory] = useState<Category | ''>('');
+export function CreateModal({
+  isOpen,
+  onClose,
+  contentType,
+}: CreateModalProps) {
+  const [content, setContent] = useState("");
+  const [category, setCategory] = useState<Category | "">("");
   const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
+  const [tagInput, setTagInput] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   const dispatch = useAppDispatch();
   const { state, location } = useAppSelector((state) => state.location);
 
   const categoryOptions = CATEGORY_OPTIONS;
 
   const handleSubmit = async () => {
-    if (!content.trim() || !category) return;
-    
+    if (!content.trim()) return;
+
     setLoading(true);
     try {
-      // カテゴリをタグに追加
-      const allTags = category ? [category, ...tags] : tags;
-
+      const effectiveCategory: Category =
+        (category as Category) || "entertainment";
+      const allTags = [
+        effectiveCategory,
+        ...tags.filter((t) => t !== effectiveCategory),
+      ];
       switch (contentType) {
-        case 'thread':
-          await dispatch(createThread({
-          content,
-          category: category as Category,
-          tags: allTags,
-          coordinate: state === Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
-          valid: true,
-          like: 0,
-          created_at: new Date().toISOString(),
-          type: 'thread',
-          }))
+        case "thread":
+          await dispatch(
+            createThread({
+              content,
+              category: effectiveCategory,
+              tags: allTags,
+              coordinate:
+                state === Status.LOADED
+                  ? { lat: location.lat, lng: location.lng }
+                  : (() => {
+                      throw new Error("位置情報が取得できません");
+                    })(),
+              valid: true,
+              like: 0,
+              created_at: new Date().toISOString(),
+              type: "thread",
+            })
+          );
           break;
-        case 'post':
-          await dispatch(createPost({
-            content,
-            category: category as Category,
-            tags: allTags,
-            coordinate: state === Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
-            valid: true,
-            like: 0,
-            created_at: new Date().toISOString(),
-            type: 'post',
-          }));
+        case "post":
+          await dispatch(
+            createPost({
+              content,
+              category: effectiveCategory,
+              tags: allTags,
+              coordinate:
+                state === Status.LOADED
+                  ? { lat: location.lat, lng: location.lng }
+                  : (() => {
+                      throw new Error("位置情報が取得できません");
+                    })(),
+              valid: true,
+              like: 0,
+              created_at: new Date().toISOString(),
+              type: "post",
+            })
+          );
           break;
-        case 'event':
-          await dispatch(createEvent({
-            content,
-            category: category as Category,
-            tags: allTags,
-            coordinate: state === Status.LOADED ? { lat: location.lat, lng: location.lng } : (() => { throw new Error('位置情報が取得できません'); })(),
-            valid: true,
-            like: 0,
-            created_at: new Date().toISOString(),
-            type: 'event',
-          }));
+        case "event":
+          await dispatch(
+            createEvent({
+              content,
+              category: effectiveCategory,
+              tags: allTags,
+              coordinate:
+                state === Status.LOADED
+                  ? { lat: location.lat, lng: location.lng }
+                  : (() => {
+                      throw new Error("位置情報が取得できません");
+                    })(),
+              valid: true,
+              like: 0,
+              created_at: new Date().toISOString(),
+              type: "event",
+            })
+          );
           break;
-        }
-      
-      
+      }
+
       // POST成功後に周辺のスレッドを再取得（地図上に即座に反映）
       if (state === Status.LOADED) {
         await dispatch(fetchThreads({ lat: location.lat, lng: location.lng }));
@@ -89,7 +122,7 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
       }
       onClose();
     } catch (error) {
-      console.error('Thread submission error:', error);
+      console.error("Thread submission error:", error);
     } finally {
       setLoading(false);
     }
@@ -98,12 +131,12 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
       setTags([...tags, tagInput.trim()]);
-      setTagInput('');
+      setTagInput("");
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+    setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
   if (!isOpen) return null;
@@ -122,7 +155,7 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
-        
+
         <CardContent className="space-y-4">
           <div>
             <Textarea
@@ -139,21 +172,28 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
 
           {/* カテゴリ選択 */}
           <div>
-            <Label htmlFor="category">カテゴリ</Label>
-            <Select value={category} onValueChange={(value: Category) => setCategory(value)}>
+            <Label htmlFor="category">カテゴリ（任意）</Label>
+            <Select
+              value={category}
+              onValueChange={(value: Category) => setCategory(value)}
+            >
               <SelectTrigger>
-                <SelectValue placeholder="カテゴリを選択してください" />
+                <SelectValue placeholder="なし" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-md z-50">
-                {categoryOptions.map(option => (
-                  <SelectItem 
-                    key={option.value} 
-                    value={option.value}
-                    className="hover:bg-gray-100 cursor-pointer px-3 py-2"
-                  >
-                    {option.label}
-                  </SelectItem>
-                ))}
+              <SelectContent className="bg-white text-gray-900 border border-gray-200 shadow-lg shadow-black/10 backdrop-blur-none">
+                {categoryOptions
+
+                  .filter((option) => option.value !== "entertainment")
+
+                  .map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className="focus:bg-blue-600 focus:text-white hover:bg-blue-50 aria-selected:bg-blue-600 aria-selected:text-white"
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -167,17 +207,17 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
                 placeholder="タグを入力"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addTag()}
+                onKeyPress={(e) => e.key === "Enter" && addTag()}
               />
               <Button onClick={addTag} variant="outline" size="sm">
                 <Hash className="h-4 w-4" />
               </Button>
             </div>
-            
+
             {/* タグ表示 */}
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
-                {tags.map(tag => (
+                {tags.map((tag) => (
                   <span
                     key={tag}
                     className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
@@ -205,10 +245,10 @@ export function CreateModal({ isOpen, onClose , contentType}: CreateModalProps) 
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!content.trim() || !category || loading || state !== Status.LOADED}
+              disabled={!content.trim() || loading || state !== Status.LOADED}
               className="flex-1"
             >
-              {loading ? '作成中...' : `${contentType}作成`}
+              {loading ? "作成中..." : `${contentType}作成`}
             </Button>
           </div>
         </CardContent>
