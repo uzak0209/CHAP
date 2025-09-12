@@ -182,109 +182,24 @@ func generateJWT(userID uuid.UUID) (string, error) {
 	return tokenString, nil
 }
 
-func GetCurrentUser(c *gin.Context) {
-	// ミドルウェアでセットされたユーザーIDを取得
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
-		return
-	}
-
-	var user types.User
-	result := db.SafeDB().Where("id = ?", userID).First(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
-		return
-	}
-
-	// パスワードは返さない
-	user.Password = ""
-
-	c.JSON(http.StatusOK, gin.H{"user": user})
-}
-
 func Logout(c *gin.Context) {
 	// Cookieからトークンを削除
 	c.SetCookie("token", "", -1, "/", "", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }
 
-// GoogleLoginRequest for Google OAuth login
-type GoogleLoginRequest struct {
-	AccessToken string `json:"access_token" binding:"required"`
-	Email       string `json:"email" binding:"required"`
-	Name        string `json:"name" binding:"required"`
-}
-
-// GoogleLogin handles Google OAuth login
-func GoogleLogin(c *gin.Context) {
-	var req GoogleLoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
-		return
-	}
-	var user types.User
-	result := db.SafeDB().Where("email = ? AND login_type = ?", req.Email, "google").First(&user)
-
-	if result.Error != nil {
-		// ユーザーが存在しない場合、新規登録
-		user = types.User{
-			ID:        uuid.New(),
-			Name:      req.Name,
-			Email:     req.Email,
-			Valid:     true,
-			LoginType: "google",
-			Password:  "", // Googleログインの場合はパスワード不要
-		}
-
-		createResult := db.SafeDB().Create(&user)
-		if createResult.Error != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
-			return
-		}
-
-		// GoogleLogin テーブルにも記録
-		googleLogin := types.GoogleLogin{
-			UserID:      user.ID,
-			AccessToken: req.AccessToken,
-			Email:       req.Email,
-			Name:        req.Name,
-		}
-		db.SafeDB().Create(&googleLogin)
-	} else {
-		// 既存ユーザーの場合、GoogleLogin テーブルのアクセストークンを更新
-		var googleLogin types.GoogleLogin
-		if err := db.SafeDB().Where("user_id = ?", user.ID).First(&googleLogin).Error; err != nil {
-			// GoogleLogin レコードが存在しない場合は作成
-			googleLogin = types.GoogleLogin{
-				UserID:      user.ID,
-				AccessToken: req.AccessToken,
-				Email:       req.Email,
-				Name:        req.Name,
-			}
-			db.SafeDB().Create(&googleLogin)
-		} else {
-			// 既存のGoogleLogin レコードを更新
-			googleLogin.AccessToken = req.AccessToken
-			db.SafeDB().Save(&googleLogin)
-		}
-	}
-
-	// JWTトークン生成
-	token, err := generateJWT(user.ID)
+// ユーザー情報取得の共通処理
+func getUserFromJWT(c *gin.Context) (uuid.UUID, string, error) {
+	userID := c.GetString("user_id")
+	uid, err := uuid.Parse(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
-		return
+		return uuid.Nil, "", fmt.Errorf("invalid user_id format")
 	}
 
-	// パスワードをレスポンスから除外
-	user.Password = ""
+	var user types.User
+	if err := db.SafeDB().Where("id = ?", uid).Select("name").First(&user).Error; err != nil {
+		return uuid.Nil, "", fmt.Errorf("failed to get user info")
+	}
 
-	// JWTをHttpOnly Cookieに設定
-	c.SetCookie("token", token, 60*60*24*7, "/", "", false, true) // 7日間有効、HttpOnly
-
-	c.JSON(http.StatusOK, AuthResponse{
-		Token: token,
-		User:  user,
-	})
+	return uid, user.Name, nil
 }
