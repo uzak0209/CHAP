@@ -57,6 +57,9 @@ export const Popup: React.FC<{ popup: Context; selectedCategory?: string }> = ({
   const showPopup = selectedCategory === 'all' || selectedCategory === category;
   const styles = getPopupStyles(popup);
 
+  // 表示する日付を決定（Event の場合は event_date、それ以外は updated_at）
+  const displayDate = isEvent(popup) ? popup.event_date : updatedAt;
+
   // z-index制御用
   const [isActive, setIsActive] = useState(false);
 
@@ -110,7 +113,7 @@ export const Popup: React.FC<{ popup: Context; selectedCategory?: string }> = ({
             >
             </Button>
             <Badge className={`${styles.badge} px-2 py-0.5 rounded-full`}>
-              {new Date(updatedAt || '').toLocaleDateString()}
+              {displayDate ? new Date(displayDate).toLocaleDateString() : '日付なし'}
             </Badge>
           </div>
         </CardContent>

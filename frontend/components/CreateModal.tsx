@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Hash } from "lucide-react";
+import { X, Hash, Calendar } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { createThread, fetchThreads } from "@/store/threadsSlice";
 import { createPost, fetchPosts } from "@/store/postsSlice";
@@ -36,6 +36,7 @@ export function CreateModal({
   const [category, setCategory] = useState<Category | "">("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  const [eventDate, setEventDate] = useState(""); // イベント開始日の状態
   const [loading, setLoading] = useState(false);
 
   const dispatch = useAppDispatch();
@@ -45,6 +46,12 @@ export function CreateModal({
 
   const handleSubmit = async () => {
     if (!content.trim()) return;
+    
+    // eventの場合は開始日も必須
+    if (contentType === "event" && !eventDate) {
+      alert("イベント開始日を入力してください");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -54,22 +61,27 @@ export function CreateModal({
         effectiveCategory,
         ...tags.filter((t) => t !== effectiveCategory),
       ];
+      
+      const baseData = {
+        content,
+        category: effectiveCategory,
+        tags: allTags,
+        coordinate:
+          state === Status.LOADED
+            ? { lat: location.lat, lng: location.lng }
+            : (() => {
+                throw new Error("位置情報が取得できません");
+              })(),
+        valid: true,
+        like: 0,
+        created_at: new Date().toISOString(),
+      };
+
       switch (contentType) {
         case "thread":
           await dispatch(
             createThread({
-              content,
-              category: effectiveCategory,
-              tags: allTags,
-              coordinate:
-                state === Status.LOADED
-                  ? { lat: location.lat, lng: location.lng }
-                  : (() => {
-                      throw new Error("位置情報が取得できません");
-                    })(),
-              valid: true,
-              like: 0,
-              created_at: new Date().toISOString(),
+              ...baseData,
               type: "thread",
             })
           );
@@ -77,18 +89,7 @@ export function CreateModal({
         case "post":
           await dispatch(
             createPost({
-              content,
-              category: effectiveCategory,
-              tags: allTags,
-              coordinate:
-                state === Status.LOADED
-                  ? { lat: location.lat, lng: location.lng }
-                  : (() => {
-                      throw new Error("位置情報が取得できません");
-                    })(),
-              valid: true,
-              like: 0,
-              created_at: new Date().toISOString(),
+              ...baseData,
               type: "post",
             })
           );
@@ -96,19 +97,9 @@ export function CreateModal({
         case "event":
           await dispatch(
             createEvent({
-              content,
-              category: effectiveCategory,
-              tags: allTags,
-              coordinate:
-                state === Status.LOADED
-                  ? { lat: location.lat, lng: location.lng }
-                  : (() => {
-                      throw new Error("位置情報が取得できません");
-                    })(),
-              valid: true,
-              like: 0,
-              created_at: new Date().toISOString(),
+              ...baseData,
               type: "event",
+              event_date: new Date(eventDate).toISOString(), // 入力された日付を使用
             })
           );
           break;
@@ -120,9 +111,17 @@ export function CreateModal({
         await dispatch(fetchEvents({ lat: location.lat, lng: location.lng }));
         await dispatch(fetchPosts({ lat: location.lat, lng: location.lng }));
       }
+      
+      // フォームをリセット
+      setContent("");
+      setCategory("");
+      setTags([]);
+      setTagInput("");
+      setEventDate("");
+      
       onClose();
     } catch (error) {
-      console.error("Thread submission error:", error);
+      console.error("Content submission error:", error);
     } finally {
       setLoading(false);
     }
@@ -170,6 +169,24 @@ export function CreateModal({
             </div>
           </div>
 
+          {/* イベント開始日入力（eventの場合のみ表示） */}
+          {contentType === "event" && (
+            <div>
+              <Label htmlFor="eventDate" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                イベント開始日時 *
+              </Label>
+              <Input
+                id="eventDate"
+                type="datetime-local"
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
+                min={new Date().toISOString().slice(0, 16)} // 現在時刻以降のみ選択可能
+                className="mt-1"
+              />
+            </div>
+          )}
+
           {/* カテゴリ選択 */}
           <div>
             <Label htmlFor="category">カテゴリ（任意）</Label>
@@ -182,9 +199,7 @@ export function CreateModal({
               </SelectTrigger>
               <SelectContent className="bg-white text-gray-900 border border-gray-200 shadow-lg shadow-black/10 backdrop-blur-none">
                 {categoryOptions
-
                   .filter((option) => option.value !== "entertainment")
-
                   .map((option) => (
                     <SelectItem
                       key={option.value}
@@ -234,6 +249,7 @@ export function CreateModal({
               </div>
             )}
           </div>
+          
           <div className="flex gap-2 pt-4">
             <Button
               variant="outline"
@@ -245,7 +261,12 @@ export function CreateModal({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!content.trim() || loading || state !== Status.LOADED}
+              disabled={
+                !content.trim() || 
+                loading || 
+                state !== Status.LOADED ||
+                (contentType === "event" && !eventDate) // eventの場合は開始日も必須
+              }
               className="flex-1"
             >
               {loading ? "作成中..." : `${contentType}作成`}
