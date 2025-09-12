@@ -69,6 +69,7 @@ export default function CreateEventPage() {
       like: 0,
       valid: true,
       tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+      event_date: new Date().toISOString(), // 仮に現在日時を設定。実際にはフォームで取得する。
   
     };
 
