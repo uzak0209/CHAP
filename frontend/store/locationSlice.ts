@@ -35,7 +35,7 @@ export const getCurrentLocation = createAsyncThunk<
       {
         enableHighAccuracy: true,  // GPS優先
         timeout: 10000,           // 10秒でタイムアウト
-        maximumAge: 0,            // キャッシュを使用しない
+        maximumAge: 10000,            // キャッシュを使用しない
       }
     );
   });

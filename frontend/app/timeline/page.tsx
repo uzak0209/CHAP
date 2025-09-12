@@ -61,7 +61,7 @@ export default function PostPage() {
   }
 
   // ローディング状態
-  if (state === Status.LOADING) {
+  if (location === null) {
     return (
       <AppLayout title="タイムライン">
         <div className="flex justify-center items-center min-h-64">

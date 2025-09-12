@@ -56,6 +56,7 @@ export interface Event {
   like: number;         // int
   tags: string[];
   username: string;
+  event_date: string;   // イベントの日付
 }
 export interface Comment{
   id: number;

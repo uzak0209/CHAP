@@ -75,6 +75,7 @@ type Event struct {
 	Valid      bool           `json:"valid"`
 	Like       int            `json:"like"`
 	Tags       pq.StringArray `json:"tags" gorm:"type:text[]"`
+	EventDate  time.Time      `json:"event_date"`
 }
 
 type User struct {
