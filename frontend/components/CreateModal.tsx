@@ -44,6 +44,15 @@ export function CreateModal({
 
   const categoryOptions = CATEGORY_OPTIONS;
 
+  // 現在時刻を取得してdatetime-local形式にフォーマット
+  const getCurrentDateTimeLocal = () => {
+    const now = new Date();
+    // タイムゾーンオフセットを考慮
+    const offsetMs = now.getTimezoneOffset() * 60 * 1000;
+    const localTime = new Date(now.getTime() - offsetMs);
+    return localTime.toISOString().slice(0, 16);
+  };
+
   const handleSubmit = async () => {
     if (!content.trim()) return;
     
@@ -95,11 +104,13 @@ export function CreateModal({
           );
           break;
         case "event":
+          // datetime-local形式の文字列をDateオブジェクトに変換
+          const eventDateTime = new Date(eventDate);
           await dispatch(
             createEvent({
               ...baseData,
               type: "event",
-              event_date: new Date(eventDate).toISOString(), // 入力された日付を使用
+              event_date: eventDateTime.toISOString(),
             })
           );
           break;
@@ -181,9 +192,16 @@ export function CreateModal({
                 type="datetime-local"
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
-                min={new Date().toISOString().slice(0, 16)} // 現在時刻以降のみ選択可能
+                min={getCurrentDateTimeLocal()} // 現在時刻以降のみ選択可能
+                step="60" // 1分単位で選択可能
                 className="mt-1"
+                placeholder="日時を選択してください"
               />
+              {eventDate && (
+                <div className="text-sm text-gray-500 mt-1">
+                  選択された日時: {new Date(eventDate).toLocaleString('ja-JP')}
+                </div>
+              )}
             </div>
           )}
 
