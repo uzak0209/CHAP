@@ -98,7 +98,7 @@ export default function EventsPage() {
   }, []);
 
   useEffect(() => {
-    locState === Status.LOADING || locState === Status.IDLE ? (
+    locState === Status.IDLE ? (
       null
     ) : dispatch(fetchEvents({ lat: location.lat, lng: location.lng }));
   }, [location]);
@@ -117,7 +117,7 @@ export default function EventsPage() {
   }, [events, sortBy]);
 
   const renderContent = () => {
-    if (locState === Status.LOADING || locState === Status.IDLE) {
+    if (locState === Status.IDLE) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <LoadingSpinner />

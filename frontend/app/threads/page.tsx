@@ -105,7 +105,7 @@ export default function ThreadsPage() {
   }, [threads, sortBy]);
 
   const renderContent = () => {
-    if (locState === Status.LOADING) {
+    if (locState === Status.IDLE) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <LoadingSpinner />
